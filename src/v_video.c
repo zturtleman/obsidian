@@ -230,7 +230,7 @@ V_DrawPatch
 	|| y+SHORT(patch->height)>SCREENHEIGHT 
 	|| (unsigned)scrn>4)
     {
-        I_Error("Bad V_DrawPatch");
+        return;//I_Error("Bad V_DrawPatch");
     }
 #endif 
  
@@ -294,7 +294,7 @@ V_DrawPatchFlipped
 	|| y+SHORT(patch->height)>SCREENHEIGHT 
 	|| (unsigned)scrn>4)
     {
-        I_Error("Bad V_DrawPatchFlipped");
+        return;//I_Error("Bad V_DrawPatchFlipped");
     }
 #endif 
  
@@ -362,7 +362,7 @@ V_DrawPatchDirect
 	|| y+SHORT(patch->height)>SCREENHEIGHT 
 	|| (unsigned)scrn>4)
     {
-	I_Error ("Bad V_DrawPatchDirect");
+	return;//I_Error ("Bad V_DrawPatchDirect");
     }
 #endif 
  
@@ -420,7 +420,7 @@ V_DrawBlock
 	|| y+height>SCREENHEIGHT 
 	|| (unsigned)scrn>4 )
     {
-	I_Error ("Bad V_DrawBlock");
+	return;//I_Error ("Bad V_DrawBlock");
     }
 #endif 
  
@@ -460,7 +460,7 @@ V_GetBlock
 	|| y+height>SCREENHEIGHT 
 	|| (unsigned)scrn>4 )
     {
-	I_Error ("Bad V_DrawBlock");
+	return;//I_Error ("Bad V_DrawBlock");
     }
 #endif 
  
