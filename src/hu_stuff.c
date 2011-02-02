@@ -46,6 +46,8 @@
 #include "dstrings.h"
 #include "sounds.h"
 
+#include "wi_stuff.h"
+
 //
 // Locally used constants, shortcuts.
 //
@@ -99,6 +101,7 @@ int key_multi_msgplayer[MAXPLAYERS] =
 };
 
 int key_message_refresh = KEY_ENTER;
+int key_scoreboard = 'l';
 
 char			chat_char; // remove later.
 static player_t*	plr;
@@ -121,6 +124,8 @@ extern int		showMessages;
 extern boolean		automapactive;
 
 static boolean		headsupactive = false;
+
+boolean scoreboard_on;
 
 //
 // Builtin map names.
@@ -441,14 +446,115 @@ void HU_Start(void)
 
 }
 
+// GhostlyDeath <July 23, 2010> -- Scoreboard locals
+static int hu_sb_lasttic;
+static boolean hu_sb_started = false;
+wbstartstruct_t hu_sb_wminfo;
+///////////////////////////
+
+extern int pars[4][10];
+extern int cpars[32];
+
+void HU_HackyScoreboardStatUpdate(void)
+{
+	int i;
+	
+	hu_sb_wminfo.pnum = consoleplayer;	// for F12 in demo!
+	
+	for (i = 0; i < MAXPLAYERS; i++)
+	{
+		hu_sb_wminfo.plyr[i].in = playeringame[i]; 
+		hu_sb_wminfo.plyr[i].skills = players[i].killcount; 
+		hu_sb_wminfo.plyr[i].sitems = players[i].itemcount; 
+		hu_sb_wminfo.plyr[i].ssecret = players[i].secretcount; 
+		hu_sb_wminfo.plyr[i].stime = leveltime;
+		
+		memcpy(hu_sb_wminfo.plyr[i].frags, players[i].frags, sizeof(hu_sb_wminfo.plyr[i].frags)); 
+	}
+}
+
+void HU_RememberScoreboardStuff(void)
+{
+	if (!hu_sb_started)
+	{
+		// Init info
+		hu_sb_wminfo.maxkills = totalkills; 
+		hu_sb_wminfo.maxitems = totalitems; 
+		hu_sb_wminfo.maxsecret = totalsecret; 
+		hu_sb_wminfo.maxfrags = 0; 
+		if ( gamemode == commercial )
+			hu_sb_wminfo.partime = TICRATE*cpars[gamemap-1]; 
+		else
+			hu_sb_wminfo.partime = TICRATE*pars[gameepisode][gamemap]; 
+		
+		HU_HackyScoreboardStatUpdate();
+		
+		// Start it
+		WI_Start(&hu_sb_wminfo);
+		
+		hu_sb_started = true;
+	}
+}
+
+void HU_ForgetScoreboardStuff(void)
+{
+	if (hu_sb_started)
+	{
+		WI_End();
+		WI_initNoState();
+		
+		hu_sb_started = false;
+		scoreboard_on = false;
+	}
+}
+
 void HU_Drawer(void)
 {
-
+	
     HUlib_drawSText(&w_message);
     HUlib_drawIText(&w_chat);
     if (automapactive)
 	HUlib_drawTextLine(&w_title, false);
-
+	
+	// GhostlyDeath <July 23, 2010> -- Scoreboard
+	if (gamestate == GS_LEVEL)
+	{
+		if (scoreboard_on)
+		{
+			HU_RememberScoreboardStuff();
+		
+			// Update
+			if (hu_sb_lasttic != gametic)
+			{
+				HU_HackyScoreboardStatUpdate();
+				
+				if (deathmatch)
+					WI_updateDeathmatchStats();
+				else if (netgame)
+					WI_updateNetgameStats();
+				else
+					WI_updateStats();
+					
+			}
+			
+			// Draw status bar (gets in the way, badly)
+			ST_doRefresh();
+		
+			// Draw
+			if (deathmatch)
+				WI_drawDeathmatchStats();
+			else if (netgame)
+				WI_drawNetgameStats();
+			else
+				WI_drawStats();
+		}
+		else if (!scoreboard_on)
+		{
+			HU_ForgetScoreboardStuff();
+		}
+	}
+	
+	hu_sb_lasttic = gametic;
 }
 
 void HU_Erase(void)
@@ -587,6 +693,12 @@ boolean HU_Responder(event_t *ev)
     numplayers = 0;
     for (i=0 ; i<MAXPLAYERS ; i++)
 	numplayers += playeringame[i];
+	
+	// GhostlyDeath <July 23, 2010> -- Scoreboard
+	if (!scoreboard_on && ev->data2 == key_scoreboard)
+		scoreboard_on = true;
+	else if (scoreboard_on && ev->data2 == key_scoreboard)
+		scoreboard_on = false;
 
     if (ev->data1 == KEY_RSHIFT)
     {

@@ -330,7 +330,7 @@ static patch_t*		keys[NUMCARDS];
 static patch_t*		faces[ST_NUMFACES];
 
 // face background
-static patch_t*		faceback;
+static patch_t*		faceback[MAXPLAYERS];
 
  // main bar right
 static patch_t*		armsbg;
@@ -427,8 +427,8 @@ void ST_refreshBackground(void)
     {
 	V_DrawPatch(ST_X, 0, BG, sbar);
 
-	if (netgame)
-	    V_DrawPatch(ST_FX, 0, BG, faceback);
+	//if (netgame)
+	    V_DrawPatch(ST_FX, 0, BG, faceback[consoleplayer]);
 
 	V_CopyRect(ST_X, 0, BG, ST_WIDTH, ST_HEIGHT, ST_X, ST_Y, FG);
     }
@@ -1116,8 +1116,11 @@ static void ST_loadUnloadGraphics(load_callback_t callback)
     }
 
     // face backgrounds for different color players
-    DEH_snprintf(namebuf, 9, "STFB%d", consoleplayer);
-    callback(namebuf, &faceback);
+    for (i = 0; i < MAXPLAYERS; i++)
+    {
+		DEH_snprintf(namebuf, 9, "STFB%d", i);
+		callback(namebuf, &faceback[i]);
+	}
 
     // status bar background bits
     callback(DEH_String("STBAR"), &sbar);

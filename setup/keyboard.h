@@ -100,6 +100,7 @@ extern int key_nextweapon;
 
 extern int key_message_refresh;
 extern int key_demo_quit;
+extern int key_scoreboard;
 
 void ConfigKeyboard(void);
 

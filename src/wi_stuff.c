@@ -910,98 +910,116 @@ void WI_updateDeathmatchStats(void)
     int		j;
     
     boolean	stillticking;
-
-    WI_updateAnimatedBack();
-
-    if (acceleratestage && dm_state != 4)
-    {
-	acceleratestage = 0;
-
-	for (i=0 ; i<MAXPLAYERS ; i++)
-	{
-	    if (playeringame[i])
-	    {
-		for (j=0 ; j<MAXPLAYERS ; j++)
-		    if (playeringame[j])
-			dm_frags[i][j] = plrs[i].frags[j];
-
-		dm_totals[i] = WI_fragSum(i);
-	    }
-	}
-	
-
-	S_StartSound(0, sfx_barexp);
-	dm_state = 4;
-    }
-
     
-    if (dm_state == 2)
+    if (gamestate == GS_LEVEL)
     {
-	if (!(bcnt&3))
-	    S_StartSound(0, sfx_pistol);
-	
-	stillticking = false;
-
-	for (i=0 ; i<MAXPLAYERS ; i++)
-	{
-	    if (playeringame[i])
-	    {
-		for (j=0 ; j<MAXPLAYERS ; j++)
+		for (i=0 ; i<MAXPLAYERS ; i++)
 		{
-		    if (playeringame[j]
-			&& dm_frags[i][j] != plrs[i].frags[j])
-		    {
-			if (plrs[i].frags[j] < 0)
-			    dm_frags[i][j]--;
-			else
-			    dm_frags[i][j]++;
+			if (playeringame[i])
+			{
+			for (j=0 ; j<MAXPLAYERS ; j++)
+				if (playeringame[j])
+				dm_frags[i][j] = plrs[i].frags[j];
 
-			if (dm_frags[i][j] > 99)
-			    dm_frags[i][j] = 99;
-
-			if (dm_frags[i][j] < -99)
-			    dm_frags[i][j] = -99;
-			
-			stillticking = true;
-		    }
+			dm_totals[i] = WI_fragSum(i);
+			}
 		}
-		dm_totals[i] = WI_fragSum(i);
+    }
+	
+	else
+	{
+		WI_updateAnimatedBack();
 
-		if (dm_totals[i] > 99)
-		    dm_totals[i] = 99;
+		if (acceleratestage && dm_state != 4)
+		{
+		acceleratestage = 0;
+
+		for (i=0 ; i<MAXPLAYERS ; i++)
+		{
+			if (playeringame[i])
+			{
+			for (j=0 ; j<MAXPLAYERS ; j++)
+				if (playeringame[j])
+				dm_frags[i][j] = plrs[i].frags[j];
+
+			dm_totals[i] = WI_fragSum(i);
+			}
+		}
+	
+
+		S_StartSound(0, sfx_barexp);
+		dm_state = 4;
+		}
+
 		
-		if (dm_totals[i] < -99)
-		    dm_totals[i] = -99;
-	    }
-	    
-	}
-	if (!stillticking)
-	{
-	    S_StartSound(0, sfx_barexp);
-	    dm_state++;
-	}
+		if (dm_state == 2)
+		{
+		if (!(bcnt&3))
+			S_StartSound(0, sfx_pistol);
+	
+		stillticking = false;
 
-    }
-    else if (dm_state == 4)
-    {
-	if (acceleratestage)
-	{
-	    S_StartSound(0, sfx_slop);
+		for (i=0 ; i<MAXPLAYERS ; i++)
+		{
+			if (playeringame[i])
+			{
+			for (j=0 ; j<MAXPLAYERS ; j++)
+			{
+				if (playeringame[j]
+				&& dm_frags[i][j] != plrs[i].frags[j])
+				{
+				if (plrs[i].frags[j] < 0)
+					dm_frags[i][j]--;
+				else
+					dm_frags[i][j]++;
 
-	    if ( gamemode == commercial)
-		WI_initNoState();
-	    else
-		WI_initShowNextLoc();
+				if (dm_frags[i][j] > 99)
+					dm_frags[i][j] = 99;
+
+				if (dm_frags[i][j] < -99)
+					dm_frags[i][j] = -99;
+			
+				stillticking = true;
+				}
+			}
+			dm_totals[i] = WI_fragSum(i);
+
+			if (dm_totals[i] > 99)
+				dm_totals[i] = 99;
+		
+			if (dm_totals[i] < -99)
+				dm_totals[i] = -99;
+			}
+			
+		}
+		if (!stillticking)
+		{
+			S_StartSound(0, sfx_barexp);
+			dm_state++;
+		}
+
+		}
+		else if (dm_state == 4)
+		{
+		if (acceleratestage)
+		{
+			S_StartSound(0, sfx_slop);
+
+			if ( gamemode == commercial)
+			WI_initNoState();
+			else
+			WI_initShowNextLoc();
+		}
+		}
+		else if (dm_state & 1)
+		{
+		if (!--cnt_pause)
+		{
+			dm_state++;
+			cnt_pause = TICRATE;
+		}
+		}
 	}
-    }
-    else if (dm_state & 1)
-    {
-	if (!--cnt_pause)
-	{
-	    dm_state++;
-	    cnt_pause = TICRATE;
-	}
-    }
 }
 
 
@@ -1019,11 +1037,14 @@ void WI_drawDeathmatchStats(void)
 
     lh = WI_SPACINGY;
 
-    WI_slamBackground();
-    
-    // draw animated background
-    WI_drawAnimatedBack(); 
-    WI_drawLF();
+	if (gamestate == GS_INTERMISSION)
+	{
+		WI_slamBackground();
+		
+		// draw animated background
+		WI_drawAnimatedBack(); 
+		WI_drawLF();
+	}
 
     // draw stat titles (top line)
     V_DrawPatch(DM_TOTALSX-SHORT(total->width)/2,
@@ -1138,150 +1159,169 @@ void WI_updateNetgameStats(void)
     int		fsum;
     
     boolean	stillticking;
-
-    WI_updateAnimatedBack();
-
-    if (acceleratestage && ng_state != 10)
+    
+    if (gamestate == GS_LEVEL)
     {
-	acceleratestage = 0;
+		for (i=0 ; i<MAXPLAYERS ; i++)
+		{
+			if (!playeringame[i])
+			continue;
 
-	for (i=0 ; i<MAXPLAYERS ; i++)
-	{
-	    if (!playeringame[i])
-		continue;
+			cnt_kills[i] = (plrs[i].skills * 100) / wbs->maxkills;
+			cnt_items[i] = (plrs[i].sitems * 100) / wbs->maxitems;
+			cnt_secret[i] = (plrs[i].ssecret * 100) / wbs->maxsecret;
 
-	    cnt_kills[i] = (plrs[i].skills * 100) / wbs->maxkills;
-	    cnt_items[i] = (plrs[i].sitems * 100) / wbs->maxitems;
-	    cnt_secret[i] = (plrs[i].ssecret * 100) / wbs->maxsecret;
-
-	    if (dofrags)
-		cnt_frags[i] = WI_fragSum(i);
-	}
-	S_StartSound(0, sfx_barexp);
-	ng_state = 10;
+			if (dofrags)
+			cnt_frags[i] = WI_fragSum(i);
+		}
     }
 
-    if (ng_state == 2)
-    {
-	if (!(bcnt&3))
-	    S_StartSound(0, sfx_pistol);
-
-	stillticking = false;
-
-	for (i=0 ; i<MAXPLAYERS ; i++)
+	else
 	{
-	    if (!playeringame[i])
-		continue;
+		WI_updateAnimatedBack();
 
-	    cnt_kills[i] += 2;
+		if (acceleratestage && ng_state != 10)
+		{
+		acceleratestage = 0;
 
-	    if (cnt_kills[i] >= (plrs[i].skills * 100) / wbs->maxkills)
-		cnt_kills[i] = (plrs[i].skills * 100) / wbs->maxkills;
-	    else
-		stillticking = true;
-	}
+		for (i=0 ; i<MAXPLAYERS ; i++)
+		{
+			if (!playeringame[i])
+			continue;
+
+			cnt_kills[i] = (plrs[i].skills * 100) / wbs->maxkills;
+			cnt_items[i] = (plrs[i].sitems * 100) / wbs->maxitems;
+			cnt_secret[i] = (plrs[i].ssecret * 100) / wbs->maxsecret;
+
+			if (dofrags)
+			cnt_frags[i] = WI_fragSum(i);
+		}
+		S_StartSound(0, sfx_barexp);
+		ng_state = 10;
+		}
+
+		if (ng_state == 2)
+		{
+		if (!(bcnt&3))
+			S_StartSound(0, sfx_pistol);
+
+		stillticking = false;
+
+		for (i=0 ; i<MAXPLAYERS ; i++)
+		{
+			if (!playeringame[i])
+			continue;
+
+			cnt_kills[i] += 2;
+
+			if (cnt_kills[i] >= (plrs[i].skills * 100) / wbs->maxkills)
+			cnt_kills[i] = (plrs[i].skills * 100) / wbs->maxkills;
+			else
+			stillticking = true;
+		}
 	
-	if (!stillticking)
-	{
-	    S_StartSound(0, sfx_barexp);
-	    ng_state++;
-	}
-    }
-    else if (ng_state == 4)
-    {
-	if (!(bcnt&3))
-	    S_StartSound(0, sfx_pistol);
+		if (!stillticking)
+		{
+			S_StartSound(0, sfx_barexp);
+			ng_state++;
+		}
+		}
+		else if (ng_state == 4)
+		{
+		if (!(bcnt&3))
+			S_StartSound(0, sfx_pistol);
 
-	stillticking = false;
+		stillticking = false;
 
-	for (i=0 ; i<MAXPLAYERS ; i++)
-	{
-	    if (!playeringame[i])
-		continue;
+		for (i=0 ; i<MAXPLAYERS ; i++)
+		{
+			if (!playeringame[i])
+			continue;
 
-	    cnt_items[i] += 2;
-	    if (cnt_items[i] >= (plrs[i].sitems * 100) / wbs->maxitems)
-		cnt_items[i] = (plrs[i].sitems * 100) / wbs->maxitems;
-	    else
-		stillticking = true;
-	}
-	if (!stillticking)
-	{
-	    S_StartSound(0, sfx_barexp);
-	    ng_state++;
-	}
-    }
-    else if (ng_state == 6)
-    {
-	if (!(bcnt&3))
-	    S_StartSound(0, sfx_pistol);
+			cnt_items[i] += 2;
+			if (cnt_items[i] >= (plrs[i].sitems * 100) / wbs->maxitems)
+			cnt_items[i] = (plrs[i].sitems * 100) / wbs->maxitems;
+			else
+			stillticking = true;
+		}
+		if (!stillticking)
+		{
+			S_StartSound(0, sfx_barexp);
+			ng_state++;
+		}
+		}
+		else if (ng_state == 6)
+		{
+		if (!(bcnt&3))
+			S_StartSound(0, sfx_pistol);
 
-	stillticking = false;
+		stillticking = false;
 
-	for (i=0 ; i<MAXPLAYERS ; i++)
-	{
-	    if (!playeringame[i])
-		continue;
+		for (i=0 ; i<MAXPLAYERS ; i++)
+		{
+			if (!playeringame[i])
+			continue;
 
-	    cnt_secret[i] += 2;
+			cnt_secret[i] += 2;
 
-	    if (cnt_secret[i] >= (plrs[i].ssecret * 100) / wbs->maxsecret)
-		cnt_secret[i] = (plrs[i].ssecret * 100) / wbs->maxsecret;
-	    else
-		stillticking = true;
-	}
+			if (cnt_secret[i] >= (plrs[i].ssecret * 100) / wbs->maxsecret)
+			cnt_secret[i] = (plrs[i].ssecret * 100) / wbs->maxsecret;
+			else
+			stillticking = true;
+		}
 	
-	if (!stillticking)
-	{
-	    S_StartSound(0, sfx_barexp);
-	    ng_state += 1 + 2*!dofrags;
-	}
-    }
-    else if (ng_state == 8)
-    {
-	if (!(bcnt&3))
-	    S_StartSound(0, sfx_pistol);
+		if (!stillticking)
+		{
+			S_StartSound(0, sfx_barexp);
+			ng_state += 1 + 2*!dofrags;
+		}
+		}
+		else if (ng_state == 8)
+		{
+		if (!(bcnt&3))
+			S_StartSound(0, sfx_pistol);
 
-	stillticking = false;
+		stillticking = false;
 
-	for (i=0 ; i<MAXPLAYERS ; i++)
-	{
-	    if (!playeringame[i])
-		continue;
+		for (i=0 ; i<MAXPLAYERS ; i++)
+		{
+			if (!playeringame[i])
+			continue;
 
-	    cnt_frags[i] += 1;
+			cnt_frags[i] += 1;
 
-	    if (cnt_frags[i] >= (fsum = WI_fragSum(i)))
-		cnt_frags[i] = fsum;
-	    else
-		stillticking = true;
-	}
+			if (cnt_frags[i] >= (fsum = WI_fragSum(i)))
+			cnt_frags[i] = fsum;
+			else
+			stillticking = true;
+		}
 	
-	if (!stillticking)
-	{
-	    S_StartSound(0, sfx_pldeth);
-	    ng_state++;
+		if (!stillticking)
+		{
+			S_StartSound(0, sfx_pldeth);
+			ng_state++;
+		}
+		}
+		else if (ng_state == 10)
+		{
+		if (acceleratestage)
+		{
+			S_StartSound(0, sfx_sgcock);
+			if ( gamemode == commercial )
+			WI_initNoState();
+			else
+			WI_initShowNextLoc();
+		}
+		}
+		else if (ng_state & 1)
+		{
+		if (!--cnt_pause)
+		{
+			ng_state++;
+			cnt_pause = TICRATE;
+		}
+		}
 	}
-    }
-    else if (ng_state == 10)
-    {
-	if (acceleratestage)
-	{
-	    S_StartSound(0, sfx_sgcock);
-	    if ( gamemode == commercial )
-		WI_initNoState();
-	    else
-		WI_initShowNextLoc();
-	}
-    }
-    else if (ng_state & 1)
-    {
-	if (!--cnt_pause)
-	{
-	    ng_state++;
-	    cnt_pause = TICRATE;
-	}
-    }
 }
 
 
@@ -1293,12 +1333,15 @@ void WI_drawNetgameStats(void)
     int		y;
     int		pwidth = SHORT(percent->width);
 
-    WI_slamBackground();
-    
-    // draw animated background
-    WI_drawAnimatedBack(); 
+	if (gamestate == GS_INTERMISSION)
+	{
+		WI_slamBackground();
+		
+		// draw animated background
+		WI_drawAnimatedBack(); 
 
-    WI_drawLF();
+		WI_drawLF();
+	}
 
     // draw stat titles (top line)
     V_DrawPatch(NG_STATSX+NG_SPACINGX-SHORT(kills->width),
@@ -1359,106 +1402,116 @@ void WI_updateStats(void)
 {
 
     WI_updateAnimatedBack();
-
-    if (acceleratestage && sp_state != 10)
+    
+    if (gamestate == GS_LEVEL)
     {
-	acceleratestage = 0;
-	cnt_kills[0] = (plrs[me].skills * 100) / wbs->maxkills;
-	cnt_items[0] = (plrs[me].sitems * 100) / wbs->maxitems;
-	cnt_secret[0] = (plrs[me].ssecret * 100) / wbs->maxsecret;
-	cnt_time = plrs[me].stime / TICRATE;
-	cnt_par = wbs->partime / TICRATE;
-	S_StartSound(0, sfx_barexp);
-	sp_state = 10;
+		cnt_kills[0] = (plrs[me].skills * 100) / wbs->maxkills;
+		cnt_items[0] = (plrs[me].sitems * 100) / wbs->maxitems;
+		cnt_secret[0] = (plrs[me].ssecret * 100) / wbs->maxsecret;
+		cnt_time = plrs[me].stime / TICRATE;
+		cnt_par = wbs->partime / TICRATE;
     }
-
-    if (sp_state == 2)
-    {
-	cnt_kills[0] += 2;
-
-	if (!(bcnt&3))
-	    S_StartSound(0, sfx_pistol);
-
-	if (cnt_kills[0] >= (plrs[me].skills * 100) / wbs->maxkills)
+	else
 	{
-	    cnt_kills[0] = (plrs[me].skills * 100) / wbs->maxkills;
-	    S_StartSound(0, sfx_barexp);
-	    sp_state++;
-	}
-    }
-    else if (sp_state == 4)
-    {
-	cnt_items[0] += 2;
-
-	if (!(bcnt&3))
-	    S_StartSound(0, sfx_pistol);
-
-	if (cnt_items[0] >= (plrs[me].sitems * 100) / wbs->maxitems)
-	{
-	    cnt_items[0] = (plrs[me].sitems * 100) / wbs->maxitems;
-	    S_StartSound(0, sfx_barexp);
-	    sp_state++;
-	}
-    }
-    else if (sp_state == 6)
-    {
-	cnt_secret[0] += 2;
-
-	if (!(bcnt&3))
-	    S_StartSound(0, sfx_pistol);
-
-	if (cnt_secret[0] >= (plrs[me].ssecret * 100) / wbs->maxsecret)
-	{
-	    cnt_secret[0] = (plrs[me].ssecret * 100) / wbs->maxsecret;
-	    S_StartSound(0, sfx_barexp);
-	    sp_state++;
-	}
-    }
-
-    else if (sp_state == 8)
-    {
-	if (!(bcnt&3))
-	    S_StartSound(0, sfx_pistol);
-
-	cnt_time += 3;
-
-	if (cnt_time >= plrs[me].stime / TICRATE)
-	    cnt_time = plrs[me].stime / TICRATE;
-
-	cnt_par += 3;
-
-	if (cnt_par >= wbs->partime / TICRATE)
-	{
-	    cnt_par = wbs->partime / TICRATE;
-
-	    if (cnt_time >= plrs[me].stime / TICRATE)
-	    {
+		if (acceleratestage && sp_state != 10)
+		{
+		acceleratestage = 0;
+		cnt_kills[0] = (plrs[me].skills * 100) / wbs->maxkills;
+		cnt_items[0] = (plrs[me].sitems * 100) / wbs->maxitems;
+		cnt_secret[0] = (plrs[me].ssecret * 100) / wbs->maxsecret;
+		cnt_time = plrs[me].stime / TICRATE;
+		cnt_par = wbs->partime / TICRATE;
 		S_StartSound(0, sfx_barexp);
-		sp_state++;
-	    }
-	}
-    }
-    else if (sp_state == 10)
-    {
-	if (acceleratestage)
-	{
-	    S_StartSound(0, sfx_sgcock);
+		sp_state = 10;
+		}
 
-	    if (gamemode == commercial)
-		WI_initNoState();
-	    else
-		WI_initShowNextLoc();
-	}
-    }
-    else if (sp_state & 1)
-    {
-	if (!--cnt_pause)
-	{
-	    sp_state++;
-	    cnt_pause = TICRATE;
-	}
-    }
+		if (sp_state == 2)
+		{
+		cnt_kills[0] += 2;
 
+		if (!(bcnt&3))
+			S_StartSound(0, sfx_pistol);
+
+		if (cnt_kills[0] >= (plrs[me].skills * 100) / wbs->maxkills)
+		{
+			cnt_kills[0] = (plrs[me].skills * 100) / wbs->maxkills;
+			S_StartSound(0, sfx_barexp);
+			sp_state++;
+		}
+		}
+		else if (sp_state == 4)
+		{
+		cnt_items[0] += 2;
+
+		if (!(bcnt&3))
+			S_StartSound(0, sfx_pistol);
+
+		if (cnt_items[0] >= (plrs[me].sitems * 100) / wbs->maxitems)
+		{
+			cnt_items[0] = (plrs[me].sitems * 100) / wbs->maxitems;
+			S_StartSound(0, sfx_barexp);
+			sp_state++;
+		}
+		}
+		else if (sp_state == 6)
+		{
+		cnt_secret[0] += 2;
+
+		if (!(bcnt&3))
+			S_StartSound(0, sfx_pistol);
+
+		if (cnt_secret[0] >= (plrs[me].ssecret * 100) / wbs->maxsecret)
+		{
+			cnt_secret[0] = (plrs[me].ssecret * 100) / wbs->maxsecret;
+			S_StartSound(0, sfx_barexp);
+			sp_state++;
+		}
+		}
+
+		else if (sp_state == 8)
+		{
+		if (!(bcnt&3))
+			S_StartSound(0, sfx_pistol);
+
+		cnt_time += 3;
+
+		if (cnt_time >= plrs[me].stime / TICRATE)
+			cnt_time = plrs[me].stime / TICRATE;
+
+		cnt_par += 3;
+
+		if (cnt_par >= wbs->partime / TICRATE)
+		{
+			cnt_par = wbs->partime / TICRATE;
+
+			if (cnt_time >= plrs[me].stime / TICRATE)
+			{
+			S_StartSound(0, sfx_barexp);
+			sp_state++;
+			}
+		}
+		}
+		else if (sp_state == 10)
+		{
+		if (acceleratestage)
+		{
+			S_StartSound(0, sfx_sgcock);
+
+			if (gamemode == commercial)
+			WI_initNoState();
+			else
+			WI_initShowNextLoc();
+		}
+		}
+		else if (sp_state & 1)
+		{
+		if (!--cnt_pause)
+		{
+			sp_state++;
+			cnt_pause = TICRATE;
+		}
+		}
+	}
 }
 
 void WI_drawStats(void)
@@ -1468,12 +1521,15 @@ void WI_drawStats(void)
 
     lh = (3*SHORT(num[0]->height))/2;
 
-    WI_slamBackground();
+	if (gamestate == GS_INTERMISSION)
+	{
+	    WI_slamBackground();
 
-    // draw animated background
-    WI_drawAnimatedBack();
-    
-    WI_drawLF();
+		// draw animated background
+		WI_drawAnimatedBack();
+		
+		WI_drawLF();
+	}
 
     V_DrawPatch(SP_STATSX, SP_STATSY, FB, kills);
     WI_drawPercent(SCREENWIDTH - SP_STATSX, SP_STATSY, cnt_kills[0]);
@@ -1806,6 +1862,10 @@ void WI_Drawer (void)
     }
 }
 
+void WI_F12Update(void)
+{
+	me = consoleplayer;
+}
 
 void WI_initVariables(wbstartstruct_t* wbstartstruct)
 {

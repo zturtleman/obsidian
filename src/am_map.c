@@ -448,6 +448,44 @@ void AM_changeWindowLoc(void)
     m_y2 = m_y + m_h;
 }
 
+/* AM_F12Update() -- Update for F12 */
+void AM_F12Update(void)
+{
+	int pnum;
+	f_oldloc.x = INT_MAX;
+
+    m_w = FTOM(f_w);
+    m_h = FTOM(f_h);
+
+    // find player to center on initially
+    if (playeringame[consoleplayer])
+    {
+        plr = &players[consoleplayer];
+    }
+    else
+    {
+        plr = &players[0];
+
+	for (pnum=0;pnum<MAXPLAYERS;pnum++)
+        {
+	    if (playeringame[pnum])
+            {
+                plr = &players[pnum];
+		break;
+            }
+        }
+    }
+
+    m_x = plr->mo->x - m_w/2;
+    m_y = plr->mo->y - m_h/2;
+    AM_changeWindowLoc();
+
+    // for saving & restoring
+    old_m_x = m_x;
+    old_m_y = m_y;
+    old_m_w = m_w;
+    old_m_h = m_h;
+}
 
 //
 //
