@@ -505,6 +505,8 @@ void HU_ForgetScoreboardStuff(void)
 		
 		hu_sb_started = false;
 		scoreboard_on = false;
+
+		ST_doRefresh();
 	}
 }
 
@@ -549,9 +551,7 @@ void HU_Drawer(void)
 				WI_drawStats();
 		}
 		else if (!scoreboard_on)
-		{
 			HU_ForgetScoreboardStuff();
-		}
 	}
 	
 	hu_sb_lasttic = gametic;
