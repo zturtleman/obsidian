@@ -20,7 +20,7 @@
 // 02111-1307, USA.
 //
 // DESCRIPTION:
-//	WAD I/O functions.
+//  WAD I/O functions.
 //
 //-----------------------------------------------------------------------------
 
@@ -40,59 +40,57 @@ extern wad_file_class_t win32_wad_file;
 
 #ifdef HAVE_MMAP
 extern wad_file_class_t posix_wad_file;
-#endif 
+#endif
 
-static wad_file_class_t *wad_file_classes[] = 
-{
+static wad_file_class_t *wad_file_classes[] = {
 #ifdef _WIN32
-    &win32_wad_file,
+	&win32_wad_file,
 #endif
 #ifdef HAVE_MMAP
-    &posix_wad_file,
+	&posix_wad_file,
 #endif
-    &stdc_wad_file,
+	&stdc_wad_file,
 };
 
 wad_file_t *W_OpenFile(char *path)
 {
-    wad_file_t *result;
-    int i;
+	wad_file_t *result;
 
-    //!
-    // Use the OS's virtual memory subsystem to map WAD files
-    // directly into memory.
-    //
+	int i;
 
-    if (!M_CheckParm("-mmap"))
-    {
-        return stdc_wad_file.OpenFile(path);
-    }
+	//!
+	// Use the OS's virtual memory subsystem to map WAD files
+	// directly into memory.
+	//
 
-    // Try all classes in order until we find one that works
+	if (!M_CheckParm("-mmap"))
+	{
+		return stdc_wad_file.OpenFile(path);
+	}
 
-    result = NULL;
+	// Try all classes in order until we find one that works
 
-    for (i=0; i<arrlen(wad_file_classes); ++i)
-    {
-        result = wad_file_classes[i]->OpenFile(path);
+	result = NULL;
 
-        if (result != NULL)
-        {
-            break;
-        }
-    }
+	for (i = 0; i < arrlen(wad_file_classes); ++i)
+	{
+		result = wad_file_classes[i]->OpenFile(path);
 
-    return result;
+		if (result != NULL)
+		{
+			break;
+		}
+	}
+
+	return result;
 }
 
-void W_CloseFile(wad_file_t *wad)
+void W_CloseFile(wad_file_t * wad)
 {
-    wad->file_class->CloseFile(wad);
+	wad->file_class->CloseFile(wad);
 }
 
-size_t W_Read(wad_file_t *wad, unsigned int offset,
-              void *buffer, size_t buffer_len)
+size_t W_Read(wad_file_t * wad, unsigned int offset, void *buffer, size_t buffer_len)
 {
-    return wad->file_class->Read(wad, offset, buffer, buffer_len);
+	return wad->file_class->Read(wad, offset, buffer, buffer_len);
 }
-

@@ -86,10 +86,15 @@
 // as opposed to the normal millisecond durations.
 
 static pcsound_callback_func callback;
+
 static int sound_server_pid;
+
 static int sleep_adjust = 0;
+
 static int sound_thread_running;
+
 static SDL_Thread *sound_thread_handle;
+
 static int sound_server_pipe[2];
 
 // Play a sound, checking how long the system call takes to complete
@@ -97,231 +102,235 @@ static int sound_server_pipe[2];
 
 static void AdjustedBeep(int speaker_handle, int ms, int freq)
 {
-    unsigned int start_time;
-    unsigned int end_time;
-    unsigned int actual_time;
-    tone_t tone;
+	unsigned int start_time;
 
-    // Adjust based on previous error to keep the tempo right
+	unsigned int end_time;
 
-    if (sleep_adjust > ms)
-    {
-        sleep_adjust -= ms;
-        return;
-    }
-    else
-    {
-        ms -= sleep_adjust;
-    }
+	unsigned int actual_time;
 
-    // Invoke the system call and time how long it takes
+	tone_t tone;
 
-    start_time = SDL_GetTicks();
+	// Adjust based on previous error to keep the tempo right
 
-    tone.duration = ms / 10;        // in 100ths of a second
-    tone.frequency = freq;
+	if (sleep_adjust > ms)
+	{
+		sleep_adjust -= ms;
+		return;
+	}
+	else
+	{
+		ms -= sleep_adjust;
+	}
 
-    // Always a positive duration
+	// Invoke the system call and time how long it takes
 
-    if (tone.duration < 1)
-    {
-        tone.duration = 1;
-    }
+	start_time = SDL_GetTicks();
 
-    if (ioctl(speaker_handle, SPKRTONE, &tone) != 0)
-    {
-        perror("ioctl");
-        return;
-    }
-    
-    end_time = SDL_GetTicks();
+	tone.duration = ms / 10;							   // in 100ths of a second
+	tone.frequency = freq;
 
-    if (end_time > start_time)
-    {
-        actual_time = end_time - start_time;
-    }
-    else
-    {
-        actual_time = ms;
-    }
+	// Always a positive duration
 
-    if (actual_time < ms)
-    {
-        actual_time = ms;
-    }
+	if (tone.duration < 1)
+	{
+		tone.duration = 1;
+	}
 
-    // Save sleep_adjust for next time
+	if (ioctl(speaker_handle, SPKRTONE, &tone) != 0)
+	{
+		perror("ioctl");
+		return;
+	}
 
-    sleep_adjust = actual_time - ms;
+	end_time = SDL_GetTicks();
+
+	if (end_time > start_time)
+	{
+		actual_time = end_time - start_time;
+	}
+	else
+	{
+		actual_time = ms;
+	}
+
+	if (actual_time < ms)
+	{
+		actual_time = ms;
+	}
+
+	// Save sleep_adjust for next time
+
+	sleep_adjust = actual_time - ms;
 }
 
 static void SoundServer(int speaker_handle)
 {
-    tone_t tone;
-    int result;
+	tone_t tone;
 
-    // Run in a loop, invoking the callback
+	int result;
 
-    for (;;)
-    {
-        result = read(sound_server_pipe[1], &tone, sizeof(tone_t));
+	// Run in a loop, invoking the callback
 
-        if (result < 0)
-        {
-            perror("read");
-            return;
-        }
+	for (;;)
+	{
+		result = read(sound_server_pipe[1], &tone, sizeof(tone_t));
 
-        // Send back a response, so the main process knows to send another
+		if (result < 0)
+		{
+			perror("read");
+			return;
+		}
 
-        write(sound_server_pipe[1], &tone, sizeof(tone_t));
+		// Send back a response, so the main process knows to send another
 
-        // Beep! (blocks until complete)
+		write(sound_server_pipe[1], &tone, sizeof(tone_t));
 
-        AdjustedBeep(speaker_handle, tone.duration, tone.frequency);
-    }
+		// Beep! (blocks until complete)
+
+		AdjustedBeep(speaker_handle, tone.duration, tone.frequency);
+	}
 }
 
 // Start up the sound server.  Returns non-zero if successful.
 
 static int StartSoundServer(void)
 {
-    int result;
-    int speaker_handle;
+	int result;
 
-    // Try to open the speaker device
+	int speaker_handle;
 
-    speaker_handle = open(SPEAKER_DEVICE, O_WRONLY);
+	// Try to open the speaker device
 
-    if (speaker_handle == -1)
-    {
-        // Don't have permissions for the console device?
+	speaker_handle = open(SPEAKER_DEVICE, O_WRONLY);
 
-	fprintf(stderr, "StartSoundServer: Failed to open '%s': %s\n",
-                        SPEAKER_DEVICE, strerror(errno));
-        return 0;
-    }
+	if (speaker_handle == -1)
+	{
+		// Don't have permissions for the console device?
 
-    // Create a pipe for communications
+		fprintf(stderr, "StartSoundServer: Failed to open '%s': %s\n", SPEAKER_DEVICE, strerror(errno));
+		return 0;
+	}
 
-    if (socketpair(AF_UNIX, SOCK_STREAM, 0, sound_server_pipe) < 0)
-    {
-        perror("socketpair");
-        close(speaker_handle);
-        return 0;
-    }
+	// Create a pipe for communications
 
-    // Start a separate process to generate PC speaker output
-    // We can't use the SDL threading functions because OpenBSD's
-    // threading sucks :-(
-    
-    result = fork();
+	if (socketpair(AF_UNIX, SOCK_STREAM, 0, sound_server_pipe) < 0)
+	{
+		perror("socketpair");
+		close(speaker_handle);
+		return 0;
+	}
 
-    if (result < 0)
-    {
-        fprintf(stderr, "Failed to fork sound server!\n");
-        close(speaker_handle);
-        return 0;
-    }
-    else if (result == 0)
-    {
-        // This is the child (sound server)
+	// Start a separate process to generate PC speaker output
+	// We can't use the SDL threading functions because OpenBSD's
+	// threading sucks :-(
 
-        SoundServer(speaker_handle);
-        close(speaker_handle);
+	result = fork();
 
-        exit(0);
-    }
-    else
-    {
-        // This is the parent
+	if (result < 0)
+	{
+		fprintf(stderr, "Failed to fork sound server!\n");
+		close(speaker_handle);
+		return 0;
+	}
+	else if (result == 0)
+	{
+		// This is the child (sound server)
 
-        sound_server_pid = result;
-    }
+		SoundServer(speaker_handle);
+		close(speaker_handle);
 
-    return 1;
+		exit(0);
+	}
+	else
+	{
+		// This is the parent
+
+		sound_server_pid = result;
+	}
+
+	return 1;
 }
 
 static void StopSoundServer(void)
 {
-    int status;
+	int status;
 
-    kill(sound_server_pid, SIGINT);
-    waitpid(sound_server_pid, &status, 0);
+	kill(sound_server_pid, SIGINT);
+	waitpid(sound_server_pid, &status, 0);
 }
 
 static int SoundThread(void *unused)
 {
-    tone_t tone;
-    int duration;
-    int frequency;
+	tone_t tone;
 
-    while (sound_thread_running)
-    {
-        // Get the next frequency to play
+	int duration;
 
-        callback(&duration, &frequency);
+	int frequency;
+
+	while(sound_thread_running)
+	{
+		// Get the next frequency to play
+
+		callback(&duration, &frequency);
 
 //printf("dur: %i, freq: %i\n", duration, frequency);
 
-        // Build up a tone structure and send to the sound server
+		// Build up a tone structure and send to the sound server
 
-        tone.frequency = frequency;
-        tone.duration = duration;
+		tone.frequency = frequency;
+		tone.duration = duration;
 
-        if (write(sound_server_pipe[0], &tone, sizeof(tone_t)) < 0) 
-        {
-            perror("write");
-            break;
-        }
+		if (write(sound_server_pipe[0], &tone, sizeof(tone_t)) < 0)
+		{
+			perror("write");
+			break;
+		}
 
-        // Wait until the sound server responds before sending another
+		// Wait until the sound server responds before sending another
 
-        if (read(sound_server_pipe[0], &tone, sizeof(tone_t)) < 0)
-        {
-            perror("read");
-            break;
-        }
-    }
+		if (read(sound_server_pipe[0], &tone, sizeof(tone_t)) < 0)
+		{
+			perror("read");
+			break;
+		}
+	}
 
-    return 0;
+	return 0;
 }
 
 static int PCSound_BSD_Init(pcsound_callback_func callback_func)
 {
-    callback = callback_func;
+	callback = callback_func;
 
-    if (!StartSoundServer())
-    {
-        fprintf(stderr, "PCSound_BSD_Init: Failed to start sound server.\n");
-        return 0;
-    }
+	if (!StartSoundServer())
+	{
+		fprintf(stderr, "PCSound_BSD_Init: Failed to start sound server.\n");
+		return 0;
+	}
 
-    sound_thread_running = 1;
-    sound_thread_handle = SDL_CreateThread(SoundThread, NULL);
+	sound_thread_running = 1;
+	sound_thread_handle = SDL_CreateThread(SoundThread, NULL);
 
-    return 1;
+	return 1;
 }
 
 static void PCSound_BSD_Shutdown(void)
 {
-    // Stop the sound thread
+	// Stop the sound thread
 
-    sound_thread_running = 0;
+	sound_thread_running = 0;
 
-    SDL_WaitThread(sound_thread_handle, NULL);
+	SDL_WaitThread(sound_thread_handle, NULL);
 
-    // Stop the sound server
+	// Stop the sound server
 
-    StopSoundServer();
+	StopSoundServer();
 }
 
-pcsound_driver_t pcsound_bsd_driver =
-{
-    "BSD",
-    PCSound_BSD_Init,
-    PCSound_BSD_Shutdown,
+pcsound_driver_t pcsound_bsd_driver = {
+	"BSD",
+	PCSound_BSD_Init,
+	PCSound_BSD_Shutdown,
 };
 
-#endif /* #ifdef HAVE_BSD_SPEAKER */
-
+#endif							/* #ifdef HAVE_BSD_SPEAKER */

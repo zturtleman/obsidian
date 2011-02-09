@@ -35,7 +35,6 @@
 #include "pcsound.h"
 #include "pcsound_internal.h"
 
-
 #ifdef HAVE_DEV_ISA_SPKRIO_H
 #define HAVE_BSD_SPEAKER
 #endif
@@ -57,19 +56,18 @@ extern pcsound_driver_t pcsound_linux_driver;
 
 extern pcsound_driver_t pcsound_sdl_driver;
 
-static pcsound_driver_t *drivers[] = 
-{
+static pcsound_driver_t *drivers[] = {
 #ifdef HAVE_LINUX_KD_H
-    &pcsound_linux_driver,
+	&pcsound_linux_driver,
 #endif
 #ifdef HAVE_BSD_SPEAKER
-    &pcsound_bsd_driver,
+	&pcsound_bsd_driver,
 #endif
 #ifdef _WIN32
-    &pcsound_win32_driver,
+	&pcsound_win32_driver,
 #endif
-    &pcsound_sdl_driver,
-    NULL,
+	&pcsound_sdl_driver,
+	NULL,
 };
 
 static pcsound_driver_t *pcsound_driver = NULL;
@@ -78,73 +76,72 @@ int pcsound_sample_rate;
 
 void PCSound_SetSampleRate(int rate)
 {
-    pcsound_sample_rate = rate;
+	pcsound_sample_rate = rate;
 }
 
 int PCSound_Init(pcsound_callback_func callback_func)
 {
-    char *driver_name;
-    int i;
+	char *driver_name;
 
-    if (pcsound_driver != NULL)
-    {
-        return 1;
-    }
+	int i;
 
-    // Check if the environment variable is set
+	if (pcsound_driver != NULL)
+	{
+		return 1;
+	}
 
-    driver_name = getenv("PCSOUND_DRIVER");
+	// Check if the environment variable is set
 
-    if (driver_name != NULL)
-    {
-        for (i=0; drivers[i] != NULL; ++i)
-        {
-            if (!strcmp(drivers[i]->name, driver_name))
-            {
-                // Found the driver!
+	driver_name = getenv("PCSOUND_DRIVER");
 
-                if (drivers[i]->init_func(callback_func))
-                {
-                    pcsound_driver = drivers[i];
-                }
-                else
-                {
-                    printf("Failed to initialize PC sound driver: %s\n",
-                           drivers[i]->name);
-                    break;
-                }
-            }
-        }
-    }
-    else
-    {
-        // Try all drivers until we find a working one
+	if (driver_name != NULL)
+	{
+		for (i = 0; drivers[i] != NULL; ++i)
+		{
+			if (!strcmp(drivers[i]->name, driver_name))
+			{
+				// Found the driver!
 
-        for (i=0; drivers[i] != NULL; ++i)
-        {
-            if (drivers[i]->init_func(callback_func)) 
-            {
-                pcsound_driver = drivers[i];
-                break;
-            }
-        }
-    }
-    
-    if (pcsound_driver != NULL)
-    {
-        printf("Using PC sound driver: %s\n", pcsound_driver->name);
-        return 1;
-    }
-    else
-    {
-        printf("Failed to find a working PC sound driver.\n");
-        return 0;
-    }
+				if (drivers[i]->init_func(callback_func))
+				{
+					pcsound_driver = drivers[i];
+				}
+				else
+				{
+					printf("Failed to initialize PC sound driver: %s\n", drivers[i]->name);
+					break;
+				}
+			}
+		}
+	}
+	else
+	{
+		// Try all drivers until we find a working one
+
+		for (i = 0; drivers[i] != NULL; ++i)
+		{
+			if (drivers[i]->init_func(callback_func))
+			{
+				pcsound_driver = drivers[i];
+				break;
+			}
+		}
+	}
+
+	if (pcsound_driver != NULL)
+	{
+		printf("Using PC sound driver: %s\n", pcsound_driver->name);
+		return 1;
+	}
+	else
+	{
+		printf("Failed to find a working PC sound driver.\n");
+		return 0;
+	}
 }
 
 void PCSound_Shutdown(void)
 {
-    pcsound_driver->shutdown_func();
-    pcsound_driver = NULL;
+	pcsound_driver->shutdown_func();
+	pcsound_driver = NULL;
 }
-

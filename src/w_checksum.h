@@ -30,5 +30,4 @@
 
 extern void W_Checksum(md5_digest_t digest);
 
-#endif /* #ifndef W_CHECKSUM_H */
-
+#endif							/* #ifndef W_CHECKSUM_H */

@@ -33,85 +33,87 @@
 #include "pcsound_internal.h"
 
 static SDL_Thread *sound_thread_handle;
+
 static int sound_thread_running;
+
 static pcsound_callback_func callback;
 
 static int SoundThread(void *unused)
 {
-    int frequency;
-    int duration;
-    
-    while (sound_thread_running)
-    {
-        callback(&duration, &frequency);
+	int frequency;
 
-        if (frequency != 0) 
-        {
-            Beep(frequency, duration);
-        }
-        else
-        {
-            Sleep(duration);
-        }
-    }
-    
-    return 0;    
+	int duration;
+
+	while(sound_thread_running)
+	{
+		callback(&duration, &frequency);
+
+		if (frequency != 0)
+		{
+			Beep(frequency, duration);
+		}
+		else
+		{
+			Sleep(duration);
+		}
+	}
+
+	return 0;
 }
 
 static int PCSound_Win32_Init(pcsound_callback_func callback_func)
 {
-    OSVERSIONINFO osvi;
-    BOOL result;
+	OSVERSIONINFO osvi;
 
-    // Temporarily disabled - the Windows scheduler is strange and 
-    // stupid.
-   
-    return 0;
+	BOOL result;
 
-    // Find the OS version
+	// Temporarily disabled - the Windows scheduler is strange and 
+	// stupid.
 
-    osvi.dwOSVersionInfoSize = sizeof(osvi);
+	return 0;
 
-    result = GetVersionEx(&osvi);
+	// Find the OS version
 
-    if (!result)
-    {
-        return 0;
-    }
+	osvi.dwOSVersionInfoSize = sizeof(osvi);
 
-    // Beep() ignores its arguments on win9x, so this driver will
-    // not work there.
+	result = GetVersionEx(&osvi);
 
-    if (osvi.dwPlatformId != VER_PLATFORM_WIN32_NT)
-    {
-        // TODO: Use _out() to write directly to the PC speaker on
-        // win9x: See PC/winsound.c in the Python standard library.
+	if (!result)
+	{
+		return 0;
+	}
 
-        return 0;
-    }
-    
-    // Start a thread to play sound.
+	// Beep() ignores its arguments on win9x, so this driver will
+	// not work there.
 
-    callback = callback_func;
-    sound_thread_running = 1;
+	if (osvi.dwPlatformId != VER_PLATFORM_WIN32_NT)
+	{
+		// TODO: Use _out() to write directly to the PC speaker on
+		// win9x: See PC/winsound.c in the Python standard library.
 
-    sound_thread_handle = SDL_CreateThread(SoundThread, NULL);
+		return 0;
+	}
 
-    return 1;
+	// Start a thread to play sound.
+
+	callback = callback_func;
+	sound_thread_running = 1;
+
+	sound_thread_handle = SDL_CreateThread(SoundThread, NULL);
+
+	return 1;
 }
 
 static void PCSound_Win32_Shutdown(void)
 {
-    sound_thread_running = 0;
-    SDL_WaitThread(sound_thread_handle, NULL);
+	sound_thread_running = 0;
+	SDL_WaitThread(sound_thread_handle, NULL);
 }
 
-pcsound_driver_t pcsound_win32_driver = 
-{
-    "Windows",
-    PCSound_Win32_Init,
-    PCSound_Win32_Shutdown,
+pcsound_driver_t pcsound_win32_driver = {
+	"Windows",
+	PCSound_Win32_Init,
+	PCSound_Win32_Shutdown,
 };
 
-#endif /* #ifdef _WIN32 */
-
+#endif							/* #ifdef _WIN32 */

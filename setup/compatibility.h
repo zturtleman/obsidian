@@ -23,9 +23,9 @@
 #define SETUP_COMPATIBILITY_H
 
 extern int vanilla_savegame_limit;
+
 extern int vanilla_demo_limit;
 
 void CompatibilitySettings(void);
 
-#endif /* #ifndef SETUP_COMPATIBILITY_H */
-
+#endif							/* #ifndef SETUP_COMPATIBILITY_H */

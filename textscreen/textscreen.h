@@ -41,5 +41,4 @@
 #include "txt_window_action.h"
 #include "txt_window.h"
 
-#endif /* #ifndef TEXTSCREEN_H */
-
+#endif							/* #ifndef TEXTSCREEN_H */

@@ -44,131 +44,134 @@
 
 struct ioperm_data
 {
-    unsigned long from;
-    unsigned long num;
-    int turn_on;
+	unsigned long from;
+	unsigned long num;
+	int turn_on;
 };
 
 // Function pointers for advapi32.dll.  This DLL does not exist on
 // Windows 9x, so they are dynamically loaded from the DLL at runtime.
 
-static SC_HANDLE WINAPI (*MyOpenSCManagerW)(wchar_t *lpMachineName,
-                                            wchar_t *lpDatabaseName,
-                                            DWORD dwDesiredAccess) = NULL;
-static SC_HANDLE WINAPI (*MyCreateServiceW)(SC_HANDLE hSCManager,
-                                            wchar_t *lpServiceName,
-                                            wchar_t *lpDisplayName,
-                                            DWORD dwDesiredAccess,
-                                            DWORD dwServiceType,
-                                            DWORD dwStartType,
-                                            DWORD dwErrorControl,
-                                            wchar_t *lpBinaryPathName,
-                                            wchar_t *lpLoadOrderGroup,
-                                            LPDWORD lpdwTagId,
-                                            wchar_t *lpDependencies,
-                                            wchar_t *lpServiceStartName,
-                                            wchar_t *lpPassword);
-static SC_HANDLE WINAPI (*MyOpenServiceW)(SC_HANDLE hSCManager,
-                                          wchar_t *lpServiceName,
-                                          DWORD dwDesiredAccess);
-static BOOL WINAPI (*MyStartServiceW)(SC_HANDLE hService,
-                                      DWORD dwNumServiceArgs,
-                                      wchar_t **lpServiceArgVectors);
-static BOOL WINAPI (*MyControlService)(SC_HANDLE hService,
-                                       DWORD dwControl,
-                                       LPSERVICE_STATUS lpServiceStatus);
-static BOOL WINAPI (*MyCloseServiceHandle)(SC_HANDLE hSCObject);
-static BOOL WINAPI (*MyDeleteService)(SC_HANDLE hService);
+static SC_HANDLE WINAPI(*MyOpenSCManagerW) (wchar_t * lpMachineName, wchar_t * lpDatabaseName, DWORD dwDesiredAccess) = NULL;
+
+static SC_HANDLE WINAPI(*MyCreateServiceW) (SC_HANDLE hSCManager,
+											wchar_t * lpServiceName,
+											wchar_t * lpDisplayName,
+											DWORD dwDesiredAccess,
+											DWORD dwServiceType,
+											DWORD dwStartType,
+											DWORD dwErrorControl,
+											wchar_t * lpBinaryPathName,
+											wchar_t * lpLoadOrderGroup,
+											LPDWORD lpdwTagId, wchar_t * lpDependencies, wchar_t * lpServiceStartName, wchar_t * lpPassword);
+static SC_HANDLE WINAPI(*MyOpenServiceW) (SC_HANDLE hSCManager, wchar_t * lpServiceName, DWORD dwDesiredAccess);
+
+static BOOL WINAPI(*MyStartServiceW) (SC_HANDLE hService, DWORD dwNumServiceArgs, wchar_t ** lpServiceArgVectors);
+
+static BOOL WINAPI(*MyControlService) (SC_HANDLE hService, DWORD dwControl, LPSERVICE_STATUS lpServiceStatus);
+
+static BOOL WINAPI(*MyCloseServiceHandle) (SC_HANDLE hSCObject);
+
+static BOOL WINAPI(*MyDeleteService) (SC_HANDLE hService);
 
 static struct
 {
-    char *name;
-    void **fn;
-} dll_functions[] = {
-    { "OpenSCManagerW",     (void **) &MyOpenSCManagerW },
-    { "CreateServiceW",     (void **) &MyCreateServiceW },
-    { "OpenServiceW",       (void **) &MyOpenServiceW },
-    { "StartServiceW",      (void **) &MyStartServiceW },
-    { "ControlService",     (void **) &MyControlService },
-    { "CloseServiceHandle", (void **) &MyCloseServiceHandle },
-    { "DeleteService",      (void **) &MyDeleteService },
-};
+	char *name;
+	void **fn;
+} dll_functions[] =
+{
+	{
+	"OpenSCManagerW", (void **)&MyOpenSCManagerW},
+	{
+	"CreateServiceW", (void **)&MyCreateServiceW},
+	{
+	"OpenServiceW", (void **)&MyOpenServiceW},
+	{
+	"StartServiceW", (void **)&MyStartServiceW},
+	{
+	"ControlService", (void **)&MyControlService},
+	{
+	"CloseServiceHandle", (void **)&MyCloseServiceHandle},
+	{
+"DeleteService", (void **)&MyDeleteService},};
 
 // Globals
 
 static SC_HANDLE scm = NULL;
+
 static SC_HANDLE svc = NULL;
+
 static int service_was_created = 0;
+
 static int service_was_started = 0;
 
 static int LoadLibraryPointers(void)
 {
-    HMODULE dll;
-    int i;
+	HMODULE dll;
 
-    // Already loaded?
+	int i;
 
-    if (MyOpenSCManagerW != NULL)
-    {
-        return 1;
-    }
+	// Already loaded?
 
-    dll = LoadLibraryW(L"advapi32.dll");
+	if (MyOpenSCManagerW != NULL)
+	{
+		return 1;
+	}
 
-    if (dll == NULL)
-    {
-        fprintf(stderr, "LoadLibraryPointers: Failed to open advapi32.dll\n");
-        return 0;
-    }
+	dll = LoadLibraryW(L"advapi32.dll");
 
-    for (i = 0; i < sizeof(dll_functions) / sizeof(*dll_functions); ++i)
-    {
-        *dll_functions[i].fn = GetProcAddress(dll, dll_functions[i].name);
+	if (dll == NULL)
+	{
+		fprintf(stderr, "LoadLibraryPointers: Failed to open advapi32.dll\n");
+		return 0;
+	}
 
-        if (*dll_functions[i].fn == NULL)
-        {
-            fprintf(stderr, "LoadLibraryPointers: Failed to get address "
-                            "for '%s'\n", dll_functions[i].name);
-            return 0;
-        }
-    }
+	for (i = 0; i < sizeof(dll_functions) / sizeof(*dll_functions); ++i)
+	{
+		*dll_functions[i].fn = GetProcAddress(dll, dll_functions[i].name);
 
-    return 1;
+		if (*dll_functions[i].fn == NULL)
+		{
+			fprintf(stderr, "LoadLibraryPointers: Failed to get address " "for '%s'\n", dll_functions[i].name);
+			return 0;
+		}
+	}
+
+	return 1;
 }
 
 int IOperm_EnablePortRange(unsigned int from, unsigned int num, int turn_on)
 {
-    HANDLE h;
-    struct ioperm_data ioperm_data;
-    DWORD BytesReturned;
-    BOOL r;
+	HANDLE h;
 
-    h = CreateFileW(IOPERM_FILE, GENERIC_READ, 0, NULL,
-                    OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	struct ioperm_data ioperm_data;
 
-    if (h == INVALID_HANDLE_VALUE)
-    {
-        errno = ENODEV;
-        return -1;
-    }
+	DWORD BytesReturned;
 
-    ioperm_data.from = from;
-    ioperm_data.num = num;
-    ioperm_data.turn_on = turn_on;
+	BOOL r;
 
-    r = DeviceIoControl(h, IOCTL_IOPERM,
-                        &ioperm_data, sizeof ioperm_data,
-                        NULL, 0,
-                        &BytesReturned, NULL);
+	h = CreateFileW(IOPERM_FILE, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 
-    if (!r)
-    {
-        errno = EPERM;
-    }
+	if (h == INVALID_HANDLE_VALUE)
+	{
+		errno = ENODEV;
+		return -1;
+	}
 
-    CloseHandle(h);
+	ioperm_data.from = from;
+	ioperm_data.num = num;
+	ioperm_data.turn_on = turn_on;
 
-    return r != 0;
+	r = DeviceIoControl(h, IOCTL_IOPERM, &ioperm_data, sizeof ioperm_data, NULL, 0, &BytesReturned, NULL);
+
+	if (!r)
+	{
+		errno = EPERM;
+	}
+
+	CloseHandle(h);
+
+	return r != 0;
 }
 
 // Load ioperm.sys driver.
@@ -177,185 +180,167 @@ int IOperm_EnablePortRange(unsigned int from, unsigned int num, int turn_on)
 
 int IOperm_InstallDriver(void)
 {
-    wchar_t driver_path[MAX_PATH];
-    int error;
-    int result = 1;
+	wchar_t driver_path[MAX_PATH];
 
-    if (!LoadLibraryPointers())
-    {
-        return 0;
-    }
+	int error;
 
-    scm = MyOpenSCManagerW(NULL, NULL, SC_MANAGER_ALL_ACCESS);
+	int result = 1;
 
-    if (scm == NULL)
-    {
-        error = GetLastError();
-        fprintf(stderr, "IOperm_InstallDriver: OpenSCManager failed (%i).\n",
-                        error);
-        return 0;
-    }
+	if (!LoadLibraryPointers())
+	{
+		return 0;
+	}
 
-    // Get the full path to the driver file.
+	scm = MyOpenSCManagerW(NULL, NULL, SC_MANAGER_ALL_ACCESS);
 
-    GetFullPathNameW(L"ioperm.sys", MAX_PATH, driver_path, NULL);
+	if (scm == NULL)
+	{
+		error = GetLastError();
+		fprintf(stderr, "IOperm_InstallDriver: OpenSCManager failed (%i).\n", error);
+		return 0;
+	}
 
-    // Create the service.
+	// Get the full path to the driver file.
 
-    svc = MyCreateServiceW(scm,
-                           L"ioperm",
-                           L"ioperm support for Cygwin driver",
-                           SERVICE_ALL_ACCESS,
-                           SERVICE_KERNEL_DRIVER,
-                           SERVICE_AUTO_START,
-                           SERVICE_ERROR_NORMAL,
-                           driver_path,
-                           NULL,
-                           NULL,
-                           NULL,
-                           NULL,
-                           NULL);
+	GetFullPathNameW(L"ioperm.sys", MAX_PATH, driver_path, NULL);
 
-    if (svc == NULL)
-    {
-        error = GetLastError();
+	// Create the service.
 
-        if (error != ERROR_SERVICE_EXISTS)
-        {
-            fprintf(stderr,
-                    "IOperm_InstallDriver: Failed to create service (%i).\n",
-                    error);
-        }
-        else
-        {
-            svc = MyOpenServiceW(scm, L"ioperm", SERVICE_ALL_ACCESS);
+	svc = MyCreateServiceW(scm,
+						   L"ioperm",
+						   L"ioperm support for Cygwin driver",
+						   SERVICE_ALL_ACCESS, SERVICE_KERNEL_DRIVER, SERVICE_AUTO_START, SERVICE_ERROR_NORMAL, driver_path, NULL, NULL, NULL, NULL, NULL);
 
-            if (svc == NULL)
-            {
-                error = GetLastError();
+	if (svc == NULL)
+	{
+		error = GetLastError();
 
-                fprintf(stderr,
-                        "IOperm_InstallDriver: Failed to open service (%i).\n",
-                        error);
-            }
-        }
+		if (error != ERROR_SERVICE_EXISTS)
+		{
+			fprintf(stderr, "IOperm_InstallDriver: Failed to create service (%i).\n", error);
+		}
+		else
+		{
+			svc = MyOpenServiceW(scm, L"ioperm", SERVICE_ALL_ACCESS);
 
-        if (svc == NULL)
-        {
-            MyCloseServiceHandle(scm);
-            return 0;
-        }
-    }
-    else
-    {
-        service_was_created = 1;
-    }
+			if (svc == NULL)
+			{
+				error = GetLastError();
 
-    // Start the service.  If the service already existed, it might have
-    // already been running as well.
+				fprintf(stderr, "IOperm_InstallDriver: Failed to open service (%i).\n", error);
+			}
+		}
 
-    if (!MyStartServiceW(svc, 0, NULL))
-    {
-        error = GetLastError();
+		if (svc == NULL)
+		{
+			MyCloseServiceHandle(scm);
+			return 0;
+		}
+	}
+	else
+	{
+		service_was_created = 1;
+	}
 
-        if (error != ERROR_SERVICE_ALREADY_RUNNING)
-        {
-            fprintf(stderr, "IOperm_InstallDriver: Failed to start service (%i).\n",
-                            error);
+	// Start the service.  If the service already existed, it might have
+	// already been running as well.
 
-            result = 0;
-        }
-        else
-        {
-            printf("IOperm_InstallDriver: ioperm driver already running.\n");
-        }
-    }
-    else
-    {
-        printf("IOperm_InstallDriver: ioperm driver installed.\n");
-        service_was_started = 1;
-    }
+	if (!MyStartServiceW(svc, 0, NULL))
+	{
+		error = GetLastError();
 
-    // If we failed to start the driver running, we need to clean up
-    // before finishing.
+		if (error != ERROR_SERVICE_ALREADY_RUNNING)
+		{
+			fprintf(stderr, "IOperm_InstallDriver: Failed to start service (%i).\n", error);
 
-    if (result == 0)
-    {
-        IOperm_UninstallDriver();
-    }
+			result = 0;
+		}
+		else
+		{
+			printf("IOperm_InstallDriver: ioperm driver already running.\n");
+		}
+	}
+	else
+	{
+		printf("IOperm_InstallDriver: ioperm driver installed.\n");
+		service_was_started = 1;
+	}
 
-    return result;
+	// If we failed to start the driver running, we need to clean up
+	// before finishing.
+
+	if (result == 0)
+	{
+		IOperm_UninstallDriver();
+	}
+
+	return result;
 }
 
 int IOperm_UninstallDriver(void)
 {
-    SERVICE_STATUS stat;
-    int result = 1;
-    int error;
+	SERVICE_STATUS stat;
 
-    // If we started the service, stop it.
+	int result = 1;
 
-    if (service_was_started)
-    {
-        if (!MyControlService(svc, SERVICE_CONTROL_STOP, &stat))
-        {
-            error = GetLastError();
+	int error;
 
-            if (error == ERROR_SERVICE_NOT_ACTIVE)
-            {
-                fprintf(stderr,
-                        "IOperm_UninstallDriver: Service not active? (%i)\n",
-                        error);
-            }
-            else
-            {
-                fprintf(stderr,
-                        "IOperm_UninstallDriver: Failed to stop service (%i).\n",
-                        error);
-                result = 0;
-            }
-        }
-    }
+	// If we started the service, stop it.
 
-    // If we created the service, delete it.
+	if (service_was_started)
+	{
+		if (!MyControlService(svc, SERVICE_CONTROL_STOP, &stat))
+		{
+			error = GetLastError();
 
-    if (service_was_created)
-    {
-        if (!MyDeleteService(svc))
-        {
-            error = GetLastError();
+			if (error == ERROR_SERVICE_NOT_ACTIVE)
+			{
+				fprintf(stderr, "IOperm_UninstallDriver: Service not active? (%i)\n", error);
+			}
+			else
+			{
+				fprintf(stderr, "IOperm_UninstallDriver: Failed to stop service (%i).\n", error);
+				result = 0;
+			}
+		}
+	}
 
-            fprintf(stderr,
-                    "IOperm_UninstallDriver: DeleteService failed (%i).\n",
-                    error);
+	// If we created the service, delete it.
 
-            result = 0;
-        }
-        else if (service_was_started)
-        {
-            printf("IOperm_UnInstallDriver: ioperm driver uninstalled.\n");
-        }
-    }
+	if (service_was_created)
+	{
+		if (!MyDeleteService(svc))
+		{
+			error = GetLastError();
 
-    // Close handles.
+			fprintf(stderr, "IOperm_UninstallDriver: DeleteService failed (%i).\n", error);
 
-    if (svc != NULL)
-    {
-        MyCloseServiceHandle(svc);
-        svc = NULL;
-    }
+			result = 0;
+		}
+		else if (service_was_started)
+		{
+			printf("IOperm_UnInstallDriver: ioperm driver uninstalled.\n");
+		}
+	}
 
-    if (scm != NULL)
-    {
-        MyCloseServiceHandle(scm);
-        scm = NULL;
-    }
+	// Close handles.
 
-    service_was_created = 0;
-    service_was_started = 0;
+	if (svc != NULL)
+	{
+		MyCloseServiceHandle(svc);
+		svc = NULL;
+	}
 
-    return result;
+	if (scm != NULL)
+	{
+		MyCloseServiceHandle(scm);
+		scm = NULL;
+	}
+
+	service_was_created = 0;
+	service_was_started = 0;
+
+	return result;
 }
 
-#endif /* #ifndef _WIN32 */
-
+#endif							/* #ifndef _WIN32 */

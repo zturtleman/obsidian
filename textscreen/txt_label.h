@@ -41,12 +41,12 @@ typedef struct txt_label_s txt_label_t;
 
 struct txt_label_s
 {
-    txt_widget_t widget;
-    char *label;
-    char **lines;
-    unsigned int w, h;
-    txt_color_t fgcolor;
-    txt_color_t bgcolor;
+	txt_widget_t widget;
+	char *label;
+	char **lines;
+	unsigned int w, h;
+	txt_color_t fgcolor;
+	txt_color_t bgcolor;
 };
 
 /**
@@ -65,7 +65,7 @@ txt_label_t *TXT_NewLabel(char *label);
  * @param value         The string to display.
  */
 
-void TXT_SetLabel(txt_label_t *label, char *value);
+void TXT_SetLabel(txt_label_t * label, char *value);
 
 /**
  * Set the background color of a label widget.
@@ -74,7 +74,7 @@ void TXT_SetLabel(txt_label_t *label, char *value);
  * @param color         The background color to use.
  */
 
-void TXT_SetBGColor(txt_label_t *label, txt_color_t color);
+void TXT_SetBGColor(txt_label_t * label, txt_color_t color);
 
 /**
  * Set the foreground color of a label widget.
@@ -83,8 +83,6 @@ void TXT_SetBGColor(txt_label_t *label, txt_color_t color);
  * @param color         The foreground color to use.
  */
 
-void TXT_SetFGColor(txt_label_t *label, txt_color_t color);
+void TXT_SetFGColor(txt_label_t * label, txt_color_t color);
 
-#endif /* #ifndef TXT_LABEL_H */
-
-
+#endif							/* #ifndef TXT_LABEL_H */

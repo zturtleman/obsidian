@@ -8,7 +8,7 @@
 #define WINCE_FILEOPS_H
 
 int remove(const char *pathname);
+
 int rename(const char *oldpath, const char *newpath);
 
-#endif /* #ifndef WINCE_FILEOPS_H */
-
+#endif							/* #ifndef WINCE_FILEOPS_H */

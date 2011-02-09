@@ -7,11 +7,10 @@
 #ifndef WINCE_ERRNO_H
 #define WINCE_ERRNO_H
 
-#define EISDIR          21      /* Is a directory */
+#define EISDIR          21								   /* Is a directory */
 
 extern int *_GetErrno();
 
 #define errno (*_GetErrno())
 
-#endif /* #ifndef WINCE_ERROR_H */
-
+#endif							/* #ifndef WINCE_ERROR_H */

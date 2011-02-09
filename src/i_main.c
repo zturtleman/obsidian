@@ -20,10 +20,9 @@
 // 02111-1307, USA.
 //
 // DESCRIPTION:
-//	Main program, simply calls D_DoomMain high level loop.
+//  Main program, simply calls D_DoomMain high level loop.
 //
 //-----------------------------------------------------------------------------
-
 
 #include "config.h"
 
@@ -47,7 +46,7 @@ static void LockCPUAffinity(void)
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
-typedef BOOL (WINAPI *SetAffinityFunc)(HANDLE hProcess, DWORD mask);
+typedef BOOL(WINAPI * SetAffinityFunc) (HANDLE hProcess, DWORD mask);
 
 // This is a bit more complicated than it really needs to be.  We really
 // just need to call the SetProcessAffinityMask function, but that
@@ -57,37 +56,37 @@ typedef BOOL (WINAPI *SetAffinityFunc)(HANDLE hProcess, DWORD mask);
 
 static void LockCPUAffinity(void)
 {
-    HMODULE kernel32_dll;
-    SetAffinityFunc SetAffinity;
+	HMODULE kernel32_dll;
 
-    // Find the kernel interface DLL.
+	SetAffinityFunc SetAffinity;
 
-    kernel32_dll = LoadLibrary("kernel32.dll");
+	// Find the kernel interface DLL.
 
-    if (kernel32_dll == NULL)
-    {
-        // This should never happen...
+	kernel32_dll = LoadLibrary("kernel32.dll");
 
-        fprintf(stderr, "Failed to load kernel32.dll\n");
-        return;
-    }
+	if (kernel32_dll == NULL)
+	{
+		// This should never happen...
 
-    // Find the SetProcessAffinityMask function.
+		fprintf(stderr, "Failed to load kernel32.dll\n");
+		return;
+	}
 
-    SetAffinity = (SetAffinityFunc)GetProcAddress(kernel32_dll, "SetProcessAffinityMask");
+	// Find the SetProcessAffinityMask function.
 
-    // If the function was not found, we are on an old (Win9x) system
-    // that doesn't have this function.  That's no problem, because
-    // those systems don't support SMP anyway.
+	SetAffinity = (SetAffinityFunc) GetProcAddress(kernel32_dll, "SetProcessAffinityMask");
 
-    if (SetAffinity != NULL)
-    {
-        if (!SetAffinity(GetCurrentProcess(), 1))
-        {
-            fprintf(stderr, "Failed to set process affinity (%d)\n",
-                            (int) GetLastError());
-        }
-    }
+	// If the function was not found, we are on an old (Win9x) system
+	// that doesn't have this function.  That's no problem, because
+	// those systems don't support SMP anyway.
+
+	if (SetAffinity != NULL)
+	{
+		if (!SetAffinity(GetCurrentProcess(), 1))
+		{
+			fprintf(stderr, "Failed to set process affinity (%d)\n", (int)GetLastError());
+		}
+	}
 }
 
 #elif defined(HAVE_SCHED_SETAFFINITY)
@@ -100,15 +99,16 @@ static void LockCPUAffinity(void)
 static void LockCPUAffinity(void)
 {
 #ifdef CPU_SET
-    cpu_set_t set;
+	cpu_set_t set;
 
-    CPU_ZERO(&set);
-    CPU_SET(0, &set);
+	CPU_ZERO(&set);
+	CPU_SET(0, &set);
 
-    sched_setaffinity(getpid(), sizeof(set), &set);
+	sched_setaffinity(getpid(), sizeof(set), &set);
 #else
-    unsigned long mask = 1;
-    sched_setaffinity(getpid(), sizeof(mask), &mask);
+	unsigned long mask = 1;
+
+	sched_setaffinity(getpid(), sizeof(mask), &mask);
 #endif
 }
 
@@ -119,38 +119,35 @@ static void LockCPUAffinity(void)
 
 static void LockCPUAffinity(void)
 {
-    fprintf(stderr, 
-    "WARNING: No known way to set processor affinity on this platform.\n"
-    "         You may experience crashes due to SDL_mixer.\n");
+	fprintf(stderr, "WARNING: No known way to set processor affinity on this platform.\n" "         You may experience crashes due to SDL_mixer.\n");
 }
 
 #endif
 
 int main(int argc, char **argv)
 {
-    // save arguments
+	// save arguments
 
-    myargc = argc;
-    myargv = argv;
+	myargc = argc;
+	myargv = argv;
 
 #ifdef _WIN32_WCE
 
-    // Windows CE has no environment, but SDL provides an implementation.
-    // Populate the environment with the values we normally find.
+	// Windows CE has no environment, but SDL provides an implementation.
+	// Populate the environment with the values we normally find.
 
-    PopulateEnvironment();
+	PopulateEnvironment();
 
 #endif
 
-    // Only schedule on a single core, if we have multiple
-    // cores.  This is to work around a bug in SDL_mixer.
+	// Only schedule on a single core, if we have multiple
+	// cores.  This is to work around a bug in SDL_mixer.
 
-    LockCPUAffinity();
+	LockCPUAffinity();
 
-    // start doom
+	// start doom
 
-    D_DoomMain ();
+	D_DoomMain();
 
-    return 0;
+	return 0;
 }
-

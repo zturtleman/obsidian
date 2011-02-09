@@ -25,23 +25,35 @@
 extern int usemouse;
 
 extern int novert;
+
 extern int mouseSensitivity;
+
 extern float mouse_acceleration;
+
 extern int mouse_threshold;
+
 extern int grabmouse;
+
 extern int mousebfire;
+
 extern int mousebforward;
+
 extern int mousebstrafe;
+
 extern int mousebstrafeleft;
+
 extern int mousebstraferight;
+
 extern int mousebbackward;
+
 extern int mousebuse;
+
 extern int dclick_use;
+
 extern int mousebprevweapon;
+
 extern int mousebnextweapon;
 
 void ConfigMouse(void);
 
-
-#endif /* #ifndef SETUP_MOUSE_H */
-
+#endif							/* #ifndef SETUP_MOUSE_H */

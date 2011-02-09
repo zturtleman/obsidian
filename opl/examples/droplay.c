@@ -24,7 +24,6 @@
 //
 //-----------------------------------------------------------------------------
 
-
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -37,181 +36,183 @@
 
 void WriteReg(unsigned int reg, unsigned int val)
 {
-    int i;
+	int i;
 
-    // This was recorded from an OPL2, but we are probably playing
-    // back on an OPL3, so we need to enable the original OPL2
-    // channels.  Doom does this already, but other games don't.
+	// This was recorded from an OPL2, but we are probably playing
+	// back on an OPL3, so we need to enable the original OPL2
+	// channels.  Doom does this already, but other games don't.
 
-    if ((reg & 0xf0) == OPL_REGS_FEEDBACK)
-    {
-        val |= 0x30;
-    }
+	if ((reg & 0xf0) == OPL_REGS_FEEDBACK)
+	{
+		val |= 0x30;
+	}
 
-    OPL_WritePort(OPL_REGISTER_PORT, reg);
+	OPL_WritePort(OPL_REGISTER_PORT, reg);
 
-    for (i=0; i<6; ++i)
-    {
-        OPL_ReadPort(OPL_REGISTER_PORT);
-    }
+	for (i = 0; i < 6; ++i)
+	{
+		OPL_ReadPort(OPL_REGISTER_PORT);
+	}
 
-    OPL_WritePort(OPL_DATA_PORT, val);
+	OPL_WritePort(OPL_DATA_PORT, val);
 
-    for (i=0; i<35; ++i)
-    {
-        OPL_ReadPort(OPL_REGISTER_PORT);
-    }
+	for (i = 0; i < 35; ++i)
+	{
+		OPL_ReadPort(OPL_REGISTER_PORT);
+	}
 }
 
 void ClearAllRegs(void)
 {
-    int i;
+	int i;
 
-    for (i=0; i<=0xff; ++i)
-    {
-	WriteReg(i, 0x00);
-    }
+	for (i = 0; i <= 0xff; ++i)
+	{
+		WriteReg(i, 0x00);
+	}
 }
 
 void Init(void)
 {
-    if (SDL_Init(SDL_INIT_TIMER) < 0)
-    {
-        fprintf(stderr, "Unable to initialise SDL timer\n");
-        exit(-1);
-    }
+	if (SDL_Init(SDL_INIT_TIMER) < 0)
+	{
+		fprintf(stderr, "Unable to initialise SDL timer\n");
+		exit(-1);
+	}
 
-    if (!OPL_Init(ADLIB_PORT))
-    {
-        fprintf(stderr, "Unable to initialise OPL layer\n");
-        exit(-1);
-    }
+	if (!OPL_Init(ADLIB_PORT))
+	{
+		fprintf(stderr, "Unable to initialise OPL layer\n");
+		exit(-1);
+	}
 }
 
 void Shutdown(void)
 {
-    OPL_Shutdown();
+	OPL_Shutdown();
 }
 
 struct timer_data
 {
-    int running;
-    FILE *fstream;
+	int running;
+	FILE *fstream;
 };
 
 void TimerCallback(void *data)
 {
-    struct timer_data *timer_data = data;
-    int delay;
+	struct timer_data *timer_data = data;
 
-    if (!timer_data->running)
-    {
-        return;
-    }
+	int delay;
 
-    // Read data until we must make a delay.
+	if (!timer_data->running)
+	{
+		return;
+	}
 
-    for (;;)
-    {
-        int reg, val;
+	// Read data until we must make a delay.
 
-        // End of file?
+	for (;;)
+	{
+		int reg, val;
 
-        if (feof(timer_data->fstream))
-        {
-            timer_data->running = 0;
-            return;
-        }
+		// End of file?
 
-        reg = fgetc(timer_data->fstream);
-        val = fgetc(timer_data->fstream);
+		if (feof(timer_data->fstream))
+		{
+			timer_data->running = 0;
+			return;
+		}
 
-        // Register value of 0 or 1 indicates a delay.
+		reg = fgetc(timer_data->fstream);
+		val = fgetc(timer_data->fstream);
 
-        if (reg == 0x00)
-        {
-            delay = val;
-            break;
-        }
-        else if (reg == 0x01)
-        {
-            val |= (fgetc(timer_data->fstream) << 8);
-            delay = val;
-            break;
-        }
-        else
-        {
-            WriteReg(reg, val);
-        }
-    }
+		// Register value of 0 or 1 indicates a delay.
 
-    // Schedule the next timer callback.
+		if (reg == 0x00)
+		{
+			delay = val;
+			break;
+		}
+		else if (reg == 0x01)
+		{
+			val |= (fgetc(timer_data->fstream) << 8);
+			delay = val;
+			break;
+		}
+		else
+		{
+			WriteReg(reg, val);
+		}
+	}
 
-    OPL_SetCallback(delay, TimerCallback, timer_data);
+	// Schedule the next timer callback.
+
+	OPL_SetCallback(delay, TimerCallback, timer_data);
 }
 
 void PlayFile(char *filename)
 {
-    struct timer_data timer_data;
-    int running;
-    char buf[8];
+	struct timer_data timer_data;
 
-    timer_data.fstream = fopen(filename, "rb");
+	int running;
 
-    if (timer_data.fstream == NULL)
-    {
-        fprintf(stderr, "Failed to open %s\n", filename);
-        exit(-1);
-    }
+	char buf[8];
 
-    if (fread(buf, 1, 8, timer_data.fstream) < 8)
-    {
-        fprintf(stderr, "failed to read raw OPL header\n");
-        exit(-1);
-    }
+	timer_data.fstream = fopen(filename, "rb");
 
-    if (strncmp(buf, HEADER_STRING, 8) != 0)
-    {
-        fprintf(stderr, "Raw OPL header not found\n");
-        exit(-1);
-    }
+	if (timer_data.fstream == NULL)
+	{
+		fprintf(stderr, "Failed to open %s\n", filename);
+		exit(-1);
+	}
 
-    fseek(timer_data.fstream, 28, SEEK_SET);
-    timer_data.running = 1;
+	if (fread(buf, 1, 8, timer_data.fstream) < 8)
+	{
+		fprintf(stderr, "failed to read raw OPL header\n");
+		exit(-1);
+	}
 
-    // Start callback loop sequence.
+	if (strncmp(buf, HEADER_STRING, 8) != 0)
+	{
+		fprintf(stderr, "Raw OPL header not found\n");
+		exit(-1);
+	}
 
-    OPL_SetCallback(0, TimerCallback, &timer_data);
+	fseek(timer_data.fstream, 28, SEEK_SET);
+	timer_data.running = 1;
 
-    // Sleep until the playback finishes.
+	// Start callback loop sequence.
 
-    do
-    {
-        OPL_Lock();
-        running = timer_data.running;
-        OPL_Unlock();
+	OPL_SetCallback(0, TimerCallback, &timer_data);
 
-        SDL_Delay(100);
-    } while (running);
+	// Sleep until the playback finishes.
 
-    fclose(timer_data.fstream);
+	do
+	{
+		OPL_Lock();
+		running = timer_data.running;
+		OPL_Unlock();
+
+		SDL_Delay(100);
+	} while(running);
+
+	fclose(timer_data.fstream);
 }
 
 int main(int argc, char *argv[])
 {
-    if (argc < 2)
-    {
-        printf("Usage: %s <filename>\n", argv[0]);
-        exit(-1);
-    }
+	if (argc < 2)
+	{
+		printf("Usage: %s <filename>\n", argv[0]);
+		exit(-1);
+	}
 
-    Init();
+	Init();
 
-    PlayFile(argv[1]);
+	PlayFile(argv[1]);
 
-    ClearAllRegs();
-    Shutdown();
+	ClearAllRegs();
+	Shutdown();
 
-    return 0;
+	return 0;
 }
-

@@ -35,28 +35,35 @@
 #include "deh_defs.h"
 #include "deh_io.h"
 
-static char *deh_signatures[] = 
-{
-    "Patch File for DeHackEd v2.3",
-    "Patch File for DeHackEd v3.0",
+static char *deh_signatures[] = {
+	"Patch File for DeHackEd v2.3",
+	"Patch File for DeHackEd v3.0",
 };
 
 // deh_ammo.c:
 extern deh_section_t deh_section_ammo;
+
 // deh_cheat.c:
 extern deh_section_t deh_section_cheat;
+
 // deh_frame.c:
 extern deh_section_t deh_section_frame;
+
 // deh_misc.c:
 extern deh_section_t deh_section_misc;
+
 // deh_ptr.c:
 extern deh_section_t deh_section_pointer;
+
 // deh_sound.c
 extern deh_section_t deh_section_sound;
+
 // deh_text.c:
 extern deh_section_t deh_section_text;
+
 // deh_thing.c: 
 extern deh_section_t deh_section_thing;
+
 // deh_weapon.c: 
 extern deh_section_t deh_section_weapon;
 
@@ -76,104 +83,104 @@ boolean deh_apply_cheats = true;
 // List of section types:
 //
 
-static deh_section_t *section_types[] =
-{
-    &deh_section_ammo,
-    &deh_section_cheat,
-    &deh_section_frame,
-    &deh_section_misc,
-    &deh_section_pointer,
-    &deh_section_sound,
-    &deh_section_text,
-    &deh_section_thing,
-    &deh_section_weapon,
+static deh_section_t *section_types[] = {
+	&deh_section_ammo,
+	&deh_section_cheat,
+	&deh_section_frame,
+	&deh_section_misc,
+	&deh_section_pointer,
+	&deh_section_sound,
+	&deh_section_text,
+	&deh_section_thing,
+	&deh_section_weapon,
 };
 
 void DEH_Checksum(md5_digest_t digest)
 {
-    md5_context_t md5_context;
-    unsigned int i;
+	md5_context_t md5_context;
 
-    MD5_Init(&md5_context);
+	unsigned int i;
 
-    for (i=0; i<arrlen(section_types); ++i)
-    {
-        if (section_types[i]->md5_hash != NULL)
-        {
-            section_types[i]->md5_hash(&md5_context);
-        }
-    }
+	MD5_Init(&md5_context);
 
-    MD5_Final(digest, &md5_context);
+	for (i = 0; i < arrlen(section_types); ++i)
+	{
+		if (section_types[i]->md5_hash != NULL)
+		{
+			section_types[i]->md5_hash(&md5_context);
+		}
+	}
+
+	MD5_Final(digest, &md5_context);
 }
 
 // Called on startup to call the Init functions
 
 static void InitializeSections(void)
 {
-    unsigned int i;
+	unsigned int i;
 
-    for (i=0; i<arrlen(section_types); ++i)
-    {
-        if (section_types[i]->init != NULL)
-        {
-            section_types[i]->init();
-        }
-    }
+	for (i = 0; i < arrlen(section_types); ++i)
+	{
+		if (section_types[i]->init != NULL)
+		{
+			section_types[i]->init();
+		}
+	}
 }
 
 // Given a section name, get the section structure which corresponds
 
 static deh_section_t *GetSectionByName(char *name)
 {
-    unsigned int i;
+	unsigned int i;
 
-    for (i=0; i<arrlen(section_types); ++i)
-    {
-        if (!strcasecmp(section_types[i]->name, name))
-        {
-            return section_types[i];
-        }
-    }
+	for (i = 0; i < arrlen(section_types); ++i)
+	{
+		if (!strcasecmp(section_types[i]->name, name))
+		{
+			return section_types[i];
+		}
+	}
 
-    return NULL;
+	return NULL;
 }
 
 // Is the string passed just whitespace?
 
 static boolean IsWhitespace(char *s)
 {
-    for (; *s; ++s)
-    {
-        if (!isspace(*s))
-            return false;
-    }
+	for (; *s; ++s)
+	{
+		if (!isspace(*s))
+			return false;
+	}
 
-    return true;
+	return true;
 }
 
 // Strip whitespace from the start and end of a string
 
 static char *CleanString(char *s)
 {
-    char *strending;
+	char *strending;
 
-    // Leading whitespace
+	// Leading whitespace
 
-    while (*s && isspace(*s))
-        ++s;
+	while(*s && isspace(*s))
+		++s;
 
-    // Trailing whitespace
-   
-    strending = s + strlen(s) - 1;
+	// Trailing whitespace
 
-    while (strlen(s) > 0 && isspace(*strending))
-    {
-        *strending = '\0';
-        --strending;
-    }
+	strending = s + strlen(s) - 1;
 
-    return s;
+	while(strlen(s) > 0 && isspace(*strending))
+	{
+		*strending = '\0';
+		--strending;
+	}
+
+	return s;
 }
 
 // This pattern is used a lot of times in different sections, 
@@ -188,280 +195,284 @@ static char *CleanString(char *s)
 
 boolean DEH_ParseAssignment(char *line, char **variable_name, char **value)
 {
-    char *p;
+	char *p;
 
-    // find the equals
-    
-    p = strchr(line, '=');
+	// find the equals
 
-    if (p == NULL && p-line > 2)
-    {
-        return false;
-    }
+	p = strchr(line, '=');
 
-    // variable name at the start
-    // turn the '=' into a \0 to terminate the string here
+	if (p == NULL && p - line > 2)
+	{
+		return false;
+	}
 
-    *p = '\0';
-    *variable_name = CleanString(line);
-    
-    // value immediately follows the '='
-    
-    *value = CleanString(p+1);
-    
-    return true;
+	// variable name at the start
+	// turn the '=' into a \0 to terminate the string here
+
+	*p = '\0';
+	*variable_name = CleanString(line);
+
+	// value immediately follows the '='
+
+	*value = CleanString(p + 1);
+
+	return true;
 }
 
-static boolean CheckSignatures(deh_context_t *context)
+static boolean CheckSignatures(deh_context_t * context)
 {
-    size_t i;
-    char *line;
-    
-    // Read the first line
+	size_t i;
 
-    line = DEH_ReadLine(context);
+	char *line;
 
-    if (line == NULL)
-    {
-        return false;
-    }
+	// Read the first line
 
-    // Check all signatures to see if one matches
+	line = DEH_ReadLine(context);
 
-    for (i=0; i<arrlen(deh_signatures); ++i)
-    {
-        if (!strcmp(deh_signatures[i], line))
-        {
-            return true;
-        }
-    }
+	if (line == NULL)
+	{
+		return false;
+	}
 
-    return false;
+	// Check all signatures to see if one matches
+
+	for (i = 0; i < arrlen(deh_signatures); ++i)
+	{
+		if (!strcmp(deh_signatures[i], line))
+		{
+			return true;
+		}
+	}
+
+	return false;
 }
 
 // Parses a comment string in a dehacked file.
 
 static void DEH_ParseComment(char *comment)
 {
-    // Allow comments containing this special value to allow string
-    // replacements longer than those permitted by DOS dehacked.
-    // This allows us to use a dehacked patch for doing string 
-    // replacements for emulating Chex Quest.
-    //
-    // If you use this, your dehacked patch may not work in Vanilla
-    // Doom.
+	// Allow comments containing this special value to allow string
+	// replacements longer than those permitted by DOS dehacked.
+	// This allows us to use a dehacked patch for doing string 
+	// replacements for emulating Chex Quest.
+	//
+	// If you use this, your dehacked patch may not work in Vanilla
+	// Doom.
 
-    if (strstr(comment, "*allow-long-strings*") != NULL)
-    {
-        deh_allow_long_strings = true;
-    }
+	if (strstr(comment, "*allow-long-strings*") != NULL)
+	{
+		deh_allow_long_strings = true;
+	}
 
-    // Allow magic comments to allow longer cheat replacements than
-    // those permitted by DOS dehacked.  This is also for Chex
-    // Quest.
+	// Allow magic comments to allow longer cheat replacements than
+	// those permitted by DOS dehacked.  This is also for Chex
+	// Quest.
 
-    if (strstr(comment, "*allow-long-cheats*") != NULL)
-    {
-        deh_allow_long_cheats = true;
-    }
+	if (strstr(comment, "*allow-long-cheats*") != NULL)
+	{
+		deh_allow_long_cheats = true;
+	}
 }
 
 // Parses a dehacked file by reading from the context
 
-static void DEH_ParseContext(deh_context_t *context)
+static void DEH_ParseContext(deh_context_t * context)
 {
-    deh_section_t *current_section = NULL;
-    char section_name[20];
-    void *tag = NULL;
-    char *line;
-    
-    // Read the header and check it matches the signature
+	deh_section_t *current_section = NULL;
 
-    if (!CheckSignatures(context))
-    {
-        DEH_Error(context, "This is not a valid dehacked patch file!");
-    }
+	char section_name[20];
 
-    // Read the file
-    
-    for (;;) 
-    {
-        // read a new line
- 
-        line = DEH_ReadLine(context);
+	void *tag = NULL;
 
-        // end of file?
+	char *line;
 
-        if (line == NULL)
-        {
-            return;
-        }
+	// Read the header and check it matches the signature
 
-        while (line[0] != '\0' && isspace(line[0]))
-            ++line;
+	if (!CheckSignatures(context))
+	{
+		DEH_Error(context, "This is not a valid dehacked patch file!");
+	}
 
-        if (line[0] == '#')
-        {
-            // comment
+	// Read the file
 
-            DEH_ParseComment(line);
-            continue;
-        }
+	for (;;)
+	{
+		// read a new line
 
-        if (IsWhitespace(line))
-        {
-            if (current_section != NULL)
-            {
-                // end of section
+		line = DEH_ReadLine(context);
 
-                if (current_section->end != NULL)
-                {
-                    current_section->end(context, tag);
-                }
+		// end of file?
 
-                //printf("end %s tag\n", current_section->name);
-                current_section = NULL;
-            }
-        }
-        else
-        {
-            if (current_section != NULL)
-            {
-                // parse this line
+		if (line == NULL)
+		{
+			return;
+		}
 
-                current_section->line_parser(context, line, tag);
-            }
-            else
-            {
-                // possibly the start of a new section
+		while(line[0] != '\0' && isspace(line[0]))
+			++line;
 
-                sscanf(line, "%19s", section_name);
+		if (line[0] == '#')
+		{
+			// comment
 
-                current_section = GetSectionByName(section_name);
-                
-                if (current_section != NULL)
-                {
-                    tag = current_section->start(context, line);
-                    //printf("started %s tag\n", section_name);
-                }
-                else
-                {
-                    //printf("unknown section name %s\n", section_name);
-                }
-            }
-        }
-    }
+			DEH_ParseComment(line);
+			continue;
+		}
+
+		if (IsWhitespace(line))
+		{
+			if (current_section != NULL)
+			{
+				// end of section
+
+				if (current_section->end != NULL)
+				{
+					current_section->end(context, tag);
+				}
+
+				//printf("end %s tag\n", current_section->name);
+				current_section = NULL;
+			}
+		}
+		else
+		{
+			if (current_section != NULL)
+			{
+				// parse this line
+
+				current_section->line_parser(context, line, tag);
+			}
+			else
+			{
+				// possibly the start of a new section
+
+				sscanf(line, "%19s", section_name);
+
+				current_section = GetSectionByName(section_name);
+
+				if (current_section != NULL)
+				{
+					tag = current_section->start(context, line);
+					//printf("started %s tag\n", section_name);
+				}
+				else
+				{
+					//printf("unknown section name %s\n", section_name);
+				}
+			}
+		}
+	}
 }
 
 // Parses a dehacked file
 
 int DEH_LoadFile(char *filename)
 {
-    deh_context_t *context;
+	deh_context_t *context;
 
-    // Vanilla dehacked files don't allow long string or cheat replacements.
+	// Vanilla dehacked files don't allow long string or cheat replacements.
 
-    deh_allow_long_strings = false;
-    deh_allow_long_cheats = false;
+	deh_allow_long_strings = false;
+	deh_allow_long_cheats = false;
 
-    printf(" loading %s\n", filename);
+	printf(" loading %s\n", filename);
 
-    context = DEH_OpenFile(filename);
+	context = DEH_OpenFile(filename);
 
-    if (context == NULL)
-    {
-        fprintf(stderr, "DEH_LoadFile: Unable to open %s\n", filename);
-        return 0;
-    }
-    
-    DEH_ParseContext(context);
-    
-    DEH_CloseFile(context);
+	if (context == NULL)
+	{
+		fprintf(stderr, "DEH_LoadFile: Unable to open %s\n", filename);
+		return 0;
+	}
 
-    return 1;
+	DEH_ParseContext(context);
+
+	DEH_CloseFile(context);
+
+	return 1;
 }
 
 // Load dehacked file from WAD lump.
 
 int DEH_LoadLump(int lumpnum)
 {
-    deh_context_t *context;
+	deh_context_t *context;
 
-    // If it's in a lump, it's probably designed for a modern source port,
-    // so allow it to do long string and cheat replacements.
+	// If it's in a lump, it's probably designed for a modern source port,
+	// so allow it to do long string and cheat replacements.
 
-    deh_allow_long_strings = true;
-    deh_allow_long_cheats = true;
+	deh_allow_long_strings = true;
+	deh_allow_long_cheats = true;
 
-    context = DEH_OpenLump(lumpnum);
+	context = DEH_OpenLump(lumpnum);
 
-    if (context == NULL)
-    {
-        fprintf(stderr, "DEH_LoadFile: Unable to open lump %i\n", lumpnum);
-        return 0;
-    }
+	if (context == NULL)
+	{
+		fprintf(stderr, "DEH_LoadFile: Unable to open lump %i\n", lumpnum);
+		return 0;
+	}
 
-    DEH_ParseContext(context);
+	DEH_ParseContext(context);
 
-    DEH_CloseFile(context);
+	DEH_CloseFile(context);
 
-    return 1;
+	return 1;
 }
 
 int DEH_LoadLumpByName(char *name)
 {
-    int lumpnum;
+	int lumpnum;
 
-    lumpnum = W_CheckNumForName(name);
+	lumpnum = W_CheckNumForName(name);
 
-    if (lumpnum == -1)
-    {
-        fprintf(stderr, "DEH_LoadLumpByName: '%s' lump not found\n", name);
-        return 0;
-    }
+	if (lumpnum == -1)
+	{
+		fprintf(stderr, "DEH_LoadLumpByName: '%s' lump not found\n", name);
+		return 0;
+	}
 
-    return DEH_LoadLump(lumpnum);
+	return DEH_LoadLump(lumpnum);
 }
 
 // Checks the command line for -deh argument
 
 void DEH_Init(void)
 {
-    char *filename;
-    int p;
+	char *filename;
 
-    InitializeSections();
+	int p;
 
-    //!
-    // @category mod
-    //
-    // Ignore cheats in dehacked files.
-    //
+	InitializeSections();
 
-    if (M_CheckParm("-nocheats") > 0) 
-    {
-	deh_apply_cheats = false;
-    }
+	//!
+	// @category mod
+	//
+	// Ignore cheats in dehacked files.
+	//
 
-    //!
-    // @arg <files>
-    // @category mod
-    //
-    // Load the given dehacked patch(es)
-    //
+	if (M_CheckParm("-nocheats") > 0)
+	{
+		deh_apply_cheats = false;
+	}
 
-    p = M_CheckParm("-deh");
+	//!
+	// @arg <files>
+	// @category mod
+	//
+	// Load the given dehacked patch(es)
+	//
 
-    if (p > 0)
-    {
-        ++p;
+	p = M_CheckParm("-deh");
 
-        while (p < myargc && myargv[p][0] != '-')
-        {
-            filename = D_TryFindWADByName(myargv[p]);
-            DEH_LoadFile(filename);
-            ++p;
-        }
-    }
+	if (p > 0)
+	{
+		++p;
+
+		while(p < myargc && myargv[p][0] != '-')
+		{
+			filename = D_TryFindWADByName(myargv[p]);
+			DEH_LoadFile(filename);
+			++p;
+		}
+	}
 }
-

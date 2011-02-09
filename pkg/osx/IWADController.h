@@ -26,29 +26,32 @@
 #include <AppKit/AppKit.h>
 #include <AppKit/NSNibLoading.h>
 
-@interface IWADController : NSObject
+@ interface IWADController:NSObject
 {
-    id iwadSelector;
-    id configWindow;
+	id iwadSelector;
 
-    id chex;
-    id doom1;
-    id doom2;
-    id plutonia;
-    id tnt;
+	id configWindow;
+
+	id chex;
+
+	id doom1;
+
+	id doom2;
+
+	id plutonia;
+
+	id tnt;
 }
 
-- (void) closeConfigWindow: (id)sender;
-- (void) openConfigWindow: (id)sender;
-- (NSString *) getIWADLocation;
-- (void) awakeFromNib;
-- (BOOL) setDropdownList;
-- (void) setDropdownSelection;
-- (void) saveConfig;
-- (char *) doomWadPath;
-- (void) setEnvironment;
+-(void)closeConfigWindow:(id) sender;
+-(void)openConfigWindow:(id) sender;
+-(NSString *) getIWADLocation;
+-(void)awakeFromNib;
+-(BOOL) setDropdownList;
+-(void)setDropdownSelection;
+-(void)saveConfig;
+-(char *)doomWadPath;
+-(void)setEnvironment;
 
 @end
-
-#endif /* #ifndef LAUNCHER_IWADCONTROLLER_H */
-
+#endif							/* #ifndef LAUNCHER_IWADCONTROLLER_H */

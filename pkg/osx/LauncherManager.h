@@ -27,25 +27,23 @@
 #include <AppKit/NSNibLoading.h>
 #include "IWADController.h"
 
-@interface LauncherManager : NSObject
+@ interface LauncherManager:NSObject
 {
-    IWADController *iwadController;
+	IWADController *iwadController;
 
-    id launcherWindow;
-    id launchButton;
+	id launcherWindow;
 
-    id commandLineArguments;
+	id launchButton;
+
+	id commandLineArguments;
 }
 
-- (void) launch: (id)sender;
-- (void) runSetup: (id)sender;
-- (void) awakeFromNib;
-- (void) clearCommandLine;
-- (void) addFileToCommandLine: (NSString *) fileName
-         forArgument: (NSString *) args;
-- (void) openTerminal: (id) sender;
+-(void)launch:(id) sender;
+-(void)runSetup:(id) sender;
+-(void)awakeFromNib;
+-(void)clearCommandLine;
+-(void)addFileToCommandLine: (NSString *) fileName forArgument:(NSString *) args;
+-(void)openTerminal:(id) sender;
 
 @end
-
-#endif /* #ifndef LAUNCHER_LAUNCHERMANAGER_H */
-
+#endif							/* #ifndef LAUNCHER_LAUNCHERMANAGER_H */

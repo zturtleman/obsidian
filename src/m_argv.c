@@ -23,7 +23,6 @@
 //
 //-----------------------------------------------------------------------------
 
-
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -33,11 +32,9 @@
 #include "i_system.h"
 #include "m_misc.h"
 
-int		myargc;
-char**		myargv;
+int myargc;
 
-
-
+char **myargv;
 
 //
 // M_CheckParm
@@ -49,164 +46,170 @@ char**		myargv;
 
 int M_CheckParmWithArgs(char *check, int num_args)
 {
-    int i;
+	int i;
 
-    for (i = 1; i < myargc - num_args; i++)
-    {
-	if (!strcasecmp(check, myargv[i]))
-	    return i;
-    }
+	for (i = 1; i < myargc - num_args; i++)
+	{
+		if (!strcasecmp(check, myargv[i]))
+			return i;
+	}
 
-    return 0;
+	return 0;
 }
 
 int M_CheckParm(char *check)
 {
-    return M_CheckParmWithArgs(check, 0);
+	return M_CheckParmWithArgs(check, 0);
 }
 
 #define MAXARGVS        100
-	
+
 static void LoadResponseFile(int argv_index)
 {
-    FILE *handle;
-    int size;
-    char *infile;
-    char *file;
-    char *response_filename;
-    char **newargv;
-    int newargc;
-    int i, k;
+	FILE *handle;
 
-    response_filename = myargv[argv_index] + 1;
+	int size;
 
-    // Read the response file into memory
-    handle = fopen(response_filename, "rb");
+	char *infile;
 
-    if (handle == NULL)
-    {
-        printf ("\nNo such response file!");
-        exit(1);
-    }
+	char *file;
 
-    printf("Found response file %s!\n", response_filename);
+	char *response_filename;
 
-    size = M_FileLength(handle);
+	char **newargv;
 
-    // Read in the entire file
-    // Allocate one byte extra - this is in case there is an argument
-    // at the end of the response file, in which case a '\0' will be 
-    // needed.
+	int newargc;
 
-    file = malloc(size + 1);
+	int i, k;
 
-    if (fread(file, 1, size, handle) < size)
-    {
-        I_Error("Failed to read entire response file");
-    }
+	response_filename = myargv[argv_index] + 1;
 
-    fclose(handle);
+	// Read the response file into memory
+	handle = fopen(response_filename, "rb");
 
-    // Create new arguments list array
+	if (handle == NULL)
+	{
+		printf("\nNo such response file!");
+		exit(1);
+	}
 
-    newargv = malloc(sizeof(char *) * MAXARGVS);
-    newargc = 0;
-    memset(newargv, 0, sizeof(char *) * MAXARGVS);
+	printf("Found response file %s!\n", response_filename);
 
-    // Copy all the arguments in the list up to the response file
+	size = M_FileLength(handle);
 
-    for (i=0; i<argv_index; ++i)
-    {
-        newargv[i] = myargv[i];
-        ++newargc;
-    }
-    
-    infile = file;
-    k = 0;
+	// Read in the entire file
+	// Allocate one byte extra - this is in case there is an argument
+	// at the end of the response file, in which case a '\0' will be 
+	// needed.
 
-    while(k < size)
-    {
-        // Skip past space characters to the next argument
+	file = malloc(size + 1);
 
-        while(k < size && isspace(infile[k]))
-        {
-            ++k;
-        } 
+	if (fread(file, 1, size, handle) < size)
+	{
+		I_Error("Failed to read entire response file");
+	}
 
-        if (k >= size)
-        {
-            break;
-        }
+	fclose(handle);
 
-        // If the next argument is enclosed in quote marks, treat
-        // the contents as a single argument.  This allows long filenames
-        // to be specified.
+	// Create new arguments list array
 
-        if (infile[k] == '\"') 
-        {
-            // Skip the first character(")
-            ++k;
+	newargv = malloc(sizeof(char *) * MAXARGVS);
+	newargc = 0;
+	memset(newargv, 0, sizeof(char *) * MAXARGVS);
 
-            newargv[newargc++] = &infile[k];
+	// Copy all the arguments in the list up to the response file
 
-            // Read all characters between quotes
+	for (i = 0; i < argv_index; ++i)
+	{
+		newargv[i] = myargv[i];
+		++newargc;
+	}
 
-            while (k < size && infile[k] != '\"' && infile[k] != '\n')
-            {
-                ++k;
-            }
+	infile = file;
+	k = 0;
 
-            if (k >= size || infile[k] == '\n') 
-            {
-                I_Error("Quotes unclosed in response file '%s'", 
-                        response_filename);
-            }
+	while(k < size)
+	{
+		// Skip past space characters to the next argument
 
-            // Cut off the string at the closing quote
+		while(k < size && isspace(infile[k]))
+		{
+			++k;
+		}
 
-            infile[k] = '\0';
-            ++k;
-        }
-        else
-        {
-            // Read in the next argument until a space is reached
+		if (k >= size)
+		{
+			break;
+		}
 
-            newargv[newargc++] = &infile[k];
+		// If the next argument is enclosed in quote marks, treat
+		// the contents as a single argument.  This allows long filenames
+		// to be specified.
 
-            while(k < size && !isspace(infile[k]))
-            {
-                ++k;
-            }
+		if (infile[k] == '\"')
+		{
+			// Skip the first character(")
+			++k;
 
-            // Cut off the end of the argument at the first space
+			newargv[newargc++] = &infile[k];
 
-            infile[k] = '\0';
+			// Read all characters between quotes
 
-            ++k;
-        }
-    } 
+			while(k < size && infile[k] != '\"' && infile[k] != '\n')
+			{
+				++k;
+			}
 
-    // Add arguments following the response file argument
+			if (k >= size || infile[k] == '\n')
+			{
+				I_Error("Quotes unclosed in response file '%s'", response_filename);
+			}
 
-    for (i=argv_index + 1; i<myargc; ++i)
-    {
-        newargv[newargc] = myargv[i];
-        ++newargc;
-    }
+			// Cut off the string at the closing quote
 
-    myargv = newargv;
-    myargc = newargc;
+			infile[k] = '\0';
+			++k;
+		}
+		else
+		{
+			// Read in the next argument until a space is reached
+
+			newargv[newargc++] = &infile[k];
+
+			while(k < size && !isspace(infile[k]))
+			{
+				++k;
+			}
+
+			// Cut off the end of the argument at the first space
+
+			infile[k] = '\0';
+
+			++k;
+		}
+	}
+
+	// Add arguments following the response file argument
+
+	for (i = argv_index + 1; i < myargc; ++i)
+	{
+		newargv[newargc] = myargv[i];
+		++newargc;
+	}
+
+	myargv = newargv;
+	myargc = newargc;
 
 #if 0
-    // Disabled - Vanilla Doom does not do this.
-    // Display arguments
+	// Disabled - Vanilla Doom does not do this.
+	// Display arguments
 
-    printf("%d command-line args:\n", myargc);
+	printf("%d command-line args:\n", myargc);
 
-    for (k=1; k<myargc; k++)
-    {
-        printf("'%s'\n", myargv[k]);
-    }
+	for (k = 1; k < myargc; k++)
+	{
+		printf("'%s'\n", myargv[k]);
+	}
 #endif
 }
 
@@ -216,14 +219,13 @@ static void LoadResponseFile(int argv_index)
 
 void M_FindResponseFile(void)
 {
-    int             i;
+	int i;
 
-    for (i = 1; i < myargc; i++)
-    {
-        if (myargv[i][0] == '@')
-        {
-            LoadResponseFile(i);
-        }
-    }
+	for (i = 1; i < myargc; i++)
+	{
+		if (myargv[i][0] == '@')
+		{
+			LoadResponseFile(i);
+		}
+	}
 }
-

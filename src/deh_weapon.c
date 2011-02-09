@@ -37,74 +37,71 @@
 #include "deh_mapping.h"
 
 DEH_BEGIN_MAPPING(weapon_mapping, weaponinfo_t)
-  DEH_MAPPING("Ammo type",        ammo)
-  DEH_MAPPING("Deselect frame",   upstate)
-  DEH_MAPPING("Select frame",     downstate)
-  DEH_MAPPING("Bobbing frame",    readystate)
-  DEH_MAPPING("Shooting frame",   atkstate)
-  DEH_MAPPING("Firing frame",     flashstate)
-DEH_END_MAPPING
-
-static void *DEH_WeaponStart(deh_context_t *context, char *line)
+DEH_MAPPING("Ammo type", ammo)
+DEH_MAPPING("Deselect frame", upstate)
+DEH_MAPPING("Select frame", downstate)
+DEH_MAPPING("Bobbing frame", readystate)
+DEH_MAPPING("Shooting frame", atkstate)
+DEH_MAPPING("Firing frame", flashstate) DEH_END_MAPPING static void *DEH_WeaponStart(deh_context_t * context, char *line)
 {
-    int weapon_number = 0;
+	int weapon_number = 0;
 
-    if (sscanf(line, "Weapon %i", &weapon_number) != 1)
-    {
-        DEH_Warning(context, "Parse error on section start");
-        return NULL;
-    }
+	if (sscanf(line, "Weapon %i", &weapon_number) != 1)
+	{
+		DEH_Warning(context, "Parse error on section start");
+		return NULL;
+	}
 
-    if (weapon_number < 0 || weapon_number >= NUMWEAPONS)
-    {
-        DEH_Warning(context, "Invalid weapon number: %i", weapon_number);
-        return NULL;
-    }
-    
-    return &weaponinfo[weapon_number];
+	if (weapon_number < 0 || weapon_number >= NUMWEAPONS)
+	{
+		DEH_Warning(context, "Invalid weapon number: %i", weapon_number);
+		return NULL;
+	}
+
+	return &weaponinfo[weapon_number];
 }
 
-static void DEH_WeaponParseLine(deh_context_t *context, char *line, void *tag)
+static void DEH_WeaponParseLine(deh_context_t * context, char *line, void *tag)
 {
-    char *variable_name, *value;
-    weaponinfo_t *weapon;
-    int ivalue;
-    
-    if (tag == NULL)
-        return;
+	char *variable_name, *value;
 
-    weapon = (weaponinfo_t *) tag;
+	weaponinfo_t *weapon;
 
-    if (!DEH_ParseAssignment(line, &variable_name, &value))
-    {
-        // Failed to parse
+	int ivalue;
 
-        DEH_Warning(context, "Failed to parse assignment");
-        return;
-    }
+	if (tag == NULL)
+		return;
 
-    ivalue = atoi(value);
+	weapon = (weaponinfo_t *) tag;
 
-    DEH_SetMapping(context, &weapon_mapping, weapon, variable_name, ivalue);
+	if (!DEH_ParseAssignment(line, &variable_name, &value))
+	{
+		// Failed to parse
+
+		DEH_Warning(context, "Failed to parse assignment");
+		return;
+	}
+
+	ivalue = atoi(value);
+
+	DEH_SetMapping(context, &weapon_mapping, weapon, variable_name, ivalue);
 }
 
-static void DEH_WeaponMD5Sum(md5_context_t *context)
+static void DEH_WeaponMD5Sum(md5_context_t * context)
 {
-    int i;
+	int i;
 
-    for (i=0; i<NUMWEAPONS ;++i)
-    {
-        DEH_StructMD5Sum(context, &weapon_mapping, &weaponinfo[i]);
-    }
+	for (i = 0; i < NUMWEAPONS; ++i)
+	{
+		DEH_StructMD5Sum(context, &weapon_mapping, &weaponinfo[i]);
+	}
 }
 
-deh_section_t deh_section_weapon =
-{
-    "Weapon",
-    NULL,
-    DEH_WeaponStart,
-    DEH_WeaponParseLine,
-    NULL,
-    DEH_WeaponMD5Sum,
+deh_section_t deh_section_weapon = {
+	"Weapon",
+	NULL,
+	DEH_WeaponStart,
+	DEH_WeaponParseLine,
+	NULL,
+	DEH_WeaponMD5Sum,
 };
-

@@ -52,10 +52,10 @@ typedef struct txt_radiobutton_s txt_radiobutton_t;
 
 struct txt_radiobutton_s
 {
-    txt_widget_t widget;
-    char *label;
-    int *variable;
-    int value;
+	txt_widget_t widget;
+	char *label;
+	int *variable;
+	int value;
 };
 
 /**
@@ -78,8 +78,6 @@ txt_radiobutton_t *TXT_NewRadioButton(char *label, int *variable, int value);
  * @param value          The new label.
  */
 
-void TXT_SetRadioButtonLabel(txt_radiobutton_t *radiobutton, char *value);
+void TXT_SetRadioButtonLabel(txt_radiobutton_t * radiobutton, char *value);
 
-#endif /* #ifndef TXT_RADIOBUTTON_H */
-
-
+#endif							/* #ifndef TXT_RADIOBUTTON_H */

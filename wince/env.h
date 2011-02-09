@@ -20,5 +20,4 @@
 
 extern void PopulateEnvironment(void);
 
-#endif /* #ifndef WINCE_ENV_H */
-
+#endif							/* #ifndef WINCE_ENV_H */

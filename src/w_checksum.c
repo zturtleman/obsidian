@@ -32,63 +32,64 @@
 #include "w_wad.h"
 
 static wad_file_t **open_wadfiles = NULL;
+
 static int num_open_wadfiles = 0;
 
-static int GetFileNumber(wad_file_t *handle)
+static int GetFileNumber(wad_file_t * handle)
 {
-    int i;
-    int result;
+	int i;
 
-    for (i=0; i<num_open_wadfiles; ++i)
-    {
-        if (open_wadfiles[i] == handle)
-        {
-            return i;
-        }
-    }
+	int result;
 
-    // Not found in list.  This is a new file we haven't seen yet.
-    // Allocate another slot for this file.
+	for (i = 0; i < num_open_wadfiles; ++i)
+	{
+		if (open_wadfiles[i] == handle)
+		{
+			return i;
+		}
+	}
 
-    open_wadfiles = realloc(open_wadfiles,
-                            sizeof(wad_file_t *) * (num_open_wadfiles + 1));
-    open_wadfiles[num_open_wadfiles] = handle;
+	// Not found in list.  This is a new file we haven't seen yet.
+	// Allocate another slot for this file.
 
-    result = num_open_wadfiles;
-    ++num_open_wadfiles;
+	open_wadfiles = realloc(open_wadfiles, sizeof(wad_file_t *) * (num_open_wadfiles + 1));
+	open_wadfiles[num_open_wadfiles] = handle;
 
-    return result;
+	result = num_open_wadfiles;
+	++num_open_wadfiles;
+
+	return result;
 }
 
-static void ChecksumAddLump(md5_context_t *md5_context, lumpinfo_t *lump)
+static void ChecksumAddLump(md5_context_t * md5_context, lumpinfo_t * lump)
 {
-    char buf[9];
+	char buf[9];
 
-    strncpy(buf, lump->name, 8);
-    buf[8] = '\0';
-    MD5_UpdateString(md5_context, buf);
-    MD5_UpdateInt32(md5_context, GetFileNumber(lump->wad_file));
-    MD5_UpdateInt32(md5_context, lump->position);
-    MD5_UpdateInt32(md5_context, lump->size);
+	strncpy(buf, lump->name, 8);
+	buf[8] = '\0';
+	MD5_UpdateString(md5_context, buf);
+	MD5_UpdateInt32(md5_context, GetFileNumber(lump->wad_file));
+	MD5_UpdateInt32(md5_context, lump->position);
+	MD5_UpdateInt32(md5_context, lump->size);
 }
 
 void W_Checksum(md5_digest_t digest)
 {
-    md5_context_t md5_context;
-    unsigned int i;
+	md5_context_t md5_context;
 
-    MD5_Init(&md5_context);
+	unsigned int i;
 
-    num_open_wadfiles = 0;
+	MD5_Init(&md5_context);
 
-    // Go through each entry in the WAD directory, adding information
-    // about each entry to the MD5 hash.
+	num_open_wadfiles = 0;
 
-    for (i=0; i<numlumps; ++i)
-    {
-        ChecksumAddLump(&md5_context, &lumpinfo[i]);
-    }
-    
-    MD5_Final(digest, &md5_context);
+	// Go through each entry in the WAD directory, adding information
+	// about each entry to the MD5 hash.
+
+	for (i = 0; i < numlumps; ++i)
+	{
+		ChecksumAddLump(&md5_context, &lumpinfo[i]);
+	}
+
+	MD5_Final(digest, &md5_context);
 }
-

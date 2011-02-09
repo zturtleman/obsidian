@@ -20,65 +20,44 @@
 // 02111-1307, USA.
 //
 // DESCRIPTION:
-//	Refresh, visplane stuff (floor, ceilings).
+//  Refresh, visplane stuff (floor, ceilings).
 //
 //-----------------------------------------------------------------------------
-
 
 #ifndef __R_PLANE__
 #define __R_PLANE__
 
-
 #include "r_data.h"
 
-
-
 // Visplane related.
-extern  short*		lastopening;
-
+extern short *lastopening;
 
 typedef void (*planefunction_t) (int top, int bottom);
 
-extern planefunction_t	floorfunc;
-extern planefunction_t	ceilingfunc_t;
+extern planefunction_t floorfunc;
 
-extern short		floorclip[SCREENWIDTH];
-extern short		ceilingclip[SCREENWIDTH];
+extern planefunction_t ceilingfunc_t;
 
-extern fixed_t		yslope[SCREENHEIGHT];
-extern fixed_t		distscale[SCREENWIDTH];
+extern short floorclip[SCREENWIDTH];
 
-void R_InitPlanes (void);
-void R_ClearPlanes (void);
+extern short ceilingclip[SCREENWIDTH];
 
-void
-R_MapPlane
-( int		y,
-  int		x1,
-  int		x2 );
+extern fixed_t yslope[SCREENHEIGHT];
 
-void
-R_MakeSpans
-( int		x,
-  int		t1,
-  int		b1,
-  int		t2,
-  int		b2 );
+extern fixed_t distscale[SCREENWIDTH];
 
-void R_DrawPlanes (void);
+void R_InitPlanes(void);
 
-visplane_t*
-R_FindPlane
-( fixed_t	height,
-  int		picnum,
-  int		lightlevel );
+void R_ClearPlanes(void);
 
-visplane_t*
-R_CheckPlane
-( visplane_t*	pl,
-  int		start,
-  int		stop );
+void R_MapPlane(int y, int x1, int x2);
 
+void R_MakeSpans(int x, int t1, int b1, int t2, int b2);
 
+void R_DrawPlanes(void);
+
+visplane_t *R_FindPlane(fixed_t height, int picnum, int lightlevel);
+
+visplane_t *R_CheckPlane(visplane_t * pl, int start, int stop);
 
 #endif

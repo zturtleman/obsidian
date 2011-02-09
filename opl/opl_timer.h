@@ -29,14 +29,17 @@
 #include "opl.h"
 
 int OPL_Timer_StartThread(void);
+
 void OPL_Timer_StopThread(void);
-void OPL_Timer_SetCallback(unsigned int ms,
-                           opl_callback_t callback,
-                           void *data);
+
+void OPL_Timer_SetCallback(unsigned int ms, opl_callback_t callback, void *data);
+
 void OPL_Timer_ClearCallbacks(void);
+
 void OPL_Timer_Lock(void);
+
 void OPL_Timer_Unlock(void);
+
 void OPL_Timer_SetPaused(int paused);
 
-#endif /* #ifndef OPL_TIMER_H */
-
+#endif							/* #ifndef OPL_TIMER_H */

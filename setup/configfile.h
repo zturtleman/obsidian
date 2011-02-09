@@ -24,21 +24,21 @@
 //    
 //-----------------------------------------------------------------------------
 
-
 #ifndef __SETUP_CONFIG__
 #define __SETUP_CONFIG__
 
 extern char *configdir;
 
-void M_LoadDefaults (void);
-void M_SaveDefaults (void);
+void M_LoadDefaults(void);
+
+void M_SaveDefaults(void);
 
 void M_SetConfigDir(void);
 
 void M_SaveMainDefaults(char *filename);
+
 void M_SaveExtraDefaults(char *filename);
 
 void M_ApplyPlatformDefaults(void);
 
 #endif
-

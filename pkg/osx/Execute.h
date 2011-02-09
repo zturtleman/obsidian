@@ -24,8 +24,9 @@
 #define LAUNCHER_EXECUTE_H
 
 void SetProgramLocation(const char *path);
+
 void ExecuteProgram(const char *executable, const char *iwad, const char *args);
+
 void OpenTerminalWindow(const char *doomwadpath);
 
-#endif /* #ifndef LAUNCHER_EXECUTE_H */
-
+#endif							/* #ifndef LAUNCHER_EXECUTE_H */

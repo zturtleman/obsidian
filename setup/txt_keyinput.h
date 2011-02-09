@@ -33,12 +33,10 @@ typedef struct txt_key_input_s txt_key_input_t;
 
 struct txt_key_input_s
 {
-    txt_widget_t widget;
-    int *variable;
+	txt_widget_t widget;
+	int *variable;
 };
 
 txt_key_input_t *TXT_NewKeyInput(int *variable);
 
-#endif /* #ifndef TXT_KEY_INPUT_H */
-
-
+#endif							/* #ifndef TXT_KEY_INPUT_H */

@@ -30,167 +30,169 @@
 
 static void TXT_LabelSizeCalc(TXT_UNCAST_ARG(label))
 {
-    TXT_CAST_ARG(txt_label_t, label);
+	TXT_CAST_ARG(txt_label_t, label);
 
-    label->widget.w = label->w;
-    label->widget.h = label->h;
+	label->widget.w = label->w;
+	label->widget.h = label->h;
 }
 
 static void TXT_LabelDrawer(TXT_UNCAST_ARG(label), int selected)
 {
-    TXT_CAST_ARG(txt_label_t, label);
-    unsigned int x, y;
-    int origin_x, origin_y;
-    unsigned int align_indent = 0;
-    unsigned int w;
+	TXT_CAST_ARG(txt_label_t, label);
+	unsigned int x, y;
 
-    w = label->widget.w;
+	int origin_x, origin_y;
 
-    TXT_BGColor(label->bgcolor, 0);
-    TXT_FGColor(label->fgcolor);
+	unsigned int align_indent = 0;
 
-    TXT_GetXY(&origin_x, &origin_y);
+	unsigned int w;
 
-    for (y=0; y<label->h; ++y)
-    {
-        // Calculate the amount to indent this line due to the align 
-        // setting
+	w = label->widget.w;
 
-        switch (label->widget.align)
-        {
-            case TXT_HORIZ_LEFT:
-                align_indent = 0;
-                break;
-            case TXT_HORIZ_CENTER:
-                align_indent = (label->w - strlen(label->lines[y])) / 2;
-                break;
-            case TXT_HORIZ_RIGHT:
-                align_indent = label->w - strlen(label->lines[y]);
-                break;
-        }
-        
-        // Draw this line
+	TXT_BGColor(label->bgcolor, 0);
+	TXT_FGColor(label->fgcolor);
 
-        TXT_GotoXY(origin_x, origin_y + y);
+	TXT_GetXY(&origin_x, &origin_y);
 
-        // Gap at the start
+	for (y = 0; y < label->h; ++y)
+	{
+		// Calculate the amount to indent this line due to the align 
+		// setting
 
-        for (x=0; x<align_indent; ++x)
-        {
-            TXT_DrawString(" ");
-        }
+		switch (label->widget.align)
+		{
+			case TXT_HORIZ_LEFT:
+				align_indent = 0;
+				break;
+			case TXT_HORIZ_CENTER:
+				align_indent = (label->w - strlen(label->lines[y])) / 2;
+				break;
+			case TXT_HORIZ_RIGHT:
+				align_indent = label->w - strlen(label->lines[y]);
+				break;
+		}
 
-        // The string itself
+		// Draw this line
 
-        TXT_DrawString(label->lines[y]);
-        x += strlen(label->lines[y]);
+		TXT_GotoXY(origin_x, origin_y + y);
 
-        // Gap at the end
+		// Gap at the start
 
-        for (; x<w; ++x)
-        {
-            TXT_DrawString(" ");
-        }
-    }
+		for (x = 0; x < align_indent; ++x)
+		{
+			TXT_DrawString(" ");
+		}
+
+		// The string itself
+
+		TXT_DrawString(label->lines[y]);
+		x += strlen(label->lines[y]);
+
+		// Gap at the end
+
+		for (; x < w; ++x)
+		{
+			TXT_DrawString(" ");
+		}
+	}
 }
 
 static void TXT_LabelDestructor(TXT_UNCAST_ARG(label))
 {
-    TXT_CAST_ARG(txt_label_t, label);
+	TXT_CAST_ARG(txt_label_t, label);
 
-    free(label->label);
-    free(label->lines);
+	free(label->label);
+	free(label->lines);
 }
 
-txt_widget_class_t txt_label_class =
-{
-    TXT_NeverSelectable,
-    TXT_LabelSizeCalc,
-    TXT_LabelDrawer,
-    NULL,
-    TXT_LabelDestructor,
-    NULL,
-    NULL,
+txt_widget_class_t txt_label_class = {
+	TXT_NeverSelectable,
+	TXT_LabelSizeCalc,
+	TXT_LabelDrawer,
+	NULL,
+	TXT_LabelDestructor,
+	NULL,
+	NULL,
 };
 
-void TXT_SetLabel(txt_label_t *label, char *value)
+void TXT_SetLabel(txt_label_t * label, char *value)
 {
-    char *p;
-    unsigned int y;
+	char *p;
 
-    // Free back the old label
+	unsigned int y;
 
-    free(label->label);
-    free(label->lines);
+	// Free back the old label
 
-    // Set the new value 
+	free(label->label);
+	free(label->lines);
 
-    label->label = strdup(value);
+	// Set the new value 
 
-    // Work out how many lines in this label
+	label->label = strdup(value);
 
-    label->h = 1;
+	// Work out how many lines in this label
 
-    for (p = value; *p != '\0'; ++p)
-    {
-        if (*p == '\n')
-        {
-            ++label->h;
-        }
-    }
+	label->h = 1;
 
-    // Split into lines
+	for (p = value; *p != '\0'; ++p)
+	{
+		if (*p == '\n')
+		{
+			++label->h;
+		}
+	}
 
-    label->lines = malloc(sizeof(char *) * label->h);
-    label->lines[0] = label->label;
-    y = 1;
-    
-    for (p = label->label; *p != '\0'; ++p)
-    {
-        if (*p == '\n')
-        {
-            label->lines[y] = p + 1;
-            *p = '\0';
-            ++y;
-        }
-    }
+	// Split into lines
 
-    label->w = 0;
+	label->lines = malloc(sizeof(char *) * label->h);
+	label->lines[0] = label->label;
+	y = 1;
 
-    for (y=0; y<label->h; ++y)
-    {
-        if (strlen(label->lines[y]) > label->w)
-            label->w = strlen(label->lines[y]);
-    }
+	for (p = label->label; *p != '\0'; ++p)
+	{
+		if (*p == '\n')
+		{
+			label->lines[y] = p + 1;
+			*p = '\0';
+			++y;
+		}
+	}
+
+	label->w = 0;
+
+	for (y = 0; y < label->h; ++y)
+	{
+		if (strlen(label->lines[y]) > label->w)
+			label->w = strlen(label->lines[y]);
+	}
 }
 
 txt_label_t *TXT_NewLabel(char *text)
 {
-    txt_label_t *label;
+	txt_label_t *label;
 
-    label = malloc(sizeof(txt_label_t));
+	label = malloc(sizeof(txt_label_t));
 
-    TXT_InitWidget(label, &txt_label_class);
-    label->label = NULL;
-    label->lines = NULL;
+	TXT_InitWidget(label, &txt_label_class);
+	label->label = NULL;
+	label->lines = NULL;
 
-    // Default colors
+	// Default colors
 
-    label->bgcolor = TXT_COLOR_BLUE;
-    label->fgcolor = TXT_COLOR_BRIGHT_WHITE;
+	label->bgcolor = TXT_COLOR_BLUE;
+	label->fgcolor = TXT_COLOR_BRIGHT_WHITE;
 
-    TXT_SetLabel(label, text);
+	TXT_SetLabel(label, text);
 
-    return label;
+	return label;
 }
 
-void TXT_SetFGColor(txt_label_t *label, txt_color_t color)
+void TXT_SetFGColor(txt_label_t * label, txt_color_t color)
 {
-    label->fgcolor = color;
+	label->fgcolor = color;
 }
 
-void TXT_SetBGColor(txt_label_t *label, txt_color_t color)
+void TXT_SetBGColor(txt_label_t * label, txt_color_t color)
 {
-    label->bgcolor = color;
+	label->bgcolor = color;
 }
-
