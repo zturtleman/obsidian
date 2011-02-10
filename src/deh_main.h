@@ -41,11 +41,8 @@
 #define DEH_VANILLA_NUMSFX 107
 
 void DEH_Init(void);
-
 int DEH_LoadFile(char *filename);
-
 int DEH_LoadLump(int lumpnum);
-
 int DEH_LoadLumpByName(char *name);
 
 boolean DEH_ParseAssignment(char *line, char **variable_name, char **value);
@@ -59,11 +56,8 @@ void DEH_Checksum(md5_digest_t digest);
 #ifdef FEATURE_DEHACKED
 
 char *DEH_String(char *s);
-
 void DEH_printf(char *fmt, ...);
-
-void DEH_fprintf(FILE * fstream, char *fmt, ...);
-
+void DEH_fprintf(FILE *fstream, char *fmt, ...);
 void DEH_snprintf(char *buffer, size_t len, char *fmt, ...);
 
 #else
@@ -76,9 +70,8 @@ void DEH_snprintf(char *buffer, size_t len, char *fmt, ...);
 #endif
 
 extern boolean deh_allow_long_strings;
-
 extern boolean deh_allow_long_cheats;
-
 extern boolean deh_apply_cheats;
 
-#endif							/* #ifndef DEH_MAIN_H */
+#endif /* #ifndef DEH_MAIN_H */
+

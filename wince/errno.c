@@ -14,6 +14,7 @@ static int my_errno;
 
 int *_GetErrno()
 {
-	my_errno = GetLastError();
-	return &my_errno;
+    my_errno = GetLastError();
+    return &my_errno;
 }
+

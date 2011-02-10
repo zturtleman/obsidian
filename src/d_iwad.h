@@ -23,21 +23,17 @@
 //
 //-----------------------------------------------------------------------------
 
+
 #ifndef __D_IWAD__
 #define __D_IWAD__
 
 char *D_FindWADByName(char *filename);
-
 char *D_TryFindWADByName(char *filename);
-
 char *D_FindIWAD(void);
-
 void D_SetSaveGameDir(void);
-
 void D_IdentifyVersion(void);
-
 void D_SetGameDescription(void);
-
 void D_FindInstalledIWADs(void);
 
 #endif
+

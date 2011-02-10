@@ -43,4 +43,6 @@
 
 #define FEATURE_SOUND 1
 
-#endif							/* #ifndef DOOM_FEATURES_H */
+#endif /* #ifndef DOOM_FEATURES_H */
+
+

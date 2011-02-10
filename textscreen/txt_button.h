@@ -41,8 +41,8 @@ typedef struct txt_button_s txt_button_t;
 
 struct txt_button_s
 {
-	txt_widget_t widget;
-	char *label;
+    txt_widget_t widget;
+    char *label;
 };
 
 /**
@@ -64,7 +64,8 @@ txt_button_t *TXT_NewButton(char *label);
  * @return             Pointer to the new button widget.
  */
 
-txt_button_t *TXT_NewButton2(char *label, TxtWidgetSignalFunc func, void *user_data);
+txt_button_t *TXT_NewButton2(char *label, TxtWidgetSignalFunc func,
+                             void *user_data);
 
 /**
  * Change the label used on a button.
@@ -73,6 +74,8 @@ txt_button_t *TXT_NewButton2(char *label, TxtWidgetSignalFunc func, void *user_d
  * @param label        The new label.
  */
 
-void TXT_SetButtonLabel(txt_button_t * button, char *label);
+void TXT_SetButtonLabel(txt_button_t *button, char *label);
 
-#endif							/* #ifndef TXT_BUTTON_H */
+#endif /* #ifndef TXT_BUTTON_H */
+
+

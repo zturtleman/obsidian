@@ -33,87 +33,85 @@
 #include "pcsound_internal.h"
 
 static SDL_Thread *sound_thread_handle;
-
 static int sound_thread_running;
-
 static pcsound_callback_func callback;
 
 static int SoundThread(void *unused)
 {
-	int frequency;
+    int frequency;
+    int duration;
+    
+    while (sound_thread_running)
+    {
+        callback(&duration, &frequency);
 
-	int duration;
-
-	while(sound_thread_running)
-	{
-		callback(&duration, &frequency);
-
-		if (frequency != 0)
-		{
-			Beep(frequency, duration);
-		}
-		else
-		{
-			Sleep(duration);
-		}
-	}
-
-	return 0;
+        if (frequency != 0) 
+        {
+            Beep(frequency, duration);
+        }
+        else
+        {
+            Sleep(duration);
+        }
+    }
+    
+    return 0;    
 }
 
 static int PCSound_Win32_Init(pcsound_callback_func callback_func)
 {
-	OSVERSIONINFO osvi;
+    OSVERSIONINFO osvi;
+    BOOL result;
 
-	BOOL result;
+    // Temporarily disabled - the Windows scheduler is strange and 
+    // stupid.
+   
+    return 0;
 
-	// Temporarily disabled - the Windows scheduler is strange and 
-	// stupid.
+    // Find the OS version
 
-	return 0;
+    osvi.dwOSVersionInfoSize = sizeof(osvi);
 
-	// Find the OS version
+    result = GetVersionEx(&osvi);
 
-	osvi.dwOSVersionInfoSize = sizeof(osvi);
+    if (!result)
+    {
+        return 0;
+    }
 
-	result = GetVersionEx(&osvi);
+    // Beep() ignores its arguments on win9x, so this driver will
+    // not work there.
 
-	if (!result)
-	{
-		return 0;
-	}
+    if (osvi.dwPlatformId != VER_PLATFORM_WIN32_NT)
+    {
+        // TODO: Use _out() to write directly to the PC speaker on
+        // win9x: See PC/winsound.c in the Python standard library.
 
-	// Beep() ignores its arguments on win9x, so this driver will
-	// not work there.
+        return 0;
+    }
+    
+    // Start a thread to play sound.
 
-	if (osvi.dwPlatformId != VER_PLATFORM_WIN32_NT)
-	{
-		// TODO: Use _out() to write directly to the PC speaker on
-		// win9x: See PC/winsound.c in the Python standard library.
+    callback = callback_func;
+    sound_thread_running = 1;
 
-		return 0;
-	}
+    sound_thread_handle = SDL_CreateThread(SoundThread, NULL);
 
-	// Start a thread to play sound.
-
-	callback = callback_func;
-	sound_thread_running = 1;
-
-	sound_thread_handle = SDL_CreateThread(SoundThread, NULL);
-
-	return 1;
+    return 1;
 }
 
 static void PCSound_Win32_Shutdown(void)
 {
-	sound_thread_running = 0;
-	SDL_WaitThread(sound_thread_handle, NULL);
+    sound_thread_running = 0;
+    SDL_WaitThread(sound_thread_handle, NULL);
 }
 
-pcsound_driver_t pcsound_win32_driver = {
-	"Windows",
-	PCSound_Win32_Init,
-	PCSound_Win32_Shutdown,
+pcsound_driver_t pcsound_win32_driver = 
+{
+    "Windows",
+    PCSound_Win32_Init,
+    PCSound_Win32_Shutdown,
 };
 
-#endif							/* #ifdef _WIN32 */
+#endif /* #ifdef _WIN32 */
+

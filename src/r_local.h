@@ -20,8 +20,8 @@
 // 02111-1307, USA.
 //
 // DESCRIPTION:
-//  Refresh (R_*) module, global header.
-//  All the rendering/drawing stuff is here.
+//	Refresh (R_*) module, global header.
+//	All the rendering/drawing stuff is here.
 //
 //-----------------------------------------------------------------------------
 
@@ -37,6 +37,8 @@
 // Include the refresh/render data structs.
 #include "r_data.h"
 
+
+
 //
 // Separate header file for each module.
 //
@@ -48,4 +50,4 @@
 #include "r_things.h"
 #include "r_draw.h"
 
-#endif							// __R_LOCAL__
+#endif		// __R_LOCAL__

@@ -23,15 +23,16 @@
 //
 //-----------------------------------------------------------------------------
 
+
 #ifndef OPL_OPL_H
 #define OPL_OPL_H
 
-typedef void (*opl_callback_t) (void *data);
+typedef void (*opl_callback_t)(void *data);
 
 typedef enum
 {
-	OPL_REGISTER_PORT = 0,
-	OPL_DATA_PORT = 1
+    OPL_REGISTER_PORT = 0,
+    OPL_DATA_PORT = 1
 } opl_port_t;
 
 #define OPL_NUM_OPERATORS   21
@@ -133,3 +134,4 @@ void OPL_Delay(unsigned int ms);
 void OPL_SetPaused(int paused);
 
 #endif
+

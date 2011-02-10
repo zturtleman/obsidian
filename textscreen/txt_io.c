@@ -30,251 +30,228 @@
 #include "txt_io.h"
 #include "txt_main.h"
 
-static struct
+static struct 
 {
-	txt_color_t color;
-	const char *name;
-} colors[] =
-{
-	{
-	TXT_COLOR_BLACK, "black"},
-	{
-	TXT_COLOR_BLUE, "blue"},
-	{
-	TXT_COLOR_GREEN, "green"},
-	{
-	TXT_COLOR_CYAN, "cyan"},
-	{
-	TXT_COLOR_RED, "red"},
-	{
-	TXT_COLOR_MAGENTA, "magenta"},
-	{
-	TXT_COLOR_BROWN, "brown"},
-	{
-	TXT_COLOR_GREY, "grey"},
-	{
-	TXT_COLOR_DARK_GREY, "darkgrey"},
-	{
-	TXT_COLOR_BRIGHT_BLUE, "brightblue"},
-	{
-	TXT_COLOR_BRIGHT_GREEN, "brightgreen"},
-	{
-	TXT_COLOR_BRIGHT_CYAN, "brightcyan"},
-	{
-	TXT_COLOR_BRIGHT_RED, "brightred"},
-	{
-	TXT_COLOR_BRIGHT_MAGENTA, "brightmagenta"},
-	{
-	TXT_COLOR_YELLOW, "yellow"},
-	{
-TXT_COLOR_BRIGHT_WHITE, "brightwhite"},};
+    txt_color_t color;
+    const char *name;
+} colors[] = {
+    {TXT_COLOR_BLACK,           "black"},
+    {TXT_COLOR_BLUE,            "blue"},
+    {TXT_COLOR_GREEN,           "green"},
+    {TXT_COLOR_CYAN,            "cyan"},
+    {TXT_COLOR_RED,             "red"},
+    {TXT_COLOR_MAGENTA,         "magenta"},
+    {TXT_COLOR_BROWN,           "brown"},
+    {TXT_COLOR_GREY,            "grey"},
+    {TXT_COLOR_DARK_GREY,       "darkgrey"},
+    {TXT_COLOR_BRIGHT_BLUE,     "brightblue"},
+    {TXT_COLOR_BRIGHT_GREEN,    "brightgreen"},
+    {TXT_COLOR_BRIGHT_CYAN,     "brightcyan"},
+    {TXT_COLOR_BRIGHT_RED,      "brightred"},
+    {TXT_COLOR_BRIGHT_MAGENTA,  "brightmagenta"},
+    {TXT_COLOR_YELLOW,          "yellow"},
+    {TXT_COLOR_BRIGHT_WHITE,    "brightwhite"},
+};
 
 static int cur_x = 0, cur_y = 0;
-
 static txt_color_t fgcolor = TXT_COLOR_GREY;
-
 static txt_color_t bgcolor = TXT_COLOR_BLACK;
 
 static int GetColorForName(char *s)
 {
-	size_t i;
+    size_t i;
 
-	for (i = 0; i < sizeof(colors) / sizeof(*colors); ++i)
-	{
-		if (!strcmp(s, colors[i].name))
-		{
-			return colors[i].color;
-		}
-	}
+    for (i=0; i<sizeof(colors) / sizeof(*colors); ++i)
+    {
+        if (!strcmp(s, colors[i].name))
+        {
+            return colors[i].color;
+        }
+    }
 
-	return -1;
+    return -1;
 }
 
 static void NewLine(unsigned char *screendata)
 {
-	int i;
+    int i;
+    unsigned char *p;
 
-	unsigned char *p;
+    cur_x = 0;
+    ++cur_y;
 
-	cur_x = 0;
-	++cur_y;
+    if (cur_y >= TXT_SCREEN_H)
+    {
+        // Scroll the screen up
 
-	if (cur_y >= TXT_SCREEN_H)
-	{
-		// Scroll the screen up
+        cur_y = TXT_SCREEN_H - 1;
 
-		cur_y = TXT_SCREEN_H - 1;
+        memcpy(screendata, screendata + TXT_SCREEN_W * 2,
+               TXT_SCREEN_W * 2 * (TXT_SCREEN_H -1));
 
-		memcpy(screendata, screendata + TXT_SCREEN_W * 2, TXT_SCREEN_W * 2 * (TXT_SCREEN_H - 1));
+        // Clear the bottom line
 
-		// Clear the bottom line
+        p = screendata + (TXT_SCREEN_H - 1) * 2 * TXT_SCREEN_W;
 
-		p = screendata + (TXT_SCREEN_H - 1) * 2 * TXT_SCREEN_W;
-
-		for (i = 0; i < TXT_SCREEN_W; ++i)
-		{
-			*p++ = ' ';
-			*p++ = fgcolor | (bgcolor << 4);
-		}
-	}
+        for (i=0; i<TXT_SCREEN_W; ++i) 
+        {
+            *p++ = ' ';
+            *p++ = fgcolor | (bgcolor << 4);
+        }
+    }
 }
 
 static void PutChar(unsigned char *screendata, int c)
 {
-	unsigned char *p;
+    unsigned char *p;
+   
+    p = screendata + cur_y * TXT_SCREEN_W * 2 +  cur_x * 2;
 
-	p = screendata + cur_y * TXT_SCREEN_W * 2 + cur_x * 2;
+    switch (c)
+    {
+        case '\n':
+            NewLine(screendata);
+            break;
 
-	switch (c)
-	{
-		case '\n':
-			NewLine(screendata);
-			break;
+        case '\b':
+            // backspace
+            --cur_x;
+            if (cur_x < 0)
+                cur_x = 0;
+            break;
 
-		case '\b':
-			// backspace
-			--cur_x;
-			if (cur_x < 0)
-				cur_x = 0;
-			break;
+        default:
 
-		default:
+            // Add a new character to the buffer
 
-			// Add a new character to the buffer
+            p[0] = c;
+            p[1] = fgcolor | (bgcolor << 4);
 
-			p[0] = c;
-			p[1] = fgcolor | (bgcolor << 4);
+            ++cur_x;
 
-			++cur_x;
+            if (cur_x >= TXT_SCREEN_W) 
+            {
+                NewLine(screendata);
+            }
 
-			if (cur_x >= TXT_SCREEN_W)
-			{
-				NewLine(screendata);
-			}
-
-			break;
-	}
+            break;
+    }
 }
 
 void TXT_PutChar(int c)
 {
-	unsigned char *screen;
+    unsigned char *screen;
 
-	screen = TXT_GetScreenData();
+    screen = TXT_GetScreenData();
 
-	PutChar(screen, c);
+    PutChar(screen, c);
 }
 
 void TXT_Puts(const char *s)
 {
-	int previous_color = TXT_COLOR_BLACK;
+    int previous_color = TXT_COLOR_BLACK;
+    unsigned char *screen;
+    const char *p;
+    char colorname_buf[20];
+    char *ending;
+    int col;
 
-	unsigned char *screen;
+    screen = TXT_GetScreenData();
 
-	const char *p;
+    for (p=s; *p != '\0'; ++p)
+    {
+        if (*p == '<')
+        {
+            ++p;
 
-	char colorname_buf[20];
+            if (*p == '<')
+            {
+                PutChar(screen, '<');
+            }
+            else
+            {
+                ending = strchr(p, '>');
 
-	char *ending;
+                if (ending == NULL)
+                {
+                    return;
+                }
 
-	int col;
+                strncpy(colorname_buf, p, 19);
+                colorname_buf[ending-p] = '\0';
 
-	screen = TXT_GetScreenData();
+                if (!strcmp(colorname_buf, "/"))
+                {
+                    // End of color block
 
-	for (p = s; *p != '\0'; ++p)
-	{
-		if (*p == '<')
-		{
-			++p;
+                    col = previous_color;
+                }
+                else
+                {
+                    col = GetColorForName(colorname_buf);
 
-			if (*p == '<')
-			{
-				PutChar(screen, '<');
-			}
-			else
-			{
-				ending = strchr(p, '>');
+                    if (col < 0)
+                    {
+                        return;
+                    }
 
-				if (ending == NULL)
-				{
-					return;
-				}
+                    // Save the color for the ending marker
 
-				strncpy(colorname_buf, p, 19);
-				colorname_buf[ending - p] = '\0';
+                    previous_color = fgcolor;
+                }
 
-				if (!strcmp(colorname_buf, "/"))
-				{
-					// End of color block
+                TXT_FGColor(col);
+                
+                p = ending;
+            }
+        }
+        else
+        {
+            PutChar(screen, *p);
+        }
+    }
 
-					col = previous_color;
-				}
-				else
-				{
-					col = GetColorForName(colorname_buf);
-
-					if (col < 0)
-					{
-						return;
-					}
-
-					// Save the color for the ending marker
-
-					previous_color = fgcolor;
-				}
-
-				TXT_FGColor(col);
-
-				p = ending;
-			}
-		}
-		else
-		{
-			PutChar(screen, *p);
-		}
-	}
-
-	PutChar(screen, '\n');
+    PutChar(screen, '\n');
 }
 
 void TXT_GotoXY(int x, int y)
 {
-	cur_x = x;
-	cur_y = y;
+    cur_x = x;
+    cur_y = y;
 }
 
 void TXT_GetXY(int *x, int *y)
 {
-	*x = cur_x;
-	*y = cur_y;
+    *x = cur_x;
+    *y = cur_y;
 }
 
 void TXT_FGColor(txt_color_t color)
 {
-	fgcolor = color;
+    fgcolor = color;
 }
 
 void TXT_BGColor(int color, int blinking)
 {
-	bgcolor = color;
-	if (blinking)
-		bgcolor |= TXT_COLOR_BLINKING;
+    bgcolor = color;
+    if (blinking)
+        bgcolor |= TXT_COLOR_BLINKING;
 }
 
 void TXT_ClearScreen(void)
 {
-	unsigned char *screen;
+    unsigned char *screen;
+    int i;
 
-	int i;
+    screen = TXT_GetScreenData();
 
-	screen = TXT_GetScreenData();
+    for (i=0; i<TXT_SCREEN_W * TXT_SCREEN_H; ++i)
+    {
+        screen[i * 2] = ' ';
+        screen[i * 2 +  1] = (bgcolor << 4) | fgcolor;
+    }
 
-	for (i = 0; i < TXT_SCREEN_W * TXT_SCREEN_H; ++i)
-	{
-		screen[i * 2] = ' ';
-		screen[i * 2 + 1] = (bgcolor << 4) | fgcolor;
-	}
-
-	cur_x = 0;
-	cur_y = 0;
+    cur_x = 0;
+    cur_y = 0;
 }
+

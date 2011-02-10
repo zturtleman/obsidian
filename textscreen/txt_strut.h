@@ -42,9 +42,9 @@ typedef struct txt_strut_s txt_strut_t;
 
 struct txt_strut_s
 {
-	txt_widget_t widget;
-	int width;
-	int height;
+    txt_widget_t widget;
+    int width;
+    int height;
 };
 
 /**
@@ -56,4 +56,6 @@ struct txt_strut_s
 
 txt_strut_t *TXT_NewStrut(int width, int height);
 
-#endif							/* #ifndef TXT_STRUT_H */
+#endif /* #ifndef TXT_STRUT_H */
+
+

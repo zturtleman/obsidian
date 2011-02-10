@@ -31,18 +31,17 @@
 #define PCSOUND_8253_FREQUENCY 1193280
 
 typedef struct pcsound_driver_s pcsound_driver_t;
-
-typedef int (*pcsound_init_func) (pcsound_callback_func callback);
-
-typedef void (*pcsound_shutdown_func) (void);
+typedef int (*pcsound_init_func)(pcsound_callback_func callback);
+typedef void (*pcsound_shutdown_func)(void);
 
 struct pcsound_driver_s
 {
-	char *name;
-	pcsound_init_func init_func;
-	pcsound_shutdown_func shutdown_func;
+    char *name;
+    pcsound_init_func init_func;
+    pcsound_shutdown_func shutdown_func;
 };
 
 extern int pcsound_sample_rate;
 
-#endif							/* #ifndef PCSOUND_INTERNAL_H */
+#endif /* #ifndef PCSOUND_INTERNAL_H */
+

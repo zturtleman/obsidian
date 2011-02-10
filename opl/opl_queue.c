@@ -34,244 +34,247 @@
 
 typedef struct
 {
-	opl_callback_t callback;
-	void *data;
-	unsigned int time;
+    opl_callback_t callback;
+    void *data;
+    unsigned int time;
 } opl_queue_entry_t;
 
 struct opl_callback_queue_s
 {
-	opl_queue_entry_t entries[MAX_OPL_QUEUE];
-	unsigned int num_entries;
+    opl_queue_entry_t entries[MAX_OPL_QUEUE];
+    unsigned int num_entries;
 };
 
 opl_callback_queue_t *OPL_Queue_Create(void)
 {
-	opl_callback_queue_t *queue;
+    opl_callback_queue_t *queue;
 
-	queue = malloc(sizeof(opl_callback_queue_t));
-	queue->num_entries = 0;
+    queue = malloc(sizeof(opl_callback_queue_t));
+    queue->num_entries = 0;
 
-	return queue;
+    return queue;
 }
 
-void OPL_Queue_Destroy(opl_callback_queue_t * queue)
+void OPL_Queue_Destroy(opl_callback_queue_t *queue)
 {
-	free(queue);
+    free(queue);
 }
 
-int OPL_Queue_IsEmpty(opl_callback_queue_t * queue)
+int OPL_Queue_IsEmpty(opl_callback_queue_t *queue)
 {
-	return queue->num_entries == 0;
+    return queue->num_entries == 0;
 }
 
-void OPL_Queue_Clear(opl_callback_queue_t * queue)
+void OPL_Queue_Clear(opl_callback_queue_t *queue)
 {
-	queue->num_entries = 0;
+    queue->num_entries = 0;
 }
 
-void OPL_Queue_Push(opl_callback_queue_t * queue, opl_callback_t callback, void *data, unsigned int time)
+void OPL_Queue_Push(opl_callback_queue_t *queue,
+                    opl_callback_t callback, void *data,
+                    unsigned int time)
 {
-	int entry_id;
+    int entry_id;
+    int parent_id;
 
-	int parent_id;
+    if (queue->num_entries >= MAX_OPL_QUEUE)
+    {
+        fprintf(stderr, "OPL_Queue_Push: Exceeded maximum callbacks\n");
+        return;
+    }
 
-	if (queue->num_entries >= MAX_OPL_QUEUE)
-	{
-		fprintf(stderr, "OPL_Queue_Push: Exceeded maximum callbacks\n");
-		return;
-	}
+    // Add to last queue entry.
 
-	// Add to last queue entry.
+    entry_id = queue->num_entries;
+    ++queue->num_entries;
 
-	entry_id = queue->num_entries;
-	++queue->num_entries;
+    // Shift existing entries down in the heap.
 
-	// Shift existing entries down in the heap.
+    while (entry_id > 0)
+    {
+        parent_id = (entry_id - 1) / 2;
 
-	while(entry_id > 0)
-	{
-		parent_id = (entry_id - 1) / 2;
+        // Is the heap condition satisfied?
 
-		// Is the heap condition satisfied?
+        if (time >= queue->entries[parent_id].time)
+        {
+            break;
+        }
 
-		if (time >= queue->entries[parent_id].time)
-		{
-			break;
-		}
+        // Move the existing entry down in the heap.
 
-		// Move the existing entry down in the heap.
+        memcpy(&queue->entries[entry_id],
+               &queue->entries[parent_id],
+               sizeof(opl_queue_entry_t));
 
-		memcpy(&queue->entries[entry_id], &queue->entries[parent_id], sizeof(opl_queue_entry_t));
+        // Advance to the parent.
 
-		// Advance to the parent.
+        entry_id = parent_id;
+    }
 
-		entry_id = parent_id;
-	}
+    // Insert new callback data.
 
-	// Insert new callback data.
-
-	queue->entries[entry_id].callback = callback;
-	queue->entries[entry_id].data = data;
-	queue->entries[entry_id].time = time;
+    queue->entries[entry_id].callback = callback;
+    queue->entries[entry_id].data = data;
+    queue->entries[entry_id].time = time;
 }
 
-int OPL_Queue_Pop(opl_callback_queue_t * queue, opl_callback_t * callback, void **data)
+int OPL_Queue_Pop(opl_callback_queue_t *queue,
+                  opl_callback_t *callback, void **data)
 {
-	opl_queue_entry_t *entry;
+    opl_queue_entry_t *entry;
+    int child1, child2;
+    int i, next_i;
 
-	int child1, child2;
+    // Empty?
 
-	int i, next_i;
+    if (queue->num_entries <= 0)
+    {
+        return 0;
+    }
 
-	// Empty?
+    // Store the result:
 
-	if (queue->num_entries <= 0)
-	{
-		return 0;
-	}
+    *callback = queue->entries[0].callback;
+    *data = queue->entries[0].data;
 
-	// Store the result:
+    // Decrease the heap size, and keep pointer to the last entry in
+    // the heap, which must now be percolated down from the top.
 
-	*callback = queue->entries[0].callback;
-	*data = queue->entries[0].data;
+    --queue->num_entries;
+    entry = &queue->entries[queue->num_entries];
 
-	// Decrease the heap size, and keep pointer to the last entry in
-	// the heap, which must now be percolated down from the top.
+    // Percolate down.
 
-	--queue->num_entries;
-	entry = &queue->entries[queue->num_entries];
+    i = 0;
 
-	// Percolate down.
+    for (;;)
+    {
+        child1 = i * 2 + 1;
+        child2 = i * 2 + 2;
 
-	i = 0;
+        if (child1 < queue->num_entries
+         && queue->entries[child1].time < entry->time)
+        {
+            // Left child is less than entry.
+            // Use the minimum of left and right children.
 
-	for (;;)
-	{
-		child1 = i * 2 + 1;
-		child2 = i * 2 + 2;
+            if (child2 < queue->num_entries
+             && queue->entries[child2].time < queue->entries[child1].time)
+            {
+                next_i = child2;
+            }
+            else
+            {
+                next_i = child1;
+            }
+        }
+        else if (child2 < queue->num_entries
+              && queue->entries[child2].time < entry->time)
+        {
+            // Right child is less than entry.  Go down the right side.
 
-		if (child1 < queue->num_entries && queue->entries[child1].time < entry->time)
-		{
-			// Left child is less than entry.
-			// Use the minimum of left and right children.
+            next_i = child2;
+        }
+        else
+        {
+            // Finished percolating.
+            break;
+        }
 
-			if (child2 < queue->num_entries && queue->entries[child2].time < queue->entries[child1].time)
-			{
-				next_i = child2;
-			}
-			else
-			{
-				next_i = child1;
-			}
-		}
-		else if (child2 < queue->num_entries && queue->entries[child2].time < entry->time)
-		{
-			// Right child is less than entry.  Go down the right side.
+        // Percolate the next value up and advance.
 
-			next_i = child2;
-		}
-		else
-		{
-			// Finished percolating.
-			break;
-		}
+        memcpy(&queue->entries[i],
+               &queue->entries[next_i],
+               sizeof(opl_queue_entry_t));
+        i = next_i;
+    }
 
-		// Percolate the next value up and advance.
+    // Store the old last-entry at its new position.
 
-		memcpy(&queue->entries[i], &queue->entries[next_i], sizeof(opl_queue_entry_t));
-		i = next_i;
-	}
+    memcpy(&queue->entries[i], entry, sizeof(opl_queue_entry_t));
 
-	// Store the old last-entry at its new position.
-
-	memcpy(&queue->entries[i], entry, sizeof(opl_queue_entry_t));
-
-	return 1;
+    return 1;
 }
 
-unsigned int OPL_Queue_Peek(opl_callback_queue_t * queue)
+unsigned int OPL_Queue_Peek(opl_callback_queue_t *queue)
 {
-	if (queue->num_entries > 0)
-	{
-		return queue->entries[0].time;
-	}
-	else
-	{
-		return 0;
-	}
+    if (queue->num_entries > 0)
+    {
+        return queue->entries[0].time;
+    }
+    else
+    {
+        return 0;
+    }
 }
 
 #ifdef TEST
 
 #include <assert.h>
 
-static void PrintQueueNode(opl_callback_queue_t * queue, int node, int depth)
+static void PrintQueueNode(opl_callback_queue_t *queue, int node, int depth)
 {
-	int i;
+    int i;
 
-	if (node >= queue->num_entries)
-	{
-		return;
-	}
+    if (node >= queue->num_entries)
+    {
+        return;
+    }
 
-	for (i = 0; i < depth * 3; ++i)
-	{
-		printf(" ");
-	}
+    for (i=0; i<depth * 3; ++i)
+    {
+        printf(" ");
+    }
 
-	printf("%i\n", queue->entries[node].time);
+    printf("%i\n", queue->entries[node].time);
 
-	PrintQueueNode(queue, node * 2 + 1, depth + 1);
-	PrintQueueNode(queue, node * 2 + 2, depth + 1);
+    PrintQueueNode(queue, node * 2 + 1, depth + 1);
+    PrintQueueNode(queue, node * 2 + 2, depth + 1);
 }
 
-static void PrintQueue(opl_callback_queue_t * queue)
+static void PrintQueue(opl_callback_queue_t *queue)
 {
-	PrintQueueNode(queue, 0, 0);
+    PrintQueueNode(queue, 0, 0);
 }
 
 int main()
 {
-	opl_callback_queue_t *queue;
+    opl_callback_queue_t *queue;
+    int iteration;
 
-	int iteration;
+    queue = OPL_Queue_Create();
 
-	queue = OPL_Queue_Create();
+    for (iteration=0; iteration<5000; ++iteration)
+    {
+        opl_callback_t callback;
+        void *data;
+        unsigned int time;
+        unsigned int newtime;
+        int i;
 
-	for (iteration = 0; iteration < 5000; ++iteration)
-	{
-		opl_callback_t callback;
+        for (i=0; i<MAX_OPL_QUEUE; ++i)
+        {
+            time = rand() % 0x10000;
+            OPL_Queue_Push(queue, NULL, NULL, time);
+        }
 
-		void *data;
+        time = 0;
 
-		unsigned int time;
+        for (i=0; i<MAX_OPL_QUEUE; ++i)
+        {
+            assert(!OPL_Queue_IsEmpty(queue));
+            newtime = OPL_Queue_Peek(queue);
+            assert(OPL_Queue_Pop(queue, &callback, &data));
 
-		unsigned int newtime;
+            assert(newtime >= time);
+            time = newtime;
+        }
 
-		int i;
-
-		for (i = 0; i < MAX_OPL_QUEUE; ++i)
-		{
-			time = rand() % 0x10000;
-			OPL_Queue_Push(queue, NULL, NULL, time);
-		}
-
-		time = 0;
-
-		for (i = 0; i < MAX_OPL_QUEUE; ++i)
-		{
-			assert(!OPL_Queue_IsEmpty(queue));
-			newtime = OPL_Queue_Peek(queue);
-			assert(OPL_Queue_Pop(queue, &callback, &data));
-
-			assert(newtime >= time);
-			time = newtime;
-		}
-
-		assert(OPL_Queue_IsEmpty(queue));
-		assert(!OPL_Queue_Pop(queue, &callback, &data));
-	}
+        assert(OPL_Queue_IsEmpty(queue));
+        assert(!OPL_Queue_Pop(queue, &callback, &data));
+    }
 }
 
 #endif
+

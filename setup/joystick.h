@@ -23,33 +23,22 @@
 #define SETUP_JOYSTICK_H
 
 extern int usejoystick;
-
 extern int joybfire;
-
 extern int joybstrafe;
-
 extern int joybuse;
-
 extern int joybspeed;
-
 extern int joybstrafeleft;
-
 extern int joybstraferight;
-
 extern int joybprevweapon;
-
 extern int joybnextweapon;
 
 extern int joystick_index;
-
 extern int joystick_x_axis;
-
 extern int joystick_x_invert;
-
 extern int joystick_y_axis;
-
 extern int joystick_y_invert;
 
 void ConfigJoystick(void);
 
-#endif							/* #ifndef SETUP_JOYSTICK_H */
+#endif /* #ifndef SETUP_JOYSTICK_H */
+

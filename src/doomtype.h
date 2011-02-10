@@ -20,10 +20,11 @@
 // 02111-1307, USA.
 //
 // DESCRIPTION:
-//  Simple basic typedefs, isolated here to make it easier
-//   separating modules.
+//	Simple basic typedefs, isolated here to make it easier
+//	 separating modules.
 //    
 //-----------------------------------------------------------------------------
+
 
 #ifndef __DOOMTYPE__
 #define __DOOMTYPE__
@@ -53,10 +54,10 @@ typedef bool boolean;
 
 #else
 
-typedef enum
+typedef enum 
 {
-	false,
-	true
+    false, 
+    true
 } boolean;
 
 #endif
@@ -80,3 +81,4 @@ typedef uint8_t byte;
 #define arrlen(array) (sizeof(array) / sizeof(*array))
 
 #endif
+

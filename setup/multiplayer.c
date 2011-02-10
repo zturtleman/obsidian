@@ -37,30 +37,31 @@
 
 typedef struct
 {
-	char *filename;
-	char *description;
-	int mask;
+    char *filename;
+    char *description;
+    int mask;
 } iwad_t;
 
 typedef enum
 {
-	WARP_DOOM1,
-	WARP_DOOM2,
+    WARP_DOOM1,
+    WARP_DOOM2,
 } warptype_t;
 
 typedef enum
 {
-	JOIN_AUTO_LAN,
-	JOIN_ADDRESS,
+    JOIN_AUTO_LAN,
+    JOIN_ADDRESS,
 } jointype_t;
 
-static iwad_t iwads[] = {
-	{"doom.wad", "Doom", IWAD_DOOM},
-	{"doom2.wad", "Doom 2", IWAD_DOOM2},
-	{"tnt.wad", "Final Doom: TNT: Evilution", IWAD_TNT},
-	{"plutonia.wad", "Final Doom: The Plutonia Experiment", IWAD_PLUTONIA},
-	{"doom1.wad", "Doom shareware", IWAD_DOOM1},
-	{"chex.wad", "Chex Quest", IWAD_CHEX},
+static iwad_t iwads[] = 
+{
+    { "doom.wad",     "Doom",                                IWAD_DOOM },
+    { "doom2.wad",    "Doom 2",                              IWAD_DOOM2 },
+    { "tnt.wad",      "Final Doom: TNT: Evilution",          IWAD_TNT },
+    { "plutonia.wad", "Final Doom: The Plutonia Experiment", IWAD_PLUTONIA },
+    { "doom1.wad",    "Doom shareware",                      IWAD_DOOM1 },
+    { "chex.wad",     "Chex Quest",                          IWAD_CHEX },
 };
 
 // Array of IWADs found to be installed
@@ -75,62 +76,51 @@ static int found_iwad_selected;
 
 static char *iwadfile;
 
-static char *skills[] = {
-	"I'm too young to die.",
-	"Hey, not too rough.",
-	"Hurt me plenty.",
-	"Ultra-Violence.",
-	"NIGHTMARE!",
+static char *skills[] = 
+{
+    "I'm too young to die.",
+    "Hey, not too rough.",
+    "Hurt me plenty.",
+    "Ultra-Violence.",
+    "NIGHTMARE!",
 };
 
-static char *chex_skills[] = {
-	"Easy does it",
-	"Not so sticky",
-	"Gobs of goo",
-	"Extreme ooze",
-	"SUPER SLIMEY!"
+static char *chex_skills[] = 
+{
+    "Easy does it",
+    "Not so sticky",
+    "Gobs of goo",
+    "Extreme ooze",
+    "SUPER SLIMEY!"
 };
 
-static char *gamemodes[] = {
-	"Co-operative",
-	"Deathmatch",
-	"Deathmatch 2.0",
+static char *gamemodes[] = 
+{
+    "Co-operative",
+    "Deathmatch",
+    "Deathmatch 2.0",
 };
 
 char *net_player_name;
-
 char *chat_macros[10];
 
 static int jointype = JOIN_ADDRESS;
 
 static char *wads[NUM_WADS];
-
 static char *extra_params[NUM_EXTRA_PARAMS];
-
 static int skill = 2;
-
 static int nomonsters = 0;
-
 static int deathmatch = 0;
-
 static int fast = 0;
-
 static int respawn = 0;
-
 static int udpport = 2342;
-
 static int timer = 0;
-
 static int privateserver = 0;
 
 static txt_dropdown_list_t *skillbutton;
-
 static txt_button_t *warpbutton;
-
 static warptype_t warptype = WARP_DOOM2;
-
 static int warpepisode = 1;
-
 static int warpmap = 1;
 
 // Address to connect to when joining a game
@@ -141,63 +131,63 @@ static char *connect_address = NULL;
 
 static iwad_t *GetIWADForDescription(char *description)
 {
-	unsigned int i;
+    unsigned int i;
 
-	for (i = 0; i < arrlen(iwads); ++i)
-	{
-		if (!strcmp(iwads[i].description, description))
-		{
-			return &iwads[i];
-		}
-	}
+    for (i=0; i<arrlen(iwads); ++i)
+    {
+        if (!strcmp(iwads[i].description, description))
+        {
+            return &iwads[i];
+        }
+    }
 
-	return NULL;
+    return NULL;
 }
 
 static iwad_t *GetCurrentIWAD(void)
 {
-	return GetIWADForDescription(found_iwads[found_iwad_selected]);
+    return GetIWADForDescription(found_iwads[found_iwad_selected]);
 }
 
-static void AddWADs(execute_context_t * exec)
+
+static void AddWADs(execute_context_t *exec)
 {
-	int have_wads = 0;
+    int have_wads = 0;
+    int i;
+    
+    for (i=0; i<NUM_WADS; ++i)
+    {
+        if (wads[i] != NULL && strlen(wads[i]) > 0)
+        {
+            if (!have_wads)
+            {
+                AddCmdLineParameter(exec, "-file");
+            }
 
-	int i;
-
-	for (i = 0; i < NUM_WADS; ++i)
-	{
-		if (wads[i] != NULL && strlen(wads[i]) > 0)
-		{
-			if (!have_wads)
-			{
-				AddCmdLineParameter(exec, "-file");
-			}
-
-			AddCmdLineParameter(exec, "\"%s\"", wads[i]);
-		}
-	}
+            AddCmdLineParameter(exec, "\"%s\"", wads[i]);
+        }
+    }
 }
 
-static void AddExtraParameters(execute_context_t * exec)
+static void AddExtraParameters(execute_context_t *exec)
 {
-	int i;
-
-	for (i = 0; i < NUM_EXTRA_PARAMS; ++i)
-	{
-		if (extra_params[i] != NULL && strlen(extra_params[i]) > 0)
-		{
-			AddCmdLineParameter(exec, extra_params[i]);
-		}
-	}
+    int i;
+    
+    for (i=0; i<NUM_EXTRA_PARAMS; ++i)
+    {
+        if (extra_params[i] != NULL && strlen(extra_params[i]) > 0)
+        {
+            AddCmdLineParameter(exec, extra_params[i]);
+        }
+    }
 }
 
-static void AddIWADParameter(execute_context_t * exec)
+static void AddIWADParameter(execute_context_t *exec)
 {
-	if (iwadfile != NULL)
-	{
-		AddCmdLineParameter(exec, "-iwad %s", iwadfile);
-	}
+    if (iwadfile != NULL)
+    {
+        AddCmdLineParameter(exec, "-iwad %s", iwadfile);
+    }
 }
 
 // Callback function invoked to launch the game.
@@ -206,349 +196,342 @@ static void AddIWADParameter(execute_context_t * exec)
 
 static void StartGame(int multiplayer)
 {
-	execute_context_t *exec;
+    execute_context_t *exec;
 
-	exec = NewExecuteContext();
+    exec = NewExecuteContext();
 
-	// Extra parameters come first, before all others; this way,
-	// they can override any of the options set in the dialog.
+    // Extra parameters come first, before all others; this way,
+    // they can override any of the options set in the dialog.
 
-	AddExtraParameters(exec);
+    AddExtraParameters(exec);
 
-	AddIWADParameter(exec);
-	AddCmdLineParameter(exec, "-skill %i", skill + 1);
+    AddIWADParameter(exec);
+    AddCmdLineParameter(exec, "-skill %i", skill + 1);
 
-	if (nomonsters)
-	{
-		AddCmdLineParameter(exec, "-nomonsters");
-	}
+    if (nomonsters)
+    {
+        AddCmdLineParameter(exec, "-nomonsters");
+    }
 
-	if (fast)
-	{
-		AddCmdLineParameter(exec, "-fast");
-	}
+    if (fast)
+    {
+        AddCmdLineParameter(exec, "-fast");
+    }
 
-	if (respawn)
-	{
-		AddCmdLineParameter(exec, "-respawn");
-	}
+    if (respawn)
+    {
+        AddCmdLineParameter(exec, "-respawn");
+    }
 
-	if (warptype == WARP_DOOM1)
-	{
-		// TODO: select IWAD based on warp type
-		AddCmdLineParameter(exec, "-warp %i %i", warpepisode, warpmap);
-	}
-	else if (warptype == WARP_DOOM2)
-	{
-		AddCmdLineParameter(exec, "-warp %i", warpmap);
-	}
+    if (warptype == WARP_DOOM1)
+    {
+        // TODO: select IWAD based on warp type
+        AddCmdLineParameter(exec, "-warp %i %i", warpepisode, warpmap);
+    }
+    else if (warptype == WARP_DOOM2)
+    {
+        AddCmdLineParameter(exec, "-warp %i", warpmap);
+    }
 
-	// Multiplayer-specific options:
+    // Multiplayer-specific options:
 
-	if (multiplayer)
-	{
-		AddCmdLineParameter(exec, "-server");
-		AddCmdLineParameter(exec, "-port %i", udpport);
+    if (multiplayer)
+    {
+        AddCmdLineParameter(exec, "-server");
+        AddCmdLineParameter(exec, "-port %i", udpport);
 
-		if (deathmatch == 1)
-		{
-			AddCmdLineParameter(exec, "-deathmatch");
-		}
-		else if (deathmatch == 2)
-		{
-			AddCmdLineParameter(exec, "-altdeath");
-		}
+        if (deathmatch == 1)
+        {
+            AddCmdLineParameter(exec, "-deathmatch");
+        }
+        else if (deathmatch == 2)
+        {
+            AddCmdLineParameter(exec, "-altdeath");
+        }
 
-		if (timer > 0)
-		{
-			AddCmdLineParameter(exec, "-timer %i", timer);
-		}
+        if (timer > 0)
+        {
+            AddCmdLineParameter(exec, "-timer %i", timer);
+        }
 
-		if (privateserver)
-		{
-			AddCmdLineParameter(exec, "-privateserver");
-		}
-	}
+        if (privateserver)
+        {
+            AddCmdLineParameter(exec, "-privateserver");
+        }
+    }
 
-	AddWADs(exec);
+    AddWADs(exec);
 
-	TXT_Shutdown();
+    TXT_Shutdown();
+    
+    M_SaveDefaults();
+    PassThroughArguments(exec);
 
-	M_SaveDefaults();
-	PassThroughArguments(exec);
+    ExecuteDoom(exec);
 
-	ExecuteDoom(exec);
-
-	exit(0);
+    exit(0);
 }
 
 static void StartServerGame(TXT_UNCAST_ARG(widget), TXT_UNCAST_ARG(unused))
 {
-	StartGame(1);
+    StartGame(1);
 }
 
 static void StartSinglePlayerGame(TXT_UNCAST_ARG(widget), TXT_UNCAST_ARG(unused))
 {
-	StartGame(0);
+    StartGame(0);
 }
 
 static void UpdateWarpButton(void)
 {
-	char buf[10];
+    char buf[10];
 
-	if (warptype == WARP_DOOM1)
-	{
-		sprintf(buf, "E%iM%i", warpepisode, warpmap);
-	}
-	else if (warptype == WARP_DOOM2)
-	{
-		sprintf(buf, "MAP%02i", warpmap);
-	}
+    if (warptype == WARP_DOOM1)
+    {
+        sprintf(buf, "E%iM%i", warpepisode, warpmap);
+    }
+    else if (warptype == WARP_DOOM2)
+    {
+        sprintf(buf, "MAP%02i", warpmap);
+    }
 
-	TXT_SetButtonLabel(warpbutton, buf);
+    TXT_SetButtonLabel(warpbutton, buf);
 }
 
 static void UpdateSkillButton(void)
 {
-	iwad_t *iwad = GetCurrentIWAD();
+    iwad_t *iwad = GetCurrentIWAD();
 
-	if (iwad->mask == IWAD_CHEX)
-	{
-		skillbutton->values = chex_skills;
-	}
-	else
-	{
-		skillbutton->values = skills;
-	}
+    if (iwad->mask == IWAD_CHEX)
+    {
+        skillbutton->values = chex_skills;
+    }
+    else
+    {
+        skillbutton->values = skills;
+    }
 }
 
 static void SetDoom1Warp(TXT_UNCAST_ARG(widget), void *val)
 {
-	int l;
+    int l;
 
-	l = (int)val;
+    l = (int) val;
 
-	warpepisode = l / 10;
-	warpmap = l % 10;
+    warpepisode = l / 10;
+    warpmap = l % 10;
 
-	UpdateWarpButton();
+    UpdateWarpButton();
 }
 
 static void SetDoom2Warp(TXT_UNCAST_ARG(widget), void *val)
 {
-	int l;
+    int l;
 
-	l = (int)val;
+    l = (int) val;
 
-	warpmap = l;
+    warpmap = l;
 
-	UpdateWarpButton();
+    UpdateWarpButton();
 }
 
 static void CloseLevelSelectDialog(TXT_UNCAST_ARG(button), TXT_UNCAST_ARG(window))
 {
-	TXT_CAST_ARG(txt_window_t, window);
+    TXT_CAST_ARG(txt_window_t, window);
 
-	TXT_CloseWindow(window);
+    TXT_CloseWindow(window);            
 }
 
 static void LevelSelectDialog(TXT_UNCAST_ARG(widget), TXT_UNCAST_ARG(user_data))
 {
-	txt_window_t *window;
+    txt_window_t *window;
+    txt_table_t *table;
+    txt_button_t *button;
+    iwad_t *iwad;
+    char buf[10];
+    int x, y;
+    int l;
+    int i;
 
-	txt_table_t *table;
+    window = TXT_NewWindow("Select level");
 
-	txt_button_t *button;
+    table = TXT_NewTable(4);
 
-	iwad_t *iwad;
+    TXT_AddWidget(window, table);
 
-	char buf[10];
+    if (warptype == WARP_DOOM1)
+    {
+        // ExMy levels
+        
+        iwad = GetCurrentIWAD();
 
-	int x, y;
+        for (i=0; i<4 * 9; ++i)
+        {
+            x = (i % 4) + 1;
+            y = (i / 4) + 1;
 
-	int l;
+            // chex.wad only has E1M1-E1M5.
 
-	int i;
+            if (iwad->mask == IWAD_CHEX && (x > 1 || y > 5))
+            {
+                continue;
+            }
 
-	window = TXT_NewWindow("Select level");
+            // doom1.wad only has E1
 
-	table = TXT_NewTable(4);
+            if (iwad->mask == IWAD_DOOM1 && x > 1)
+            {
+                continue;
+            }
 
-	TXT_AddWidget(window, table);
+            sprintf(buf, " E%iM%i ", x, y);
+            button = TXT_NewButton(buf);
+            TXT_SignalConnect(button, "pressed",
+                              SetDoom1Warp, (void *) (x * 10 + y));
+            TXT_SignalConnect(button, "pressed",
+                              CloseLevelSelectDialog, window);
+            TXT_AddWidget(table, button);
 
-	if (warptype == WARP_DOOM1)
-	{
-		// ExMy levels
+            if (warpepisode == x && warpmap == y)
+            {
+                TXT_SelectWidget(table, button);
+            }
+        }
+    }
+    else
+    {
+        for (i=0; i<32; ++i)
+        {
+            x = i % 4;
+            y = i / 4;
 
-		iwad = GetCurrentIWAD();
+            l = x * 8 + y + 1;
+          
+            sprintf(buf, " MAP%02i ", l);
+            button = TXT_NewButton(buf);
+            TXT_SignalConnect(button, "pressed", 
+                              SetDoom2Warp, (void *) l);
+            TXT_SignalConnect(button, "pressed",
+                              CloseLevelSelectDialog, window);
+            TXT_AddWidget(table, button);
 
-		for (i = 0; i < 4 * 9; ++i)
-		{
-			x = (i % 4) + 1;
-			y = (i / 4) + 1;
-
-			// chex.wad only has E1M1-E1M5.
-
-			if (iwad->mask == IWAD_CHEX && (x > 1 || y > 5))
-			{
-				continue;
-			}
-
-			// doom1.wad only has E1
-
-			if (iwad->mask == IWAD_DOOM1 && x > 1)
-			{
-				continue;
-			}
-
-			sprintf(buf, " E%iM%i ", x, y);
-			button = TXT_NewButton(buf);
-			TXT_SignalConnect(button, "pressed", SetDoom1Warp, (void *)(x * 10 + y));
-			TXT_SignalConnect(button, "pressed", CloseLevelSelectDialog, window);
-			TXT_AddWidget(table, button);
-
-			if (warpepisode == x && warpmap == y)
-			{
-				TXT_SelectWidget(table, button);
-			}
-		}
-	}
-	else
-	{
-		for (i = 0; i < 32; ++i)
-		{
-			x = i % 4;
-			y = i / 4;
-
-			l = x * 8 + y + 1;
-
-			sprintf(buf, " MAP%02i ", l);
-			button = TXT_NewButton(buf);
-			TXT_SignalConnect(button, "pressed", SetDoom2Warp, (void *)l);
-			TXT_SignalConnect(button, "pressed", CloseLevelSelectDialog, window);
-			TXT_AddWidget(table, button);
-
-			if (warpmap == l)
-			{
-				TXT_SelectWidget(table, button);
-			}
-		}
-	}
+            if (warpmap == l)
+            {
+                TXT_SelectWidget(table, button);
+            }
+        }
+    }
 }
 
 static void IWADSelected(TXT_UNCAST_ARG(widget), TXT_UNCAST_ARG(unused))
 {
-	iwad_t *iwad;
+    iwad_t *iwad;
 
-	// Find the iwad_t selected
+    // Find the iwad_t selected
 
-	iwad = GetCurrentIWAD();
+    iwad = GetCurrentIWAD();
 
-	// Update iwadfile
+    // Update iwadfile
 
-	iwadfile = iwad->filename;
+    iwadfile = iwad->filename;
 }
 
 // Called when the IWAD button is changed, to update warptype.
 
 static void UpdateWarpType(TXT_UNCAST_ARG(widget), TXT_UNCAST_ARG(unused))
 {
-	warptype_t new_warptype;
+    warptype_t new_warptype;
+    iwad_t *iwad;
+    
+    // Get the selected IWAD
 
-	iwad_t *iwad;
+    iwad = GetIWADForDescription(found_iwads[found_iwad_selected]);
 
-	// Get the selected IWAD
+    // Find the new warp type
 
-	iwad = GetIWADForDescription(found_iwads[found_iwad_selected]);
+    if (iwad->mask & (IWAD_DOOM | IWAD_DOOM1 | IWAD_CHEX))
+    {
+        new_warptype = WARP_DOOM1;
+    }
+    else
+    {
+        new_warptype = WARP_DOOM2;
+    }
 
-	// Find the new warp type
+    // Reset to E1M1 / MAP01 when the warp type is changed.
 
-	if (iwad->mask & (IWAD_DOOM | IWAD_DOOM1 | IWAD_CHEX))
-	{
-		new_warptype = WARP_DOOM1;
-	}
-	else
-	{
-		new_warptype = WARP_DOOM2;
-	}
+    if (new_warptype != warptype)
+    {
+        warpepisode = 1;
+        warpmap = 1;
+    }
 
-	// Reset to E1M1 / MAP01 when the warp type is changed.
+    warptype = new_warptype;
 
-	if (new_warptype != warptype)
-	{
-		warpepisode = 1;
-		warpmap = 1;
-	}
-
-	warptype = new_warptype;
-
-	UpdateWarpButton();
-	UpdateSkillButton();
+    UpdateWarpButton();
+    UpdateSkillButton();
 }
 
 static txt_widget_t *IWADSelector(void)
 {
-	txt_dropdown_list_t *dropdown;
+    txt_dropdown_list_t *dropdown;
+    txt_widget_t *result;
+    int installed_iwads;
+    int num_iwads;
+    unsigned int i;
 
-	txt_widget_t *result;
+    // Find out what WADs are installed
+    
+    installed_iwads = FindInstalledIWADs();
 
-	int installed_iwads;
+    // Build a list of the descriptions for all installed IWADs
 
-	int num_iwads;
+    num_iwads = 0;
 
-	unsigned int i;
+    for (i=0; i<arrlen(iwads); ++i)
+    {
+        if (installed_iwads & iwads[i].mask)
+        {
+            found_iwads[num_iwads] = iwads[i].description;
+            ++num_iwads;
+        }
+    }
 
-	// Find out what WADs are installed
+    // If no IWADs are found, provide Doom 2 as an option, but
+    // we're probably screwed.
 
-	installed_iwads = FindInstalledIWADs();
+    if (num_iwads == 0)
+    {
+        found_iwads[0] = "Doom 2";
+        num_iwads = 1;
+    }
 
-	// Build a list of the descriptions for all installed IWADs
+    // Build a dropdown list of IWADs
 
-	num_iwads = 0;
+    if (num_iwads < 2)
+    {
+        // We have only one IWAD.  Show as a label.
 
-	for (i = 0; i < arrlen(iwads); ++i)
-	{
-		if (installed_iwads & iwads[i].mask)
-		{
-			found_iwads[num_iwads] = iwads[i].description;
-			++num_iwads;
-		}
-	}
+        result = (txt_widget_t *) TXT_NewLabel(found_iwads[0]);
+    }
+    else
+    {
+        // Dropdown list allowing IWAD to be selected.
 
-	// If no IWADs are found, provide Doom 2 as an option, but
-	// we're probably screwed.
+        dropdown = TXT_NewDropdownList(&found_iwad_selected, 
+                                       found_iwads, num_iwads);
 
-	if (num_iwads == 0)
-	{
-		found_iwads[0] = "Doom 2";
-		num_iwads = 1;
-	}
+        TXT_SignalConnect(dropdown, "changed", IWADSelected, NULL);
 
-	// Build a dropdown list of IWADs
+        result = (txt_widget_t *) dropdown;
+    }
 
-	if (num_iwads < 2)
-	{
-		// We have only one IWAD.  Show as a label.
+    // Select first in the list.
 
-		result = (txt_widget_t *) TXT_NewLabel(found_iwads[0]);
-	}
-	else
-	{
-		// Dropdown list allowing IWAD to be selected.
+    found_iwad_selected = 0;
+    IWADSelected(NULL, NULL);
 
-		dropdown = TXT_NewDropdownList(&found_iwad_selected, found_iwads, num_iwads);
-
-		TXT_SignalConnect(dropdown, "changed", IWADSelected, NULL);
-
-		result = (txt_widget_t *) dropdown;
-	}
-
-	// Select first in the list.
-
-	found_iwad_selected = 0;
-	IWADSelected(NULL, NULL);
-
-	return result;
+    return result;
 }
 
 // Create the window action button to start the game.  This invokes
@@ -557,62 +540,60 @@ static txt_widget_t *IWADSelector(void)
 
 static txt_window_action_t *StartGameAction(int multiplayer)
 {
-	txt_window_action_t *action;
+    txt_window_action_t *action;
+    TxtWidgetSignalFunc callback;
 
-	TxtWidgetSignalFunc callback;
+    action = TXT_NewWindowAction(KEY_F10, "Start");
 
-	action = TXT_NewWindowAction(KEY_F10, "Start");
+    if (multiplayer)
+    {
+        callback = StartServerGame;
+    }
+    else
+    {
+        callback = StartSinglePlayerGame;
+    }
 
-	if (multiplayer)
-	{
-		callback = StartServerGame;
-	}
-	else
-	{
-		callback = StartSinglePlayerGame;
-	}
+    TXT_SignalConnect(action, "pressed", callback, NULL);
 
-	TXT_SignalConnect(action, "pressed", callback, NULL);
-
-	return action;
+    return action;
 }
 
 static void OpenWadsWindow(TXT_UNCAST_ARG(widget), TXT_UNCAST_ARG(user_data))
 {
-	txt_window_t *window;
+    txt_window_t *window;
+    int i;
 
-	int i;
+    window = TXT_NewWindow("Add WADs");
 
-	window = TXT_NewWindow("Add WADs");
-
-	for (i = 0; i < NUM_WADS; ++i)
-	{
-		TXT_AddWidget(window, TXT_NewInputBox(&wads[i], 60));
-	}
+    for (i=0; i<NUM_WADS; ++i)
+    {
+        TXT_AddWidget(window, TXT_NewInputBox(&wads[i], 60));
+    }
 }
 
-static void OpenExtraParamsWindow(TXT_UNCAST_ARG(widget), TXT_UNCAST_ARG(user_data))
+static void OpenExtraParamsWindow(TXT_UNCAST_ARG(widget), 
+                                  TXT_UNCAST_ARG(user_data))
 {
-	txt_window_t *window;
+    txt_window_t *window;
+    int i;
 
-	int i;
-
-	window = TXT_NewWindow("Extra command line parameters");
-
-	for (i = 0; i < NUM_EXTRA_PARAMS; ++i)
-	{
-		TXT_AddWidget(window, TXT_NewInputBox(&extra_params[i], 70));
-	}
+    window = TXT_NewWindow("Extra command line parameters");
+    
+    for (i=0; i<NUM_EXTRA_PARAMS; ++i)
+    {
+        TXT_AddWidget(window, TXT_NewInputBox(&extra_params[i], 70));
+    }
 }
 
 static txt_window_action_t *WadWindowAction(void)
 {
-	txt_window_action_t *action;
+    txt_window_action_t *action;
 
-	action = TXT_NewWindowAction('w', "Add WADs");
-	TXT_SignalConnect(action, "pressed", OpenWadsWindow, NULL);
+    action = TXT_NewWindowAction('w', "Add WADs");
+    TXT_SignalConnect(action, "pressed", OpenWadsWindow, NULL);
 
-	return action;
+    return action;
 }
 
 // "Start game" menu.  This is used for the start server window
@@ -621,226 +602,249 @@ static txt_window_action_t *WadWindowAction(void)
 
 static void StartGameMenu(char *window_title, int multiplayer)
 {
-	txt_window_t *window;
+    txt_window_t *window;
+    txt_table_t *gameopt_table;
+    txt_table_t *advanced_table;
+    txt_widget_t *iwad_selector;
 
-	txt_table_t *gameopt_table;
+    window = TXT_NewWindow(window_title);
 
-	txt_table_t *advanced_table;
+    TXT_AddWidgets(window, 
+                   gameopt_table = TXT_NewTable(2),
+                   TXT_NewSeparator("Monster options"),
+                   TXT_NewInvertedCheckBox("Monsters enabled", &nomonsters),
+                   TXT_NewCheckBox("Fast monsters", &fast),
+                   TXT_NewCheckBox("Respawning monsters", &respawn),
+                   TXT_NewSeparator("Advanced"),
+                   advanced_table = TXT_NewTable(2),
+                   NULL);
 
-	txt_widget_t *iwad_selector;
+    TXT_SetWindowAction(window, TXT_HORIZ_CENTER, WadWindowAction());
+    TXT_SetWindowAction(window, TXT_HORIZ_RIGHT, StartGameAction(multiplayer));
+    
+    TXT_SetColumnWidths(gameopt_table, 12, 6);
 
-	window = TXT_NewWindow(window_title);
+    TXT_AddWidgets(gameopt_table,
+           TXT_NewLabel("Game"),
+           iwad_selector = IWADSelector(),
+           TXT_NewLabel("Skill"),
+           skillbutton = TXT_NewDropdownList(&skill, skills, 5),
+           TXT_NewLabel("Level warp"),
+           warpbutton = TXT_NewButton2("????", LevelSelectDialog, NULL),
+           NULL);
 
-	TXT_AddWidgets(window,
-				   gameopt_table = TXT_NewTable(2),
-				   TXT_NewSeparator("Monster options"),
-				   TXT_NewInvertedCheckBox("Monsters enabled", &nomonsters),
-				   TXT_NewCheckBox("Fast monsters", &fast),
-				   TXT_NewCheckBox("Respawning monsters", &respawn), TXT_NewSeparator("Advanced"), advanced_table = TXT_NewTable(2), NULL);
+    if (multiplayer)
+    {
+        TXT_AddWidgets(gameopt_table,
+               TXT_NewLabel("Game type"),
+               TXT_NewDropdownList(&deathmatch, gamemodes, 3),
+               TXT_NewLabel("Time limit"),
+               TXT_NewHorizBox(TXT_NewIntInputBox(&timer, 2),
+                               TXT_NewLabel("minutes"),
+                               NULL),
+               NULL);
 
-	TXT_SetWindowAction(window, TXT_HORIZ_CENTER, WadWindowAction());
-	TXT_SetWindowAction(window, TXT_HORIZ_RIGHT, StartGameAction(multiplayer));
+        TXT_AddWidget(window,
+                      TXT_NewInvertedCheckBox("Register with master server",
+                                              &privateserver));
 
-	TXT_SetColumnWidths(gameopt_table, 12, 6);
+        TXT_AddWidgets(advanced_table,
+                       TXT_NewLabel("UDP port"),
+                       TXT_NewIntInputBox(&udpport, 5),
+                       NULL);
+    }
 
-	TXT_AddWidgets(gameopt_table,
-				   TXT_NewLabel("Game"),
-				   iwad_selector = IWADSelector(),
-				   TXT_NewLabel("Skill"),
-				   skillbutton = TXT_NewDropdownList(&skill, skills, 5),
-				   TXT_NewLabel("Level warp"), warpbutton = TXT_NewButton2("????", LevelSelectDialog, NULL), NULL);
+    TXT_AddWidget(window,
+                  TXT_NewButton2("Add extra parameters...", 
+                                 OpenExtraParamsWindow, NULL));
 
-	if (multiplayer)
-	{
-		TXT_AddWidgets(gameopt_table,
-					   TXT_NewLabel("Game type"),
-					   TXT_NewDropdownList(&deathmatch, gamemodes, 3),
-					   TXT_NewLabel("Time limit"), TXT_NewHorizBox(TXT_NewIntInputBox(&timer, 2), TXT_NewLabel("minutes"), NULL), NULL);
+    TXT_SetColumnWidths(advanced_table, 12, 6);
 
-		TXT_AddWidget(window, TXT_NewInvertedCheckBox("Register with master server", &privateserver));
+    TXT_SignalConnect(iwad_selector, "changed", UpdateWarpType, NULL);
 
-		TXT_AddWidgets(advanced_table, TXT_NewLabel("UDP port"), TXT_NewIntInputBox(&udpport, 5), NULL);
-	}
-
-	TXT_AddWidget(window, TXT_NewButton2("Add extra parameters...", OpenExtraParamsWindow, NULL));
-
-	TXT_SetColumnWidths(advanced_table, 12, 6);
-
-	TXT_SignalConnect(iwad_selector, "changed", UpdateWarpType, NULL);
-
-	UpdateWarpType(NULL, NULL);
-	UpdateWarpButton();
+    UpdateWarpType(NULL, NULL);
+    UpdateWarpButton();
 }
 
 void StartMultiGame(void)
 {
-	StartGameMenu("Start multiplayer game", 1);
+    StartGameMenu("Start multiplayer game", 1);
 }
 
 void WarpMenu(void)
 {
-	StartGameMenu("Level Warp", 0);
+    StartGameMenu("Level Warp", 0);
 }
 
 static void DoJoinGame(void *unused1, void *unused2)
 {
-	execute_context_t *exec;
+    execute_context_t *exec;
 
-	exec = NewExecuteContext();
+    exec = NewExecuteContext();
 
-	if (jointype == JOIN_ADDRESS)
-	{
-		AddCmdLineParameter(exec, "-connect %s", connect_address);
-	}
-	else if (jointype == JOIN_AUTO_LAN)
-	{
-		AddCmdLineParameter(exec, "-autojoin");
-	}
+    if (jointype == JOIN_ADDRESS)
+    {
+        AddCmdLineParameter(exec, "-connect %s", connect_address);
+    }
+    else if (jointype == JOIN_AUTO_LAN)
+    {
+        AddCmdLineParameter(exec, "-autojoin");
+    }
 
-	// Extra parameters come first, so that they can be used to override
-	// the other parameters.
+    // Extra parameters come first, so that they can be used to override
+    // the other parameters.
 
-	AddExtraParameters(exec);
-	AddIWADParameter(exec);
-	AddWADs(exec);
+    AddExtraParameters(exec);
+    AddIWADParameter(exec);
+    AddWADs(exec);
 
-	TXT_Shutdown();
+    TXT_Shutdown();
+    
+    M_SaveDefaults();
 
-	M_SaveDefaults();
+    PassThroughArguments(exec);
 
-	PassThroughArguments(exec);
+    ExecuteDoom(exec);
 
-	ExecuteDoom(exec);
-
-	exit(0);
+    exit(0);
 }
 
 static txt_window_action_t *JoinGameAction(void)
 {
-	txt_window_action_t *action;
+    txt_window_action_t *action;
 
-	action = TXT_NewWindowAction(KEY_F10, "Connect");
-	TXT_SignalConnect(action, "pressed", DoJoinGame, NULL);
+    action = TXT_NewWindowAction(KEY_F10, "Connect");
+    TXT_SignalConnect(action, "pressed", DoJoinGame, NULL);
 
-	return action;
+    return action;
 }
 
 // When an address is entered, select "address" mode.
 
 static void SelectAddressJoin(TXT_UNCAST_ARG(widget), TXT_UNCAST_ARG(unused))
 {
-	jointype = JOIN_ADDRESS;
+    jointype = JOIN_ADDRESS;
 }
 
 void JoinMultiGame(void)
 {
-	txt_window_t *window;
+    txt_window_t *window;
+    txt_table_t *gameopt_table;
+    txt_table_t *serveropt_table;
+    txt_inputbox_t *address_box;
 
-	txt_table_t *gameopt_table;
+    window = TXT_NewWindow("Join multiplayer game");
 
-	txt_table_t *serveropt_table;
+    TXT_AddWidgets(window, 
+        gameopt_table = TXT_NewTable(2),
+        TXT_NewSeparator("Server"),
+        serveropt_table = TXT_NewTable(2),
+        TXT_NewStrut(0, 1),
+        TXT_NewButton2("Add extra parameters...", OpenExtraParamsWindow, NULL),
+        NULL);
 
-	txt_inputbox_t *address_box;
+    TXT_SetColumnWidths(gameopt_table, 12, 12);
 
-	window = TXT_NewWindow("Join multiplayer game");
+    TXT_AddWidgets(gameopt_table,
+                   TXT_NewLabel("Game"),
+                   IWADSelector(),
+                   NULL);
 
-	TXT_AddWidgets(window,
-				   gameopt_table = TXT_NewTable(2),
-				   TXT_NewSeparator("Server"),
-				   serveropt_table = TXT_NewTable(2), TXT_NewStrut(0, 1), TXT_NewButton2("Add extra parameters...", OpenExtraParamsWindow, NULL), NULL);
+    TXT_AddWidgets(serveropt_table,
+                   TXT_NewRadioButton("Connect to address:",
+                                      &jointype, JOIN_ADDRESS),
+                   address_box = TXT_NewInputBox(&connect_address, 30),
+                   TXT_NewRadioButton("Auto-join LAN game",
+                                      &jointype, JOIN_AUTO_LAN),
+                   NULL);
 
-	TXT_SetColumnWidths(gameopt_table, 12, 12);
+    TXT_SignalConnect(address_box, "changed", SelectAddressJoin, NULL);
+    TXT_SelectWidget(window, address_box);
 
-	TXT_AddWidgets(gameopt_table, TXT_NewLabel("Game"), IWADSelector(), NULL);
-
-	TXT_AddWidgets(serveropt_table,
-				   TXT_NewRadioButton("Connect to address:",
-									  &jointype, JOIN_ADDRESS),
-				   address_box = TXT_NewInputBox(&connect_address, 30), TXT_NewRadioButton("Auto-join LAN game", &jointype, JOIN_AUTO_LAN), NULL);
-
-	TXT_SignalConnect(address_box, "changed", SelectAddressJoin, NULL);
-	TXT_SelectWidget(window, address_box);
-
-	TXT_SetWindowAction(window, TXT_HORIZ_CENTER, WadWindowAction());
-	TXT_SetWindowAction(window, TXT_HORIZ_RIGHT, JoinGameAction());
+    TXT_SetWindowAction(window, TXT_HORIZ_CENTER, WadWindowAction());
+    TXT_SetWindowAction(window, TXT_HORIZ_RIGHT, JoinGameAction());
 }
 
 void SetChatMacroDefaults(void)
 {
-	int i;
+    int i;
+    char *defaults[] = 
+    {
+        HUSTR_CHATMACRO1,
+        HUSTR_CHATMACRO2,
+        HUSTR_CHATMACRO3,
+        HUSTR_CHATMACRO4,
+        HUSTR_CHATMACRO5,
+        HUSTR_CHATMACRO6,
+        HUSTR_CHATMACRO7,
+        HUSTR_CHATMACRO8,
+        HUSTR_CHATMACRO9,
+        HUSTR_CHATMACRO0,
+    };
+    
+    // If the chat macros have not been set, initialize with defaults.
 
-	char *defaults[] = {
-		HUSTR_CHATMACRO1,
-		HUSTR_CHATMACRO2,
-		HUSTR_CHATMACRO3,
-		HUSTR_CHATMACRO4,
-		HUSTR_CHATMACRO5,
-		HUSTR_CHATMACRO6,
-		HUSTR_CHATMACRO7,
-		HUSTR_CHATMACRO8,
-		HUSTR_CHATMACRO9,
-		HUSTR_CHATMACRO0,
-	};
-
-	// If the chat macros have not been set, initialize with defaults.
-
-	for (i = 0; i < 10; ++i)
-	{
-		if (chat_macros[i] == NULL)
-		{
-			chat_macros[i] = strdup(defaults[i]);
-		}
-	}
+    for (i=0; i<10; ++i)
+    {
+        if (chat_macros[i] == NULL)
+        {
+            chat_macros[i] = strdup(defaults[i]);
+        }
+    }
 }
 
 void SetPlayerNameDefault(void)
 {
-	if (net_player_name == NULL)
-	{
-		net_player_name = getenv("USER");
-	}
+    if (net_player_name == NULL)
+    {
+        net_player_name = getenv("USER");
+    }
 
-	if (net_player_name == NULL)
-	{
-		net_player_name = getenv("USERNAME");
-	}
+    if (net_player_name == NULL)
+    {
+        net_player_name = getenv("USERNAME");
+    }
 
-	if (net_player_name == NULL)
-	{
-		net_player_name = "player";
-	}
+    if (net_player_name == NULL)
+    {
+        net_player_name = "player";
+    }
 }
 
 void MultiplayerConfig(void)
 {
-	txt_window_t *window;
+    txt_window_t *window;
+    txt_label_t *label;
+    txt_table_t *table;
+    char buf[10];
+    int i;
 
-	txt_label_t *label;
+    window = TXT_NewWindow("Multiplayer Configuration");
 
-	txt_table_t *table;
+    TXT_AddWidgets(window, 
+                   TXT_NewStrut(0, 1),
+                   TXT_NewHorizBox(TXT_NewLabel("Player name:  "),
+                                   TXT_NewInputBox(&net_player_name, 25),
+                                   NULL),
+                   TXT_NewStrut(0, 1),
+                   TXT_NewSeparator("Chat macros"),
+                   NULL);
 
-	char buf[10];
+    table = TXT_NewTable(2);
 
-	int i;
+    for (i=0; i<10; ++i)
+    {
+        sprintf(buf, "#%i ", i + 1);
 
-	window = TXT_NewWindow("Multiplayer Configuration");
+        label = TXT_NewLabel(buf);
+        TXT_SetFGColor(label, TXT_COLOR_BRIGHT_CYAN);
 
-	TXT_AddWidgets(window,
-				   TXT_NewStrut(0, 1),
-				   TXT_NewHorizBox(TXT_NewLabel("Player name:  "),
-								   TXT_NewInputBox(&net_player_name, 25), NULL), TXT_NewStrut(0, 1), TXT_NewSeparator("Chat macros"), NULL);
-
-	table = TXT_NewTable(2);
-
-	for (i = 0; i < 10; ++i)
-	{
-		sprintf(buf, "#%i ", i + 1);
-
-		label = TXT_NewLabel(buf);
-		TXT_SetFGColor(label, TXT_COLOR_BRIGHT_CYAN);
-
-		TXT_AddWidgets(table, label, TXT_NewInputBox(&chat_macros[(i + 1) % 10], 40), NULL);
-	}
-
-	TXT_AddWidget(window, table);
+        TXT_AddWidgets(table,
+                       label,
+                       TXT_NewInputBox(&chat_macros[(i + 1) % 10], 40),
+                       NULL);
+    }
+    
+    TXT_AddWidget(window, table);
 }
+

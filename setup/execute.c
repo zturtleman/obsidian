@@ -68,8 +68,8 @@
 
 struct execute_context_s
 {
-	char *response_file;
-	FILE *stream;
+    char *response_file;
+    FILE *stream;
 };
 
 // Returns the path to a temporary file of the given name, stored
@@ -77,93 +77,92 @@ struct execute_context_s
 
 static char *TempFile(char *s)
 {
-	char *result;
-
-	char *tempdir;
+    char *result;
+    char *tempdir;
 
 #ifdef _WIN32
-	// Check the TEMP environment variable to find the location.
+    // Check the TEMP environment variable to find the location.
 
-	tempdir = getenv("TEMP");
+    tempdir = getenv("TEMP");
 
-	if (tempdir == NULL)
-	{
-		tempdir = ".";
-	}
+    if (tempdir == NULL)
+    {
+        tempdir = ".";
+    }
 #else
-	// In Unix, just use /tmp.
+    // In Unix, just use /tmp.
 
-	tempdir = "/tmp";
+    tempdir = "/tmp";
 #endif
 
-	result = malloc(strlen(tempdir) + strlen(s) + 2);
-	sprintf(result, "%s%c%s", tempdir, DIR_SEPARATOR, s);
+    result = malloc(strlen(tempdir) + strlen(s) + 2);
+    sprintf(result, "%s%c%s", tempdir, DIR_SEPARATOR, s);
 
-	return result;
+    return result;
 }
 
 static int ArgumentNeedsEscape(char *arg)
 {
-	char *p;
+    char *p;
 
-	for (p = arg; *p != '\0'; ++p)
-	{
-		if (isspace(*p))
-		{
-			return 1;
-		}
-	}
+    for (p = arg; *p != '\0'; ++p)
+    {
+        if (isspace(*p))
+        {
+            return 1;
+        }
+    }
 
-	return 0;
+    return 0;
 }
 
 // Arguments passed to the setup tool should be passed through to the
 // game when launching a game.  Calling this adds all arguments from
 // myargv to the output context.
 
-void PassThroughArguments(execute_context_t * context)
+void PassThroughArguments(execute_context_t *context)
 {
-	int i;
+    int i;
 
-	for (i = 1; i < myargc; ++i)
-	{
-		if (ArgumentNeedsEscape(myargv[i]))
-		{
-			AddCmdLineParameter(context, "\"%s\"", myargv[i]);
-		}
-		else
-		{
-			AddCmdLineParameter(context, "%s", myargv[i]);
-		}
-	}
+    for (i = 1; i < myargc; ++i)
+    {
+        if (ArgumentNeedsEscape(myargv[i]))
+        {
+            AddCmdLineParameter(context, "\"%s\"", myargv[i]);
+        }
+        else
+        {
+            AddCmdLineParameter(context, "%s", myargv[i]);
+        }
+    }
 }
 
 execute_context_t *NewExecuteContext(void)
 {
-	execute_context_t *result;
+    execute_context_t *result;
 
-	result = malloc(sizeof(execute_context_t));
+    result = malloc(sizeof(execute_context_t));
+    
+    result->response_file = TempFile("chocolat.rsp");
+    result->stream = fopen(result->response_file, "w");
 
-	result->response_file = TempFile("chocolat.rsp");
-	result->stream = fopen(result->response_file, "w");
-
-	if (result->stream == NULL)
-	{
-		fprintf(stderr, "Error opening response file\n");
-		exit(-1);
-	}
-
-	return result;
+    if (result->stream == NULL)
+    {
+        fprintf(stderr, "Error opening response file\n");
+        exit(-1);
+    }
+    
+    return result;
 }
 
-void AddCmdLineParameter(execute_context_t * context, char *s, ...)
+void AddCmdLineParameter(execute_context_t *context, char *s, ...)
 {
-	va_list args;
+    va_list args;
 
-	va_start(args, s);
+    va_start(args, s);
 
-	vfprintf(context->stream, s, args);
-	fprintf(context->stream, "\n");
+    vfprintf(context->stream, s, args);
+    fprintf(context->stream, "\n");
 }
 
 #if defined(_WIN32)
@@ -172,27 +171,29 @@ void AddCmdLineParameter(execute_context_t * context, char *s, ...)
 
 static unsigned int WaitForProcessExit(HANDLE subprocess)
 {
-	DWORD exit_code;
+    DWORD exit_code;
 
-	for (;;)
-	{
-		WaitForSingleObject(subprocess, INFINITE);
+    for (;;)
+    {
+        WaitForSingleObject(subprocess, INFINITE);
 
-		if (!GetExitCodeProcess(subprocess, &exit_code))
-		{
-			return -1;
-		}
+        if (!GetExitCodeProcess(subprocess, &exit_code))
+        {
+            return -1;
+        }
 
-		if (exit_code != STILL_ACTIVE)
-		{
-			return exit_code;
-		}
-	}
+        if (exit_code != STILL_ACTIVE)
+        {
+            return exit_code;
+        }
+    }
 }
 
-static void ConcatWCString(wchar_t * buf, const char *value)
+static void ConcatWCString(wchar_t *buf, const char *value)
 {
-	MultiByteToWideChar(CP_OEMCP, 0, value, strlen(value) + 1, buf + wcslen(buf), strlen(value) + 1);
+    MultiByteToWideChar(CP_OEMCP, 0,
+                        value, strlen(value) + 1,
+                        buf + wcslen(buf), strlen(value) + 1);
 }
 
 // Build the command line string, a wide character string of the form:
@@ -201,83 +202,81 @@ static void ConcatWCString(wchar_t * buf, const char *value)
 
 static wchar_t *BuildCommandLine(const char *program, const char *arg)
 {
-	wchar_t exe_path[MAX_PATH];
+    wchar_t exe_path[MAX_PATH];
+    wchar_t *result;
+    wchar_t *sep;
 
-	wchar_t *result;
+    // Get the path to this .exe file.
 
-	wchar_t *sep;
+    GetModuleFileNameW(NULL, exe_path, MAX_PATH);
 
-	// Get the path to this .exe file.
+    // Allocate buffer to contain result string.
 
-	GetModuleFileNameW(NULL, exe_path, MAX_PATH);
+    result = calloc(wcslen(exe_path) + strlen(program) + strlen(arg) + 6,
+                    sizeof(wchar_t));
 
-	// Allocate buffer to contain result string.
+    wcscpy(result, L"\"");
 
-	result = calloc(wcslen(exe_path) + strlen(program) + strlen(arg) + 6, sizeof(wchar_t));
+    // Copy the path part of the filename (including ending \)
+    // into the result buffer:
 
-	wcscpy(result, L"\"");
+    sep = wcsrchr(exe_path, DIR_SEPARATOR);
 
-	// Copy the path part of the filename (including ending \)
-	// into the result buffer:
+    if (sep != NULL)
+    {
+        wcsncpy(result + 1, exe_path, sep - exe_path + 1);
+        result[sep - exe_path + 2] = '\0';
+    }
 
-	sep = wcsrchr(exe_path, DIR_SEPARATOR);
+    // Concatenate the name of the program:
 
-	if (sep != NULL)
-	{
-		wcsncpy(result + 1, exe_path, sep - exe_path + 1);
-		result[sep - exe_path + 2] = '\0';
-	}
+    ConcatWCString(result, program);
 
-	// Concatenate the name of the program:
+    // End of program name, start of argument:
 
-	ConcatWCString(result, program);
+    wcscat(result, L"\" \"");
 
-	// End of program name, start of argument:
+    ConcatWCString(result, arg);
 
-	wcscat(result, L"\" \"");
+    wcscat(result, L"\"");
 
-	ConcatWCString(result, arg);
-
-	wcscat(result, L"\"");
-
-	return result;
+    return result;
 }
 
 static int ExecuteCommand(const char *program, const char *arg)
 {
-	STARTUPINFOW startup_info;
+    STARTUPINFOW startup_info;
+    PROCESS_INFORMATION proc_info;
+    wchar_t *command;
+    int result = 0;
 
-	PROCESS_INFORMATION proc_info;
+    command = BuildCommandLine(program, arg);
 
-	wchar_t *command;
+    // Invoke the program:
 
-	int result = 0;
+    memset(&proc_info, 0, sizeof(proc_info));
+    memset(&startup_info, 0, sizeof(startup_info));
+    startup_info.cb = sizeof(startup_info);
 
-	command = BuildCommandLine(program, arg);
+    if (!CreateProcessW(NULL, command,
+                        NULL, NULL, FALSE, 0, NULL, NULL,
+                        &startup_info, &proc_info))
+    {
+        result = -1;
+    }
+    else
+    {
+        // Wait for the process to finish, and save the exit code.
 
-	// Invoke the program:
+        result = WaitForProcessExit(proc_info.hProcess);
 
-	memset(&proc_info, 0, sizeof(proc_info));
-	memset(&startup_info, 0, sizeof(startup_info));
-	startup_info.cb = sizeof(startup_info);
+        CloseHandle(proc_info.hProcess);
+        CloseHandle(proc_info.hThread);
+    }
 
-	if (!CreateProcessW(NULL, command, NULL, NULL, FALSE, 0, NULL, NULL, &startup_info, &proc_info))
-	{
-		result = -1;
-	}
-	else
-	{
-		// Wait for the process to finish, and save the exit code.
+    free(command);
 
-		result = WaitForProcessExit(proc_info.hProcess);
-
-		CloseHandle(proc_info.hProcess);
-		CloseHandle(proc_info.hThread);
-	}
-
-	free(command);
-
-	return result;
+    return result;
 }
 
 #else
@@ -287,155 +286,147 @@ static int ExecuteCommand(const char *program, const char *arg)
 
 static char *GetFullExePath(const char *program)
 {
-	char *result;
+    char *result;
+    char *sep;
+    unsigned int path_len;
 
-	char *sep;
+    sep = strrchr(myargv[0], DIR_SEPARATOR);
 
-	unsigned int path_len;
+    if (sep == NULL)
+    {
+        result = strdup(program);
+    }
+    else
+    {
+        path_len = sep - myargv[0] + 1;
 
-	sep = strrchr(myargv[0], DIR_SEPARATOR);
+        result = malloc(strlen(program) + path_len + 1);
 
-	if (sep == NULL)
-	{
-		result = strdup(program);
-	}
-	else
-	{
-		path_len = sep - myargv[0] + 1;
+        strncpy(result, myargv[0], path_len);
+        result[path_len] = '\0';
 
-		result = malloc(strlen(program) + path_len + 1);
+        strcat(result, program);
+    }
 
-		strncpy(result, myargv[0], path_len);
-		result[path_len] = '\0';
-
-		strcat(result, program);
-	}
-
-	return result;
+    return result;
 }
 
 static int ExecuteCommand(const char *program, const char *arg)
 {
-	pid_t childpid;
+    pid_t childpid;
+    int result;
+    const char *argv[3];
 
-	int result;
+    childpid = fork();
 
-	const char *argv[3];
+    if (childpid == 0) 
+    {
+        // This is the child.  Execute the command.
 
-	childpid = fork();
+        argv[0] = GetFullExePath(program);
+        argv[1] = arg;
+        argv[2] = NULL;
 
-	if (childpid == 0)
-	{
-		// This is the child.  Execute the command.
+        execvp(argv[0], (char **) argv);
 
-		argv[0] = GetFullExePath(program);
-		argv[1] = arg;
-		argv[2] = NULL;
+        exit(0x80);
+    }
+    else
+    {
+        // This is the parent.  Wait for the child to finish, and return
+        // the status code.
 
-		execvp(argv[0], (char **)argv);
+        waitpid(childpid, &result, 0);
 
-		exit(0x80);
-	}
-	else
-	{
-		// This is the parent.  Wait for the child to finish, and return
-		// the status code.
-
-		waitpid(childpid, &result, 0);
-
-		if (WIFEXITED(result) && WEXITSTATUS(result) != 0x80)
-		{
-			return WEXITSTATUS(result);
-		}
-		else
-		{
-			return -1;
-		}
-	}
+        if (WIFEXITED(result) && WEXITSTATUS(result) != 0x80) 
+        {
+            return WEXITSTATUS(result);
+        }
+        else
+        {
+            return -1;
+        }
+    }
 }
 
 #endif
 
-int ExecuteDoom(execute_context_t * context)
+int ExecuteDoom(execute_context_t *context)
 {
-	char *response_file_arg;
+    char *response_file_arg;
+    int result;
+    
+    fclose(context->stream);
 
-	int result;
+    // Build the command line
 
-	fclose(context->stream);
+    response_file_arg = malloc(strlen(context->response_file) + 2);
+    sprintf(response_file_arg, "@%s", context->response_file);
 
-	// Build the command line
+    // Run Doom
 
-	response_file_arg = malloc(strlen(context->response_file) + 2);
-	sprintf(response_file_arg, "@%s", context->response_file);
+    result = ExecuteCommand(DOOM_BINARY, response_file_arg);
 
-	// Run Doom
+    free(response_file_arg);
 
-	result = ExecuteCommand(DOOM_BINARY, response_file_arg);
+    // Destroy context
+    remove(context->response_file);
+    free(context->response_file);
+    free(context);
 
-	free(response_file_arg);
-
-	// Destroy context
-	remove(context->response_file);
-	free(context->response_file);
-	free(context);
-
-	return result;
+    return result;
 }
 
 static void TestCallback(TXT_UNCAST_ARG(widget), TXT_UNCAST_ARG(data))
 {
-	execute_context_t *exec;
+    execute_context_t *exec;
+    char *main_cfg;
+    char *extra_cfg;
+    txt_window_t *testwindow;
+    txt_label_t *label;
+    
+    testwindow = TXT_NewWindow("Starting Doom");
 
-	char *main_cfg;
+    label = TXT_NewLabel("Starting Doom to test the\n"
+                         "settings.  Please wait.");
+    TXT_SetWidgetAlign(label, TXT_HORIZ_CENTER);
+    TXT_AddWidget(testwindow, label);
+    TXT_DrawDesktop();
 
-	char *extra_cfg;
+    // Save temporary configuration files with the current configuration
 
-	txt_window_t *testwindow;
+    main_cfg = TempFile("tmp.cfg");
+    extra_cfg = TempFile("extratmp.cfg");
 
-	txt_label_t *label;
+    M_SaveMainDefaults(main_cfg);
+    M_SaveExtraDefaults(extra_cfg);
 
-	testwindow = TXT_NewWindow("Starting Doom");
+    // Run with the -testcontrols parameter
 
-	label = TXT_NewLabel("Starting Doom to test the\n" "settings.  Please wait.");
-	TXT_SetWidgetAlign(label, TXT_HORIZ_CENTER);
-	TXT_AddWidget(testwindow, label);
-	TXT_DrawDesktop();
+    exec = NewExecuteContext();
+    AddCmdLineParameter(exec, "-testcontrols");
+    AddCmdLineParameter(exec, "-config \"%s\"", main_cfg);
+    AddCmdLineParameter(exec, "-extraconfig \"%s\"", extra_cfg);
+    ExecuteDoom(exec);
 
-	// Save temporary configuration files with the current configuration
+    TXT_CloseWindow(testwindow);
 
-	main_cfg = TempFile("tmp.cfg");
-	extra_cfg = TempFile("extratmp.cfg");
+    // Delete the temporary config files
 
-	M_SaveMainDefaults(main_cfg);
-	M_SaveExtraDefaults(extra_cfg);
-
-	// Run with the -testcontrols parameter
-
-	exec = NewExecuteContext();
-	AddCmdLineParameter(exec, "-testcontrols");
-	AddCmdLineParameter(exec, "-config \"%s\"", main_cfg);
-	AddCmdLineParameter(exec, "-extraconfig \"%s\"", extra_cfg);
-	ExecuteDoom(exec);
-
-	TXT_CloseWindow(testwindow);
-
-	// Delete the temporary config files
-
-	remove(main_cfg);
-	remove(extra_cfg);
-	free(main_cfg);
-	free(extra_cfg);
+    remove(main_cfg);
+    remove(extra_cfg);
+    free(main_cfg);
+    free(extra_cfg);
 }
 
 txt_window_action_t *TestConfigAction(void)
 {
-	txt_window_action_t *test_action;
+    txt_window_action_t *test_action;
+    
+    test_action = TXT_NewWindowAction('t', "Test");
+    TXT_SignalConnect(test_action, "pressed", TestCallback, NULL);
 
-	test_action = TXT_NewWindowAction('t', "Test");
-	TXT_SignalConnect(test_action, "pressed", TestCallback, NULL);
-
-	return test_action;
+    return test_action;
 }
 
 // Invokes Doom to find which IWADs are installed.
@@ -444,20 +435,20 @@ txt_window_action_t *TestConfigAction(void)
 
 int FindInstalledIWADs(void)
 {
-	execute_context_t *context;
+    execute_context_t *context;
+    int result;
 
-	int result;
+    context = NewExecuteContext();
+    AddCmdLineParameter(context, "-findiwads");
+    result = ExecuteDoom(context);
 
-	context = NewExecuteContext();
-	AddCmdLineParameter(context, "-findiwads");
-	result = ExecuteDoom(context);
-
-	if (result < 0)
-	{
-		return 0;
-	}
-	else
-	{
-		return result;
-	}
+    if (result < 0)
+    {
+        return 0;
+    }
+    else
+    {
+        return result;
+    }
 }
+

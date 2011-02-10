@@ -43,8 +43,8 @@ typedef struct txt_separator_s txt_separator_t;
 
 struct txt_separator_s
 {
-	txt_widget_t widget;
-	char *label;
+    txt_widget_t widget;
+    char *label;
 };
 
 extern txt_widget_class_t txt_separator_class;
@@ -59,4 +59,6 @@ extern txt_widget_class_t txt_separator_class;
 
 txt_separator_t *TXT_NewSeparator(char *label);
 
-#endif							/* #ifndef TXT_SEPARATOR_H */
+#endif /* #ifndef TXT_SEPARATOR_H */
+
+

@@ -24,34 +24,31 @@
 
 enum
 {
-	SNDDEVICE_NONE = 0,
-	SNDDEVICE_PCSPEAKER = 1,
-	SNDDEVICE_ADLIB = 2,
-	SNDDEVICE_SB = 3,
-	SNDDEVICE_PAS = 4,
-	SNDDEVICE_GUS = 5,
-	SNDDEVICE_WAVEBLASTER = 6,
-	SNDDEVICE_SOUNDCANVAS = 7,
-	SNDDEVICE_GENMIDI = 8,
-	SNDDEVICE_AWE32 = 9,
+    SNDDEVICE_NONE = 0,
+    SNDDEVICE_PCSPEAKER = 1,
+    SNDDEVICE_ADLIB = 2,
+    SNDDEVICE_SB = 3,
+    SNDDEVICE_PAS = 4,
+    SNDDEVICE_GUS = 5,
+    SNDDEVICE_WAVEBLASTER = 6,
+    SNDDEVICE_SOUNDCANVAS = 7,
+    SNDDEVICE_GENMIDI = 8,
+    SNDDEVICE_AWE32 = 9,
 };
 
 extern int snd_sfxdevice;
-
 extern int numChannels;
-
 extern int sfxVolume;
 
 extern int snd_musicdevice;
-
 extern int musicVolume;
 
 extern int snd_samplerate;
-
 extern int opl_io_port;
 
 extern int use_libsamplerate;
 
 void ConfigSound(void);
 
-#endif							/* #ifndef SETUP_SOUND_H */
+#endif /* #ifndef SETUP_SOUND_H */
+

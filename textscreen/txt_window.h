@@ -49,47 +49,48 @@
 
 typedef struct txt_window_s txt_window_t;
 
-#include "txt_widget.h"
+#include "txt_widget.h" 
 #include "txt_table.h"
 #include "txt_window_action.h"
 
 // Callback function for window key presses
 
-typedef int (*TxtWindowKeyPress) (txt_window_t * window, int key, void *user_data);
-
-typedef int (*TxtWindowMousePress) (txt_window_t * window, int x, int y, int b, void *user_data);
+typedef int (*TxtWindowKeyPress)(txt_window_t *window, int key, void *user_data);
+typedef int (*TxtWindowMousePress)(txt_window_t *window, 
+                                   int x, int y, int b, 
+                                   void *user_data);
 
 struct txt_window_s
 {
-	// Base class: all windows are tables with one column.
+    // Base class: all windows are tables with one column.
 
-	txt_table_t table;
+    txt_table_t table;
+    
+    // Window title
 
-	// Window title
+    char *title;
 
-	char *title;
+    // Screen coordinates of the window
 
-	// Screen coordinates of the window
+    txt_vert_align_t vert_align;
+    txt_horiz_align_t horiz_align;
+    int x, y;
 
-	txt_vert_align_t vert_align;
-	txt_horiz_align_t horiz_align;
-	int x, y;
+    // Actions that appear in the box at the bottom of the window
 
-	// Actions that appear in the box at the bottom of the window
+    txt_window_action_t *actions[3];
 
-	txt_window_action_t *actions[3];
+    // Callback functions to invoke when keys/mouse buttons are pressed
 
-	// Callback functions to invoke when keys/mouse buttons are pressed
+    TxtWindowKeyPress key_listener;
+    void *key_listener_data;
+    TxtWindowMousePress mouse_listener;
+    void *mouse_listener_data;
 
-	TxtWindowKeyPress key_listener;
-	void *key_listener_data;
-	TxtWindowMousePress mouse_listener;
-	void *mouse_listener_data;
+    // These are set automatically when the window is drawn
 
-	// These are set automatically when the window is drawn
-
-	int window_x, window_y;
-	unsigned int window_w, window_h;
+    int window_x, window_y;
+    unsigned int window_w, window_h;
 };
 
 /**
@@ -108,7 +109,7 @@ txt_window_t *TXT_NewWindow(char *title);
  * @param window       Tine window to close.
  */
 
-void TXT_CloseWindow(txt_window_t * window);
+void TXT_CloseWindow(txt_window_t *window);
 
 /**
  * Set the position of a window on the screen.
@@ -127,7 +128,10 @@ void TXT_CloseWindow(txt_window_t * window);
  * @param y            Y coordinate (vertical axis) for window position.
  */
 
-void TXT_SetWindowPosition(txt_window_t * window, txt_horiz_align_t horiz_align, txt_vert_align_t vert_align, int x, int y);
+void TXT_SetWindowPosition(txt_window_t *window,
+                           txt_horiz_align_t horiz_align,
+                           txt_vert_align_t vert_align,
+                           int x, int y);
 
 /**
  * Set a window action for a given window.
@@ -141,7 +145,8 @@ void TXT_SetWindowPosition(txt_window_t * window, txt_horiz_align_t horiz_align,
  *                    current window action in the given slot is removed.
  */
 
-void TXT_SetWindowAction(txt_window_t * window, txt_horiz_align_t position, txt_window_action_t * action);
+void TXT_SetWindowAction(txt_window_t *window, txt_horiz_align_t position, 
+                         txt_window_action_t *action);
 
 /**
  * Set a callback function to be invoked whenever a key is pressed within
@@ -153,7 +158,9 @@ void TXT_SetWindowAction(txt_window_t * window, txt_horiz_align_t position, txt_
  *                      function.
  */
 
-void TXT_SetKeyListener(txt_window_t * window, TxtWindowKeyPress key_listener, void *user_data);
+void TXT_SetKeyListener(txt_window_t *window,
+                        TxtWindowKeyPress key_listener,
+                        void *user_data);
 
 /**
  * Set a callback function to be invoked whenever a mouse button is pressed
@@ -165,6 +172,10 @@ void TXT_SetKeyListener(txt_window_t * window, TxtWindowKeyPress key_listener, v
  *                        function.
  */
 
-void TXT_SetMouseListener(txt_window_t * window, TxtWindowMousePress mouse_listener, void *user_data);
+void TXT_SetMouseListener(txt_window_t *window,
+                          TxtWindowMousePress mouse_listener,
+                          void *user_data);
 
-#endif							/* #ifndef TXT_WINDOW_T */
+#endif /* #ifndef TXT_WINDOW_T */
+
+

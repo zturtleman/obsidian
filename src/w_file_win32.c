@@ -20,7 +20,7 @@
 // 02111-1307, USA.
 //
 // DESCRIPTION:
-//  WAD I/O functions.
+//	WAD I/O functions.
 //
 //-----------------------------------------------------------------------------
 
@@ -45,142 +45,161 @@
 
 typedef struct
 {
-	wad_file_t wad;
-	HANDLE handle;
-	HANDLE handle_map;
+    wad_file_t wad;
+    HANDLE handle;
+    HANDLE handle_map;
 } win32_wad_file_t;
 
 extern wad_file_class_t win32_wad_file;
 
-static void MapFile(win32_wad_file_t * wad, char *filename)
+static void MapFile(win32_wad_file_t *wad, char *filename)
 {
-	wad->handle_map = CreateFileMapping(wad->handle, NULL, PAGE_WRITECOPY, 0, 0, NULL);
+    wad->handle_map = CreateFileMapping(wad->handle,
+                                        NULL,
+                                        PAGE_WRITECOPY,
+                                        0,
+                                        0,
+                                        NULL);
 
-	if (wad->handle_map == NULL)
-	{
-		fprintf(stderr, "W_Win32_OpenFile: Unable to CreateFileMapping() " "for %s\n", filename);
-		return;
-	}
+    if (wad->handle_map == NULL)
+    {
+        fprintf(stderr, "W_Win32_OpenFile: Unable to CreateFileMapping() "
+                        "for %s\n", filename);
+        return;
+    }
 
-	wad->wad.mapped = MapViewOfFile(wad->handle_map, FILE_MAP_COPY, 0, 0, 0);
+    wad->wad.mapped = MapViewOfFile(wad->handle_map,
+                                    FILE_MAP_COPY,
+                                    0, 0, 0);
 
-	if (wad->wad.mapped == NULL)
-	{
-		fprintf(stderr, "W_Win32_OpenFile: Unable to MapViewOfFile() for %s\n", filename);
-	}
+    if (wad->wad.mapped == NULL)
+    {
+        fprintf(stderr, "W_Win32_OpenFile: Unable to MapViewOfFile() for %s\n",
+                        filename);
+    }
 }
 
 unsigned int GetFileLength(HANDLE handle)
 {
-	DWORD result;
+    DWORD result;
 
-	result = SetFilePointer(handle, 0, NULL, FILE_END);
+    result = SetFilePointer(handle, 0, NULL, FILE_END);
 
-	if (result == INVALID_SET_FILE_POINTER)
-	{
-		I_Error("W_Win32_OpenFile: Failed to read file length");
-	}
+    if (result == INVALID_SET_FILE_POINTER)
+    {
+        I_Error("W_Win32_OpenFile: Failed to read file length");
+    }
 
-	return result;
+    return result;
 }
-
+   
 static wad_file_t *W_Win32_OpenFile(char *path)
 {
-	win32_wad_file_t *result;
+    win32_wad_file_t *result;
+    wchar_t wpath[MAX_PATH + 1];
+    HANDLE handle;
 
-	wchar_t wpath[MAX_PATH + 1];
+    // Open the file:
 
-	HANDLE handle;
+    MultiByteToWideChar(CP_OEMCP, 0,
+                        path, strlen(path) + 1,
+                        wpath, sizeof(wpath));
 
-	// Open the file:
+    handle = CreateFileW(wpath,
+                         GENERIC_READ,
+                         FILE_SHARE_READ,
+                         NULL,
+                         OPEN_EXISTING,
+                         FILE_ATTRIBUTE_NORMAL,
+                         NULL);
 
-	MultiByteToWideChar(CP_OEMCP, 0, path, strlen(path) + 1, wpath, sizeof(wpath));
+    if (handle == INVALID_HANDLE_VALUE)
+    {
+        return NULL;
+    }
 
-	handle = CreateFileW(wpath, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+    // Create a new win32_wad_file_t to hold the file handle.
 
-	if (handle == INVALID_HANDLE_VALUE)
-	{
-		return NULL;
-	}
+    result = Z_Malloc(sizeof(win32_wad_file_t), PU_STATIC, 0);
+    result->wad.file_class = &win32_wad_file;
+    result->wad.length = GetFileLength(handle);
+    result->handle = handle;
 
-	// Create a new win32_wad_file_t to hold the file handle.
+    // Try to map the file into memory with mmap:
 
-	result = Z_Malloc(sizeof(win32_wad_file_t), PU_STATIC, 0);
-	result->wad.file_class = &win32_wad_file;
-	result->wad.length = GetFileLength(handle);
-	result->handle = handle;
+    MapFile(result, path);
 
-	// Try to map the file into memory with mmap:
-
-	MapFile(result, path);
-
-	return &result->wad;
+    return &result->wad;
 }
 
-static void W_Win32_CloseFile(wad_file_t * wad)
+static void W_Win32_CloseFile(wad_file_t *wad)
 {
-	win32_wad_file_t *win32_wad;
+    win32_wad_file_t *win32_wad;
 
-	win32_wad = (win32_wad_file_t *) wad;
+    win32_wad = (win32_wad_file_t *) wad;
 
-	// If mapped, unmap it.
+    // If mapped, unmap it.
 
-	if (win32_wad->wad.mapped != NULL)
-	{
-		UnmapViewOfFile(win32_wad->wad.mapped);
-	}
+    if (win32_wad->wad.mapped != NULL)
+    {
+        UnmapViewOfFile(win32_wad->wad.mapped);
+    }
 
-	if (win32_wad->handle_map != NULL)
-	{
-		CloseHandle(win32_wad->handle_map);
-	}
+    if (win32_wad->handle_map != NULL)
+    {
+        CloseHandle(win32_wad->handle_map);
+    }
 
-	// Close the file
+    // Close the file
+  
+    if (win32_wad->handle != NULL)
+    {
+        CloseHandle(win32_wad->handle);
+    }
 
-	if (win32_wad->handle != NULL)
-	{
-		CloseHandle(win32_wad->handle);
-	}
-
-	Z_Free(win32_wad);
+    Z_Free(win32_wad);
 }
 
 // Read data from the specified position in the file into the 
 // provided buffer.  Returns the number of bytes read.
 
-size_t W_Win32_Read(wad_file_t * wad, unsigned int offset, void *buffer, size_t buffer_len)
+size_t W_Win32_Read(wad_file_t *wad, unsigned int offset,
+                   void *buffer, size_t buffer_len)
 {
-	win32_wad_file_t *win32_wad;
+    win32_wad_file_t *win32_wad;
+    DWORD bytes_read;
+    DWORD result;
 
-	DWORD bytes_read;
+    win32_wad = (win32_wad_file_t *) wad;
 
-	DWORD result;
+    // Jump to the specified position in the file.
 
-	win32_wad = (win32_wad_file_t *) wad;
+    result = SetFilePointer(win32_wad->handle, offset, NULL, FILE_BEGIN);
 
-	// Jump to the specified position in the file.
+    if (result == INVALID_SET_FILE_POINTER)
+    {
+        I_Error("W_Win32_Read: Failed to set file pointer to %i",
+                offset);
+    }
 
-	result = SetFilePointer(win32_wad->handle, offset, NULL, FILE_BEGIN);
+    // Read into the buffer.
 
-	if (result == INVALID_SET_FILE_POINTER)
-	{
-		I_Error("W_Win32_Read: Failed to set file pointer to %i", offset);
-	}
+    if (!ReadFile(win32_wad->handle, buffer, buffer_len, &bytes_read, NULL))
+    {
+        I_Error("W_Win32_Read: Error reading from file");
+    }
 
-	// Read into the buffer.
-
-	if (!ReadFile(win32_wad->handle, buffer, buffer_len, &bytes_read, NULL))
-	{
-		I_Error("W_Win32_Read: Error reading from file");
-	}
-
-	return bytes_read;
+    return bytes_read;
 }
 
-wad_file_class_t win32_wad_file = {
-	W_Win32_OpenFile,
-	W_Win32_CloseFile,
-	W_Win32_Read,
+
+wad_file_class_t win32_wad_file = 
+{
+    W_Win32_OpenFile,
+    W_Win32_CloseFile,
+    W_Win32_Read,
 };
 
-#endif							/* #ifdef _WIN32 */
+
+#endif /* #ifdef _WIN32 */
+

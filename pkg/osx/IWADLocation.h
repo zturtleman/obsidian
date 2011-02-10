@@ -27,16 +27,18 @@
 
 #include "IWADController.h"
 
-@ interface IWADLocation:NSObject
+@interface IWADLocation : NSObject
 {
-	IWADController *iwadController;
+    IWADController *iwadController;
 
-	id locationConfigBox;
+    id locationConfigBox;
 }
 
--(void)setButtonClicked:(id) sender;
--(NSString *) getLocation;
--(void)setLocation:(NSString *) value;
+- (void) setButtonClicked: (id)sender;
+- (NSString *) getLocation;
+- (void) setLocation: (NSString *) value;
 
 @end
-#endif							/* #ifndef LAUNCHER_IWADLOCATION_H */
+
+#endif /* #ifndef LAUNCHER_IWADLOCATION_H */
+

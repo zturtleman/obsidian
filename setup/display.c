@@ -33,81 +33,74 @@ extern void RestartTextscreen(void);
 
 typedef struct
 {
-	char *description;
-	int bpp;
+    char *description;
+    int bpp;
 } pixel_depth_t;
 
 // List of supported pixel depths.
 
-static pixel_depth_t pixel_depths[] = {
-	{"8-bit", 8},
-	{"16-bit", 16},
-	{"24-bit", 24},
-	{"32-bit", 32},
+static pixel_depth_t pixel_depths[] =
+{
+    { "8-bit",    8 },
+    { "16-bit",   16 },
+    { "24-bit",   24 },
+    { "32-bit",   32 },
 };
 
 // List of strings containing supported pixel depths.
 
 static char **supported_bpps;
-
 static int num_supported_bpps;
 
-typedef struct
+typedef struct 
 {
-	int w, h;
+    int w, h;
 } screen_mode_t;
 
 // List of aspect ratio-uncorrected modes
 
-static screen_mode_t screen_modes_unscaled[] = {
-	{320, 200},
-	{640, 400},
-	{960, 600},
-	{1280, 800},
-	{1600, 1000},
-	{0, 0},
+static screen_mode_t screen_modes_unscaled[] = 
+{
+    { 320,  200 },
+    { 640,  400 },
+    { 960,  600 },
+    { 1280, 800 },
+    { 1600, 1000 },
+    { 0, 0},
 };
 
 // List of aspect ratio-corrected modes
 
-static screen_mode_t screen_modes_scaled[] = {
-	{256, 200},
-	{320, 240},
-	{512, 400},
-	{640, 480},
-	{800, 600},
-	{960, 720},
-	{1024, 800},
-	{1280, 960},
-	{1280, 1000},
-	{1600, 1200},
-	{0, 0},
+static screen_mode_t screen_modes_scaled[] = 
+{
+    { 256,  200 },
+    { 320,  240 },
+    { 512,  400 },
+    { 640,  480 },
+    { 800,  600 },
+    { 960,  720 },
+    { 1024, 800 },
+    { 1280, 960 },
+    { 1280, 1000 },
+    { 1600, 1200 },
+    { 0, 0},
 };
 
 // List of fullscreen modes generated at runtime
 
 static screen_mode_t *screen_modes_fullscreen = NULL;
-
 static int num_screen_modes_fullscreen;
 
 static int vidmode = 0;
 
 char *video_driver = "";
-
 int autoadjust_video_settings = 1;
-
 int aspect_ratio_correct = 1;
-
 int fullscreen = 1;
-
 int screen_width = 320;
-
 int screen_height = 200;
-
 int screen_bpp = 8;
-
 int startup_delay = 1000;
-
 int show_endoom = 1;
 
 // These are the last screen width/height values that were chosen by the
@@ -127,41 +120,41 @@ static int system_video_env_set;
 
 void SetDisplayDriver(void)
 {
-	static int first_time = 1;
+    static int first_time = 1;
 
-	if (first_time)
-	{
-		system_video_env_set = getenv("SDL_VIDEODRIVER") != NULL;
+    if (first_time)
+    {
+        system_video_env_set = getenv("SDL_VIDEODRIVER") != NULL;
 
-		first_time = 0;
-	}
+        first_time = 0;
+    }
+    
+    // Don't override the command line environment, if it has been set.
 
-	// Don't override the command line environment, if it has been set.
+    if (system_video_env_set)
+    {
+        return;
+    }
 
-	if (system_video_env_set)
-	{
-		return;
-	}
+    // Use the value from the configuration file, if it has been set.
 
-	// Use the value from the configuration file, if it has been set.
+    if (strcmp(video_driver, "") != 0)
+    {
+        char *env_string;
 
-	if (strcmp(video_driver, "") != 0)
-	{
-		char *env_string;
-
-		env_string = malloc(strlen(video_driver) + 30);
-		sprintf(env_string, "SDL_VIDEODRIVER=%s", video_driver);
-		putenv(env_string);
-		free(env_string);
-	}
-	else
-	{
+        env_string = malloc(strlen(video_driver) + 30);
+        sprintf(env_string, "SDL_VIDEODRIVER=%s", video_driver);
+        putenv(env_string);
+        free(env_string);
+    }
+    else
+    {
 #if defined(_WIN32) && !defined(_WIN32_WCE)
-		// On Windows, use DirectX over windib by default.
+        // On Windows, use DirectX over windib by default.
 
-		putenv("SDL_VIDEODRIVER=directx");
+        putenv("SDL_VIDEODRIVER=directx");
 #endif
-	}
+    }
 }
 
 // Query SDL as to whether any fullscreen modes are available for the
@@ -169,525 +162,528 @@ void SetDisplayDriver(void)
 
 static int PixelDepthSupported(int bpp)
 {
-	SDL_PixelFormat format;
+    SDL_PixelFormat format;
+    SDL_Rect **modes;
 
-	SDL_Rect **modes;
+    format.BitsPerPixel = bpp;
+    format.BytesPerPixel = (bpp + 7) / 8;
 
-	format.BitsPerPixel = bpp;
-	format.BytesPerPixel = (bpp + 7) / 8;
+    modes = SDL_ListModes(&format, SDL_FULLSCREEN);
 
-	modes = SDL_ListModes(&format, SDL_FULLSCREEN);
-
-	return modes != NULL;
+    return modes != NULL;
 }
 
 // Query SDL and populate the supported_bpps array.
 
 static void IdentifyPixelDepths(void)
 {
-	unsigned int i;
+    unsigned int i;
+    unsigned int num_depths = sizeof(pixel_depths) / sizeof(*pixel_depths);
 
-	unsigned int num_depths = sizeof(pixel_depths) / sizeof(*pixel_depths);
+    if (supported_bpps != NULL)
+    {
+        free(supported_bpps);
+    }
 
-	if (supported_bpps != NULL)
-	{
-		free(supported_bpps);
-	}
+    supported_bpps = malloc(sizeof(char *) * num_depths);
+    num_supported_bpps = 0;
 
-	supported_bpps = malloc(sizeof(char *) * num_depths);
-	num_supported_bpps = 0;
+    // Check each bit depth to determine if modes are available.
 
-	// Check each bit depth to determine if modes are available.
+    for (i = 0; i < num_depths; ++i)
+    {
+        // If modes are available, add this bit depth to the list.
 
-	for (i = 0; i < num_depths; ++i)
-	{
-		// If modes are available, add this bit depth to the list.
+        if (PixelDepthSupported(pixel_depths[i].bpp))
+        {
+            supported_bpps[num_supported_bpps] = pixel_depths[i].description;
+            ++num_supported_bpps;
+        }
+    }
 
-		if (PixelDepthSupported(pixel_depths[i].bpp))
-		{
-			supported_bpps[num_supported_bpps] = pixel_depths[i].description;
-			++num_supported_bpps;
-		}
-	}
+    // No supported pixel depths?  That's kind of a problem.  Add 8bpp
+    // as a fallback.
 
-	// No supported pixel depths?  That's kind of a problem.  Add 8bpp
-	// as a fallback.
-
-	if (num_supported_bpps == 0)
-	{
-		supported_bpps[0] = pixel_depths[0].description;
-		++num_supported_bpps;
-	}
+    if (num_supported_bpps == 0)
+    {
+        supported_bpps[0] = pixel_depths[0].description;
+        ++num_supported_bpps;
+    }
 }
 
 // Get the screen pixel depth corresponding to what selected_bpp is set to.
 
 static int GetSelectedBPP(void)
 {
-	unsigned int num_depths = sizeof(pixel_depths) / sizeof(*pixel_depths);
+    unsigned int num_depths = sizeof(pixel_depths) / sizeof(*pixel_depths);
+    unsigned int i;
 
-	unsigned int i;
+    // Find which pixel depth is selected, and set screen_bpp.
 
-	// Find which pixel depth is selected, and set screen_bpp.
+    for (i = 0; i < num_depths; ++i)
+    {
+        if (pixel_depths[i].description == supported_bpps[selected_bpp])
+        {
+            return pixel_depths[i].bpp;
+        }
+    }
 
-	for (i = 0; i < num_depths; ++i)
-	{
-		if (pixel_depths[i].description == supported_bpps[selected_bpp])
-		{
-			return pixel_depths[i].bpp;
-		}
-	}
+    // Default fallback value.
 
-	// Default fallback value.
-
-	return 8;
+    return 8;
 }
 
 // Get the index into supported_bpps of the specified pixel depth string.
 
 static int GetSupportedBPPIndex(char *description)
 {
-	unsigned int i;
+    unsigned int i;
 
-	for (i = 0; i < num_supported_bpps; ++i)
-	{
-		if (supported_bpps[i] == description)
-		{
-			return i;
-		}
-	}
+    for (i = 0; i < num_supported_bpps; ++i)
+    {
+        if (supported_bpps[i] == description)
+        {
+            return i;
+        }
+    }
 
-	// Shouldn't happen; fall back to the first in the list.
+    // Shouldn't happen; fall back to the first in the list.
 
-	return 0;
+    return 0;
 }
 
 // Set selected_bpp to match screen_bpp.
 
 static int TrySetSelectedBPP(void)
 {
-	unsigned int num_depths = sizeof(pixel_depths) / sizeof(*pixel_depths);
+    unsigned int num_depths = sizeof(pixel_depths) / sizeof(*pixel_depths);
+    unsigned int i;
 
-	unsigned int i;
+    // Search pixel_depths, find the bpp that corresponds to screen_bpp,
+    // then set selected_bpp to match.
 
-	// Search pixel_depths, find the bpp that corresponds to screen_bpp,
-	// then set selected_bpp to match.
+    for (i = 0; i < num_depths; ++i)
+    {
+        if (pixel_depths[i].bpp == screen_bpp)
+        {
+            selected_bpp = GetSupportedBPPIndex(pixel_depths[i].description);
+            return 1;
+        }
+    }
 
-	for (i = 0; i < num_depths; ++i)
-	{
-		if (pixel_depths[i].bpp == screen_bpp)
-		{
-			selected_bpp = GetSupportedBPPIndex(pixel_depths[i].description);
-			return 1;
-		}
-	}
-
-	return 0;
+    return 0;
 }
 
 static void SetSelectedBPP(void)
 {
-	const SDL_VideoInfo *info;
+    const SDL_VideoInfo *info;
 
-	if (TrySetSelectedBPP())
-	{
-		return;
-	}
+    if (TrySetSelectedBPP())
+    {
+        return;
+    }
 
-	// screen_bpp does not match any supported pixel depth.  Query SDL
-	// to find out what it recommends using.
+    // screen_bpp does not match any supported pixel depth.  Query SDL
+    // to find out what it recommends using.
 
-	info = SDL_GetVideoInfo();
+    info = SDL_GetVideoInfo();
 
-	if (info != NULL && info->vfmt != NULL)
-	{
-		screen_bpp = info->vfmt->BitsPerPixel;
-	}
+    if (info != NULL && info->vfmt != NULL)
+    {
+        screen_bpp = info->vfmt->BitsPerPixel;
+    }
 
-	// Try again.
+    // Try again.
 
-	if (!TrySetSelectedBPP())
-	{
-		// Give up and just use the first in the list.
+    if (!TrySetSelectedBPP())
+    {
+        // Give up and just use the first in the list.
 
-		selected_bpp = 0;
-		screen_bpp = GetSelectedBPP();
-	}
+        selected_bpp = 0;
+        screen_bpp = GetSelectedBPP();
+    }
 }
 
 static void ModeSelected(TXT_UNCAST_ARG(widget), TXT_UNCAST_ARG(mode))
 {
-	TXT_CAST_ARG(screen_mode_t, mode);
+    TXT_CAST_ARG(screen_mode_t, mode);
 
-	screen_width = mode->w;
-	screen_height = mode->h;
+    screen_width = mode->w;
+    screen_height = mode->h;
 
-	// This is now the most recently selected screen width
+    // This is now the most recently selected screen width
 
-	selected_screen_width = screen_width;
-	selected_screen_height = screen_height;
+    selected_screen_width = screen_width;
+    selected_screen_height = screen_height;
 }
 
-static int GoodFullscreenMode(screen_mode_t * mode)
+static int GoodFullscreenMode(screen_mode_t *mode)
 {
-	int w, h;
+    int w, h;
 
-	w = mode->w;
-	h = mode->h;
+    w = mode->w;
+    h = mode->h;
 
-	// 320x200 and 640x400 are always good (special case)
+    // 320x200 and 640x400 are always good (special case)
 
-	if ((w == 320 && h == 200) || (w == 640 && h == 400))
-	{
-		return 1;
-	}
+    if ((w == 320 && h == 200) || (w == 640 && h == 400))
+    {
+        return 1;
+    }
 
-	// Special case: 320x240 letterboxed mode is okay (but not aspect
-	// ratio corrected 320x240)
+    // Special case: 320x240 letterboxed mode is okay (but not aspect
+    // ratio corrected 320x240)
 
-	if (w == 320 && h == 240 && !aspect_ratio_correct)
-	{
-		return 1;
-	}
+    if (w == 320 && h == 240 && !aspect_ratio_correct)
+    {
+        return 1;
+    }
 
-	// Ignore all modes less than 640x480
+    // Ignore all modes less than 640x480
 
-	return w >= 640 && h >= 480;
+    return w >= 640 && h >= 480;
 }
 
 // Build screen_modes_fullscreen
 
 static void BuildFullscreenModesList(void)
 {
-	SDL_PixelFormat format;
+    SDL_PixelFormat format;
+    SDL_Rect **modes;
+    screen_mode_t *m1;
+    screen_mode_t *m2;
+    screen_mode_t m;
+    int num_modes;
+    int i;
 
-	SDL_Rect **modes;
+    // Free the existing modes list, if one exists
 
-	screen_mode_t *m1;
+    if (screen_modes_fullscreen != NULL)
+    {
+        free(screen_modes_fullscreen);
+    }
 
-	screen_mode_t *m2;
+    // Get a list of fullscreen modes and find out how many
+    // modes are in the list.
 
-	screen_mode_t m;
+    format.BitsPerPixel = screen_bpp;
+    format.BytesPerPixel = (screen_bpp + 7) / 8;
 
-	int num_modes;
+    modes = SDL_ListModes(&format, SDL_FULLSCREEN);
 
-	int i;
+    if (modes == NULL || modes == (SDL_Rect **) -1)
+    {
+        num_modes = 0;
+    }
+    else
+    {
+        for (num_modes=0; modes[num_modes] != NULL; ++num_modes);
+    }
 
-	// Free the existing modes list, if one exists
+    // Build the screen_modes_fullscreen array
 
-	if (screen_modes_fullscreen != NULL)
-	{
-		free(screen_modes_fullscreen);
-	}
+    screen_modes_fullscreen = malloc(sizeof(screen_mode_t) * (num_modes + 1));
 
-	// Get a list of fullscreen modes and find out how many
-	// modes are in the list.
+    for (i=0; i<num_modes; ++i)
+    {
+        screen_modes_fullscreen[i].w = modes[i]->w;
+        screen_modes_fullscreen[i].h = modes[i]->h;
+    }
 
-	format.BitsPerPixel = screen_bpp;
-	format.BytesPerPixel = (screen_bpp + 7) / 8;
+    screen_modes_fullscreen[i].w = 0;
+    screen_modes_fullscreen[i].h = 0;
 
-	modes = SDL_ListModes(&format, SDL_FULLSCREEN);
+    // Reverse the order of the modes list (smallest modes first)
 
-	if (modes == NULL || modes == (SDL_Rect **) - 1)
-	{
-		num_modes = 0;
-	}
-	else
-	{
-		for (num_modes = 0; modes[num_modes] != NULL; ++num_modes);
-	}
+    for (i=0; i<num_modes / 2; ++i)
+    {
+        m1 = &screen_modes_fullscreen[i];
+        m2 = &screen_modes_fullscreen[num_modes - 1 - i];
 
-	// Build the screen_modes_fullscreen array
+        memcpy(&m, m1, sizeof(screen_mode_t));
+        memcpy(m1, m2, sizeof(screen_mode_t));
+        memcpy(m2, &m, sizeof(screen_mode_t));
+    }
 
-	screen_modes_fullscreen = malloc(sizeof(screen_mode_t) * (num_modes + 1));
-
-	for (i = 0; i < num_modes; ++i)
-	{
-		screen_modes_fullscreen[i].w = modes[i]->w;
-		screen_modes_fullscreen[i].h = modes[i]->h;
-	}
-
-	screen_modes_fullscreen[i].w = 0;
-	screen_modes_fullscreen[i].h = 0;
-
-	// Reverse the order of the modes list (smallest modes first)
-
-	for (i = 0; i < num_modes / 2; ++i)
-	{
-		m1 = &screen_modes_fullscreen[i];
-		m2 = &screen_modes_fullscreen[num_modes - 1 - i];
-
-		memcpy(&m, m1, sizeof(screen_mode_t));
-		memcpy(m1, m2, sizeof(screen_mode_t));
-		memcpy(m2, &m, sizeof(screen_mode_t));
-	}
-
-	num_screen_modes_fullscreen = num_modes;
+    num_screen_modes_fullscreen = num_modes;
 }
 
-static int FindBestMode(screen_mode_t * modes)
+static int FindBestMode(screen_mode_t *modes)
 {
-	int i;
+    int i;
+    int best_mode;
+    int best_mode_diff;
+    int diff;
 
-	int best_mode;
+    best_mode = -1;
+    best_mode_diff = 0;
 
-	int best_mode_diff;
+    for (i=0; modes[i].w != 0; ++i)
+    {
+        if (fullscreen && !GoodFullscreenMode(&modes[i]))
+        {
+            continue;
+        }
 
-	int diff;
+        diff = (selected_screen_width - modes[i].w)
+                  * (selected_screen_width - modes[i].w) 
+             + (selected_screen_height - modes[i].h)
+                  * (selected_screen_height - modes[i].h);
 
-	best_mode = -1;
-	best_mode_diff = 0;
+        if (best_mode == -1 || diff < best_mode_diff)
+        {
+            best_mode_diff = diff;
+            best_mode = i;
+        }
+    }
 
-	for (i = 0; modes[i].w != 0; ++i)
-	{
-		if (fullscreen && !GoodFullscreenMode(&modes[i]))
-		{
-			continue;
-		}
-
-		diff = (selected_screen_width - modes[i].w)
-			* (selected_screen_width - modes[i].w) + (selected_screen_height - modes[i].h) * (selected_screen_height - modes[i].h);
-
-		if (best_mode == -1 || diff < best_mode_diff)
-		{
-			best_mode_diff = diff;
-			best_mode = i;
-		}
-	}
-
-	return best_mode;
+    return best_mode;
 }
 
-static void GenerateModesTable(TXT_UNCAST_ARG(widget), TXT_UNCAST_ARG(modes_table))
+static void GenerateModesTable(TXT_UNCAST_ARG(widget),
+                               TXT_UNCAST_ARG(modes_table))
 {
-	TXT_CAST_ARG(txt_table_t, modes_table);
-	char buf[15];
+    TXT_CAST_ARG(txt_table_t, modes_table);
+    char buf[15];
+    screen_mode_t *modes;
+    txt_radiobutton_t *rbutton;
+    int i;
 
-	screen_mode_t *modes;
+    // Pick which modes list to use
 
-	txt_radiobutton_t *rbutton;
+    if (fullscreen)
+    {
+        if (screen_modes_fullscreen == NULL)
+        {
+            BuildFullscreenModesList();
+        }
 
-	int i;
+        modes = screen_modes_fullscreen;
+    }
+    else if (aspect_ratio_correct) 
+    {
+        modes = screen_modes_scaled;
+    }
+    else
+    {
+        modes = screen_modes_unscaled;
+    }
 
-	// Pick which modes list to use
+    // Build the table
+ 
+    TXT_ClearTable(modes_table);
+    TXT_SetColumnWidths(modes_table, 14, 14, 14, 14, 14);
 
-	if (fullscreen)
-	{
-		if (screen_modes_fullscreen == NULL)
-		{
-			BuildFullscreenModesList();
-		}
+    for (i=0; modes[i].w != 0; ++i) 
+    {
+        // Skip bad fullscreen modes
 
-		modes = screen_modes_fullscreen;
-	}
-	else if (aspect_ratio_correct)
-	{
-		modes = screen_modes_scaled;
-	}
-	else
-	{
-		modes = screen_modes_unscaled;
-	}
+        if (fullscreen && !GoodFullscreenMode(&modes[i]))
+        {
+            continue;
+        }
 
-	// Build the table
+        sprintf(buf, "%ix%i", modes[i].w, modes[i].h);
+        rbutton = TXT_NewRadioButton(buf, &vidmode, i);
+        TXT_AddWidget(modes_table, rbutton);
+        TXT_SignalConnect(rbutton, "selected", ModeSelected, &modes[i]);
+    }
 
-	TXT_ClearTable(modes_table);
-	TXT_SetColumnWidths(modes_table, 14, 14, 14, 14, 14);
+    // Find the nearest mode in the list that matches the current
+    // settings
 
-	for (i = 0; modes[i].w != 0; ++i)
-	{
-		// Skip bad fullscreen modes
+    vidmode = FindBestMode(modes);
 
-		if (fullscreen && !GoodFullscreenMode(&modes[i]))
-		{
-			continue;
-		}
-
-		sprintf(buf, "%ix%i", modes[i].w, modes[i].h);
-		rbutton = TXT_NewRadioButton(buf, &vidmode, i);
-		TXT_AddWidget(modes_table, rbutton);
-		TXT_SignalConnect(rbutton, "selected", ModeSelected, &modes[i]);
-	}
-
-	// Find the nearest mode in the list that matches the current
-	// settings
-
-	vidmode = FindBestMode(modes);
-
-	if (vidmode > 0)
-	{
-		screen_width = modes[vidmode].w;
-		screen_height = modes[vidmode].h;
-	}
+    if (vidmode > 0)
+    {
+        screen_width = modes[vidmode].w;
+        screen_height = modes[vidmode].h;
+    }
 }
 
 // Callback invoked when the BPP selector is changed.
 
 static void UpdateBPP(TXT_UNCAST_ARG(widget), TXT_UNCAST_ARG(modes_table))
 {
-	TXT_CAST_ARG(txt_table_t, modes_table);
+    TXT_CAST_ARG(txt_table_t, modes_table);
 
-	screen_bpp = GetSelectedBPP();
+    screen_bpp = GetSelectedBPP();
 
-	// Rebuild list of fullscreen modes.
+    // Rebuild list of fullscreen modes.
 
-	BuildFullscreenModesList();
-	GenerateModesTable(NULL, modes_table);
+    BuildFullscreenModesList();
+    GenerateModesTable(NULL, modes_table);
 }
 
 #if defined(_WIN32) && !defined(_WIN32_WCE)
 
 static int win32_video_driver = 0;
 
-static char *win32_video_drivers[] = {
-	"DirectX",
-	"Windows GDI",
+static char *win32_video_drivers[] = 
+{
+    "DirectX",
+    "Windows GDI",
 };
 
 static void SetWin32VideoDriver(void)
 {
-	if (!strcmp(video_driver, "windib"))
-	{
-		win32_video_driver = 1;
-	}
-	else
-	{
-		win32_video_driver = 0;
-	}
+    if (!strcmp(video_driver, "windib"))
+    {
+        win32_video_driver = 1;
+    }
+    else
+    {
+        win32_video_driver = 0;
+    }
 }
 
-static void UpdateVideoDriver(TXT_UNCAST_ARG(widget), TXT_UNCAST_ARG(modes_table))
+static void UpdateVideoDriver(TXT_UNCAST_ARG(widget), 
+                              TXT_UNCAST_ARG(modes_table))
 {
-	TXT_CAST_ARG(txt_table_t, modes_table);
-	char *drivers[] = {
-		"",
-		"windib",
-	};
+    TXT_CAST_ARG(txt_table_t, modes_table);
+    char *drivers[] = 
+    {
+        "",
+        "windib",
+    };
 
-	video_driver = drivers[win32_video_driver != 0];
+    video_driver = drivers[win32_video_driver != 0];
 
-	// When the video driver is changed, we need to restart the textscreen 
-	// library.
+    // When the video driver is changed, we need to restart the textscreen 
+    // library.
 
-	RestartTextscreen();
+    RestartTextscreen();
 
-	// Rebuild the list of supported pixel depths.
+    // Rebuild the list of supported pixel depths.
 
-	IdentifyPixelDepths();
-	SetSelectedBPP();
+    IdentifyPixelDepths();
+    SetSelectedBPP();
 
-	// Rebuild the video modes list
+    // Rebuild the video modes list
 
-	BuildFullscreenModesList();
-	GenerateModesTable(NULL, modes_table);
+    BuildFullscreenModesList();
+    GenerateModesTable(NULL, modes_table);
 }
 
 #endif
+
 
 void ConfigDisplay(void)
 {
-	txt_window_t *window;
+    txt_window_t *window;
+    txt_table_t *modes_table;
+    txt_table_t *bpp_table;
+    txt_checkbox_t *fs_checkbox;
+    txt_checkbox_t *ar_checkbox;
+    txt_dropdown_list_t *bpp_selector;
+    int num_columns;
+    int window_y;
 
-	txt_table_t *modes_table;
+    // What color depths are supported?  Generate supported_bpps array
+    // and set selected_bpp to match the current value of screen_bpp.
 
-	txt_table_t *bpp_table;
+    IdentifyPixelDepths();
+    SetSelectedBPP();
 
-	txt_checkbox_t *fs_checkbox;
+    // First time in? Initialise selected_screen_{width,height}
 
-	txt_checkbox_t *ar_checkbox;
+    if (selected_screen_width == 0)
+    {
+        selected_screen_width = screen_width;
+        selected_screen_height = screen_height;
+    }
 
-	txt_dropdown_list_t *bpp_selector;
+    // Open the window
+    
+    window = TXT_NewWindow("Display Configuration");
 
-	int num_columns;
+    TXT_AddWidgets(window, 
+                   fs_checkbox = TXT_NewCheckBox("Fullscreen", &fullscreen),
+                   ar_checkbox = TXT_NewCheckBox("Correct aspect ratio",
+                                                 &aspect_ratio_correct),
+                   NULL);
 
-	int window_y;
+    // Some machines can have lots of video modes.  This tries to
+    // keep a limit of six lines by increasing the number of
+    // columns.  In extreme cases, the window is moved up slightly.
 
-	// What color depths are supported?  Generate supported_bpps array
-	// and set selected_bpp to match the current value of screen_bpp.
+    BuildFullscreenModesList();
 
-	IdentifyPixelDepths();
-	SetSelectedBPP();
+    window_y = 5;
 
-	// First time in? Initialise selected_screen_{width,height}
+    if (num_screen_modes_fullscreen <= 18)
+    {
+        num_columns = 3;
+    }
+    else if (num_screen_modes_fullscreen <= 24)
+    {
+        num_columns = 4;
+    }
+    else
+    {
+        num_columns = 5;
+        window_y -= 3;
+    }
 
-	if (selected_screen_width == 0)
-	{
-		selected_screen_width = screen_width;
-		selected_screen_height = screen_height;
-	}
+    modes_table = TXT_NewTable(num_columns);
 
-	// Open the window
+    // The window is set at a fixed vertical position.  This keeps
+    // the top of the window stationary when switching between
+    // fullscreen and windowed mode (which causes the window's
+    // height to change).
 
-	window = TXT_NewWindow("Display Configuration");
+    TXT_SetWindowPosition(window, TXT_HORIZ_CENTER, TXT_VERT_TOP, 
+                                  TXT_SCREEN_W / 2, window_y);
 
-	TXT_AddWidgets(window,
-				   fs_checkbox = TXT_NewCheckBox("Fullscreen", &fullscreen),
-				   ar_checkbox = TXT_NewCheckBox("Correct aspect ratio", &aspect_ratio_correct), NULL);
-
-	// Some machines can have lots of video modes.  This tries to
-	// keep a limit of six lines by increasing the number of
-	// columns.  In extreme cases, the window is moved up slightly.
-
-	BuildFullscreenModesList();
-
-	window_y = 5;
-
-	if (num_screen_modes_fullscreen <= 18)
-	{
-		num_columns = 3;
-	}
-	else if (num_screen_modes_fullscreen <= 24)
-	{
-		num_columns = 4;
-	}
-	else
-	{
-		num_columns = 5;
-		window_y -= 3;
-	}
-
-	modes_table = TXT_NewTable(num_columns);
-
-	// The window is set at a fixed vertical position.  This keeps
-	// the top of the window stationary when switching between
-	// fullscreen and windowed mode (which causes the window's
-	// height to change).
-
-	TXT_SetWindowPosition(window, TXT_HORIZ_CENTER, TXT_VERT_TOP, TXT_SCREEN_W / 2, window_y);
-
-	// On Windows, there is an extra control to change between 
-	// the Windows GDI and DirectX video drivers.
+    // On Windows, there is an extra control to change between 
+    // the Windows GDI and DirectX video drivers.
 
 #if defined(_WIN32) && !defined(_WIN32_WCE)
-	{
-		txt_table_t *driver_table;
+    {
+        txt_table_t *driver_table;
+        txt_dropdown_list_t *driver_list;
 
-		txt_dropdown_list_t *driver_list;
+        driver_table = TXT_NewTable(2);
 
-		driver_table = TXT_NewTable(2);
+        TXT_SetColumnWidths(driver_table, 20, 0);
 
-		TXT_SetColumnWidths(driver_table, 20, 0);
+        TXT_AddWidgets(driver_table,
+                       TXT_NewLabel("Video driver"),
+                       driver_list = TXT_NewDropdownList(&win32_video_driver,
+                                                         win32_video_drivers,
+                                                         2),
+                       NULL);
 
-		TXT_AddWidgets(driver_table, TXT_NewLabel("Video driver"), driver_list = TXT_NewDropdownList(&win32_video_driver, win32_video_drivers, 2), NULL);
+        TXT_SignalConnect(driver_list, "changed",
+                          UpdateVideoDriver, modes_table);
+        SetWin32VideoDriver();
 
-		TXT_SignalConnect(driver_list, "changed", UpdateVideoDriver, modes_table);
-		SetWin32VideoDriver();
-
-		TXT_AddWidget(window, driver_table);
-	}
+        TXT_AddWidget(window, driver_table);
+    }
 #endif
 
-	// Screen modes list
+    // Screen modes list
 
-	TXT_AddWidgets(window,
-				   TXT_NewSeparator("Screen mode"),
-				   bpp_table = TXT_NewTable(2), modes_table, TXT_NewSeparator("Misc."), TXT_NewCheckBox("Show ENDOOM screen", &show_endoom), NULL);
+    TXT_AddWidgets(window,
+                   TXT_NewSeparator("Screen mode"),
+                   bpp_table = TXT_NewTable(2),
+                   modes_table,
+                   TXT_NewSeparator("Misc."),
+                   TXT_NewCheckBox("Show ENDOOM screen", &show_endoom),
+                   NULL);
 
-	TXT_AddWidgets(bpp_table, TXT_NewLabel("Color depth: "), bpp_selector = TXT_NewDropdownList(&selected_bpp, supported_bpps, num_supported_bpps), NULL);
+    TXT_AddWidgets(bpp_table,
+                   TXT_NewLabel("Color depth: "),
+                   bpp_selector = TXT_NewDropdownList(&selected_bpp,
+                                                      supported_bpps,
+                                                      num_supported_bpps),
+                   NULL);
 
-	TXT_SignalConnect(bpp_selector, "changed", UpdateBPP, modes_table);
-	TXT_SignalConnect(fs_checkbox, "changed", GenerateModesTable, modes_table);
-	TXT_SignalConnect(ar_checkbox, "changed", GenerateModesTable, modes_table);
 
-	GenerateModesTable(NULL, modes_table);
+    TXT_SignalConnect(bpp_selector, "changed", UpdateBPP, modes_table);
+    TXT_SignalConnect(fs_checkbox, "changed", GenerateModesTable, modes_table);
+    TXT_SignalConnect(ar_checkbox, "changed", GenerateModesTable, modes_table);
+
+    GenerateModesTable(NULL, modes_table);
 }
+

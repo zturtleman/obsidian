@@ -30,17 +30,12 @@
 #include "txt_main.h"
 
 void TXT_PutChar(int c);
-
 void TXT_Puts(const char *s);
-
 void TXT_GotoXY(int x, int y);
-
 void TXT_GetXY(int *x, int *y);
-
 void TXT_FGColor(txt_color_t color);
-
 void TXT_BGColor(int color, int blinking);
-
 void TXT_ClearScreen(void);
 
-#endif							/* #ifndef TXT_IO_H */
+#endif /* #ifndef TXT_IO_H */
+

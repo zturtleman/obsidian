@@ -20,8 +20,8 @@
 // 02111-1307, USA.
 //
 // DESCRIPTION:
-//  Printed strings for translation.
-//  English language support (default).
+//	Printed strings for translation.
+//	English language support (default).
 //
 //-----------------------------------------------------------------------------
 
@@ -29,7 +29,7 @@
 #define __D_ENGLSH__
 
 //
-//  Printed strings for translation
+//	Printed strings for translation
 //
 
 //
@@ -39,7 +39,7 @@
 #define D_CDROM	"CD-ROM Version: default.cfg from c:\\doomdata\n"
 
 //
-//  M_Menu.C
+//	M_Menu.C
 //
 #define PRESSKEY 	"press a key."
 #define PRESSYN 	"press y or n."
@@ -80,7 +80,7 @@
 #define EMPTYSTRING	"empty slot"
 
 //
-//  P_inter.C
+//	P_inter.C
 //
 #define GOTARMOR	"Picked up the armor."
 #define GOTMEGA	"Picked up the MegaArmor!"
@@ -135,12 +135,12 @@
 #define PD_YELLOWK	"You need a yellow key to open this door"
 
 //
-//  G_game.C
+//	G_game.C
 //
 #define GGSAVED	"game saved."
 
 //
-//  HU_stuff.C
+//	HU_stuff.C
 //
 #define HUSTR_MSGU	"[Message unsent]"
 
@@ -325,7 +325,7 @@
 #define HUSTR_KEYRED	'r'
 
 //
-//  AM_map.C
+//	AM_map.C
 //
 
 #define AMSTR_FOLLOWON	"Follow Mode ON"
@@ -338,7 +338,7 @@
 #define AMSTR_MARKSCLEARED	"All Marks Cleared"
 
 //
-//  ST_stuff.C
+//	ST_stuff.C
 //
 
 #define STSTR_MUS		"Music Change"
@@ -359,7 +359,7 @@
 #define STSTR_CLEV		"Changing Level..."
 
 //
-//  F_Finale.C
+//	F_Finale.C
 //
 #define E1TEXT \
 "Once you beat the big badasses and\n"\
@@ -377,6 +377,7 @@
 "To continue the DOOM experience, play\n"\
 "The Shores of Hell and its amazing\n"\
 "sequel, Inferno!\n"
+
 
 #define E2TEXT \
 "You've done it! The hideous cyber-\n"\
@@ -397,6 +398,7 @@
 "Now, it's on to the final chapter of\n"\
 "DOOM! -- Inferno."
 
+
 #define E3TEXT \
 "The loathsome spiderdemon that\n"\
 "masterminded the invasion of the moon\n"\
@@ -416,6 +418,7 @@
 "spawn could have come through that\n"\
 "door with you ..."
 
+
 #define E4TEXT \
 "the spider mastermind must have sent forth\n"\
 "its legions of hellspawn before your\n"\
@@ -433,6 +436,7 @@
 "of demons run amok among our cities.\n"\
 "\n"\
 "next stop, hell on earth!"
+
 
 // after level 6, put this:
 
@@ -471,6 +475,7 @@
 "STARPORT.\" SLOWLY AND PAINFULLY YOU GET\n"\
 "UP AND RETURN TO THE FRAY."
 
+
 // After level 20, put this:
 
 #define C3TEXT \
@@ -483,6 +488,7 @@
 "THERE MUST BE A WAY TO CLOSE IT ON THE\n"\
 "OTHER SIDE. WHAT DO YOU CARE IF YOU'VE\n"\
 "GOT TO GO THROUGH HELL TO GET TO IT?"
+
 
 // After level 29, put this:
 
@@ -503,6 +509,8 @@
 "HOME. REBUILDING EARTH OUGHT TO BE A\n"\
 "LOT MORE FUN THAN RUINING IT WAS.\n"
 
+
+
 // Before level 31, put this:
 
 #define C5TEXT \
@@ -512,6 +520,7 @@
 "WHO THE INMATES OF THIS CORNER OF HELL\n"\
 "WILL BE."
 
+
 // Before level 32, put this:
 
 #define C6TEXT \
@@ -519,7 +528,8 @@
 "SUPER SECRET LEVEL!  YOU'D BETTER\n"\
 "BLAZE THROUGH THIS ONE!\n"
 
-// after map 06 
+
+// after map 06	
 
 #define P1TEXT  \
 "You gloat over the steaming carcass of the\n"\
@@ -535,6 +545,7 @@
 "moving, keep fighting, keep killing.\n"\
 "Oh yes, keep living, too."
 
+
 // after map 11
 
 #define P2TEXT \
@@ -544,6 +555,7 @@
 "efficiently and permanently deactivated.\n"\
 "\n"\
 "You're good at that kind of thing."
+
 
 // after map 20
 
@@ -590,6 +602,7 @@
 "level we had ready for ya?  Now you know.\n"\
 "No one gets out alive."
 
+
 #define T1TEXT \
 "You've fought your way out of the infested\n"\
 "experimental labs.   It seems that UAC has\n"\
@@ -604,6 +617,7 @@
 "complex still has some warlike ordnance\n"\
 "laying around."
 
+
 #define T2TEXT \
 "You hear the grinding of heavy machinery\n"\
 "ahead.  You sure hope they're not stamping\n"\
@@ -614,6 +628,7 @@
 "maniacs packed into one mad killer.\n"\
 "\n"\
 "You don't plan to go down easy."
+
 
 #define T3TEXT \
 "The vista opening ahead looks real damn\n"\
@@ -638,12 +653,14 @@
 "A blue light begins to glow inside the\n"\
 "ruined skull of the demon-spitter."
 
+
 #define T5TEXT \
 "What now? Looks totally different. Kind\n"\
 "of like King Tut's condo. Well,\n"\
 "whatever's here can't be any worse\n"\
 "than usual. Can it?  Or maybe it's best\n"\
 "to let sleeping gods lie.."
+
 
 #define T6TEXT \
 "Time for a vacation. You've burst the\n"\
@@ -656,6 +673,8 @@
 "\n"\
 "As you step off the transport, you hear\n"\
 "the stomp of a cyberdemon's iron shoe."
+
+
 
 //
 // Character cast strings F_FINALE.C
@@ -677,5 +696,6 @@
 #define CC_SPIDER	"THE SPIDER MASTERMIND"
 #define CC_CYBER	"THE CYBERDEMON"
 #define CC_HERO	"OUR HERO"
+
 
 #endif

@@ -20,9 +20,10 @@
 // 02111-1307, USA.
 //
 // DESCRIPTION:
-//  Cheat code checking.
+//	Cheat code checking.
 //
 //-----------------------------------------------------------------------------
+
 
 #ifndef __M_CHEAT__
 #define __M_CHEAT__
@@ -41,21 +42,29 @@
 
 typedef struct
 {
-	// settings for this cheat
+    // settings for this cheat
 
-	char sequence[MAX_CHEAT_LEN];
-	size_t sequence_len;
-	int parameter_chars;
+    char sequence[MAX_CHEAT_LEN];
+    size_t sequence_len;
+    int parameter_chars;
 
-	// state used during the game
+    // state used during the game
 
-	size_t chars_read;
-	int param_chars_read;
-	char parameter_buf[MAX_CHEAT_PARAMS];
+    size_t chars_read;
+    int param_chars_read;
+    char parameter_buf[MAX_CHEAT_PARAMS];
 } cheatseq_t;
 
-int cht_CheckCheat(cheatseq_t * cht, char key);
+int
+cht_CheckCheat
+( cheatseq_t*		cht,
+  char			key );
 
-void cht_GetParam(cheatseq_t * cht, char *buffer);
+
+void
+cht_GetParam
+( cheatseq_t*		cht,
+  char*			buffer );
+
 
 #endif

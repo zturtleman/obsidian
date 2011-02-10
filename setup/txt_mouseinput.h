@@ -33,10 +33,12 @@ typedef struct txt_mouse_input_s txt_mouse_input_t;
 
 struct txt_mouse_input_s
 {
-	txt_widget_t widget;
-	int *variable;
+    txt_widget_t widget;
+    int *variable;
 };
 
 txt_mouse_input_t *TXT_NewMouseInput(int *variable);
 
-#endif							/* #ifndef TXT_MOUSE_INPUT_H */
+#endif /* #ifndef TXT_MOUSE_INPUT_H */
+
+

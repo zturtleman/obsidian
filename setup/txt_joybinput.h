@@ -34,11 +34,13 @@ typedef struct txt_joystick_input_s txt_joystick_input_t;
 
 struct txt_joystick_input_s
 {
-	txt_widget_t widget;
-	int *variable;
-	txt_window_t *prompt_window;
+    txt_widget_t widget;
+    int *variable;
+    txt_window_t *prompt_window;
 };
 
 txt_joystick_input_t *TXT_NewJoystickInput(int *variable);
 
-#endif							/* #ifndef TXT_JOYB_INPUT_H */
+#endif /* #ifndef TXT_JOYB_INPUT_H */
+
+
