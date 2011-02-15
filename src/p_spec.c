@@ -141,7 +141,7 @@ anim_t*		lastanim;
 //
 //      Animating line specials
 //
-#define MAXLINEANIMS            16384
+#define MAXLINEANIMS            512
 
 extern  short	numlinespecials;
 extern  line_t*	linespeciallist[MAXLINEANIMS];
@@ -1469,7 +1469,8 @@ void P_SpawnSpecials (void)
     
     //	Init line EFFECTs
     numlinespecials = 0;
-    for (i = 0;i < numlines; i++)
+    // GhostlyDeath <February 25, 2010> -- Stop adding line specials if we can't fit any more
+    for (i = 0;i < numlines && numlinespecials < MAXLINEANIMS; i++)
     {
 	switch(lines[i].special)
 	{
