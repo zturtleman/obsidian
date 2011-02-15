@@ -135,7 +135,6 @@ AC_DEFUN([AC_DATAROOTDIR_CHECKED])
 AC_OUTPUT([
 Makefile
 rpm.spec
-man/Makefile
 opl/Makefile
 opl/examples/Makefile
 pcsound/Makefile

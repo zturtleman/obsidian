@@ -51,15 +51,5 @@ EXTRA_DIST=                             \
 MAINTAINERCLEANFILES =  $(AUX_DIST_GEN)
 
 docdir=$(prefix)/share/doc/@PACKAGE@
-SUBDIRS=wince textscreen opl pcsound src man setup
+SUBDIRS=wince textscreen opl pcsound src setup
 DIST_SUBDIRS=pkg $(SUBDIRS)
-
-if HAVE_PYTHON
-
-noinst_DATA=CMDLINE
-
-CMDLINE : src/
-	./man/docgen -p man/CMDLINE.template src/ > $@
-
-endif
-
