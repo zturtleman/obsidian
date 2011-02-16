@@ -127,7 +127,6 @@ void T_VerticalDoor (vldoor_t* door)
 	      case blazeClose:
 		door->sector->specialdata = NULL;
 		P_RemoveThinker (&door->thinker);  // unlink and free
-		S_StartSound(&door->sector->soundorg, sfx_bdcls);
 		break;
 		
 	      case normal:

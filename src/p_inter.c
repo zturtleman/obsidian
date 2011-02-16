@@ -478,13 +478,14 @@ P_TouchSpecialThing
 	break;
 	
       case SPR_MEDI:
-	if (!P_GiveBody (player, 25))
-	    return;
-
 	if (player->health < 25)
 	    player->message = DEH_String(GOTMEDINEED);
 	else
 	    player->message = DEH_String(GOTMEDIKIT);
+
+	// [tm512] Picked up a medikit you REALLY need! - 2/16/11
+	if (!P_GiveBody (player, 25))
+	    return;
 	break;
 
 	
