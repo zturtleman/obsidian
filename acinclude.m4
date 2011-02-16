@@ -1,6 +1,6 @@
 
 dnl
-dnl SDL workaround autoconf macros, by tm512.
+dnl SDL workaround autoconf macros, by Simon Howard.
 dnl I release the contents of this file to the public domain.
 dnl
 
