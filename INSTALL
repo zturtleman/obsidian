@@ -1,19 +1,19 @@
 
-Chocolate Doom installation
+obsidian installation
 ===========================
 
-These are instructions for how to install and set up Chocolate Doom
+These are instructions for how to install and set up obsidian
 for play.
 
-Building Chocolate Doom
+Building obsidian
 -----------------------
 
-Before you can play Chocolate Doom, you need to compile a binary that
+Before you can play obsidian, you need to compile a binary that
 you can run.  If you are using Windows or Mac OS X, precompiled
 binaries are available on the website for download, and you can skip
 this section.
 
-For compilation, Chocolate Doom requires the following to be installed:
+For compilation, obsidian requires the following to be installed:
 
  * A C compiler (gcc is recommended)
  * make (GNU make is recommended)
@@ -109,17 +109,17 @@ methods:
    directories to search (similar to the Unix PATH environment
    variable).
 
- * Run Chocolate Doom with the '-iwad' command line parameter to
+ * Run obsidian with the '-iwad' command line parameter to
    specify the IWAD file to use, eg.
 
-       chocolate-doom -iwad /root/doom2.wad
+       obsidian -iwad /root/doom2.wad
 
 Playing with Chex Quest
 -----------------------
 
 Chex Quest is a game based on Doom with some minor modifications that
 was distributed with boxes of Chex cereal in 1997.  It is possible to
-play Chex Quest using Chocolate Doom.  To do this, the following files
+play Chex Quest using obsidian.  To do this, the following files
 are needed:
 
  * The IWAD file 'chex.wad', from the Chex Quest CD.
@@ -130,12 +130,12 @@ are needed:
 Copy these files into a directory together and use the '-iwad' command
 line parameter to specify the Chex Quest IWAD file:
 
-   chocolate-doom -iwad chex.wad
+   obsidian -iwad chex.wad
 
 Installing upgrades
 -------------------
 
-Chocolate Doom requires a Doom 1.9 IWAD file.  Generally, if you
+obsidian requires a Doom 1.9 IWAD file.  Generally, if you
 install a recent version of Doom you should automatically have a 1.9
 IWAD.  However, if you are installing from a very old CD version or
 from floppy disks, you might find you have an older version.
