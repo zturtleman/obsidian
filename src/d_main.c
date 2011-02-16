@@ -1167,7 +1167,9 @@ void D_DoomMain (void)
 
             filename = D_TryFindWADByName(myargv[p]);
 
-	    D_AddFile(filename);
+            // [tm512] This should be default behavior - 2/16/11
+	    // D_AddFile(filename);
+            W_MergeFile(filename);
         }
     }
 
