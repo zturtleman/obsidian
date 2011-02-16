@@ -3,7 +3,7 @@ gamesdir = $(prefix)/games
 
 AM_CFLAGS = -I../textscreen -I../src @SDLMIXER_CFLAGS@
 
-games_PROGRAMS = chocolate-setup
+games_PROGRAMS = obsidian-setup
 
 SOURCE_FILES =                                  \
     compatibility.c   compatibility.h           \
@@ -26,12 +26,12 @@ EXTRA_DIST=                                     \
     setup-manifest.xml
 
 if HAVE_WINDRES
-chocolate_setup_SOURCES=$(SOURCE_FILES) setup-res.rc
+obsidian_setup_SOURCES=$(SOURCE_FILES) setup-res.rc
 else
-chocolate_setup_SOURCES=$(SOURCE_FILES)
+obsidian_setup_SOURCES=$(SOURCE_FILES)
 endif
 
-chocolate_setup_LDADD =                              \
+obsidian_setup_LDADD =                              \
                        ../wince/libc_wince.a         \
                        ../textscreen/libtextscreen.a \
                        @SDLMIXER_LIBS@               \
