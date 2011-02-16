@@ -1454,10 +1454,7 @@ void G_SecretExitLevel (void)
 void G_DoCompleted (void) 
 { 
     int             i; 
-    
-    // GhostlyDeath <July 23, 2010> -- Clean scoreboard stuff up
-    HU_ForgetScoreboardStuff();
-	 
+    	 
     gameaction = ga_nothing; 
  
     for (i=0 ; i<MAXPLAYERS ; i++) 

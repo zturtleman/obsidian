@@ -99,9 +99,6 @@ int key_demo_quit      = 'q';
 int key_multi_msg      = 't';
 int key_multi_msgplayer[] = { 'g', 'i', 'b', 'r' };
 
-// GhostlyDeath <July 23, 2010> -- Scoreboard
-int key_scoreboard     = 'l';
-
 int vanilla_keyboard_mapping = 1;
 
 static int always_run = 0;
@@ -284,7 +281,6 @@ static void OtherKeysDialog(TXT_UNCAST_ARG(widget), TXT_UNCAST_ARG(unused))
     AddKeyControl(table, "Quit game",             &key_menu_quit);
     AddKeyControl(table, "Toggle gamma",          &key_menu_gamma);
     AddKeyControl(table, "Multiplayer spy",       &key_spy);
-    AddKeyControl(table, "Toggle Leaderboard",    &key_scoreboard);
 
     AddKeyControl(table, "Increase screen size",  &key_menu_incscreen);
     AddKeyControl(table, "Decrease screen size",  &key_menu_decscreen);

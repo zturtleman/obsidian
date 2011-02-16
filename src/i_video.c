@@ -976,7 +976,8 @@ void I_SetWindowCaption(void)
 
     buf = Z_Malloc(strlen(gamedescription) + strlen(PACKAGE_STRING) + 10, 
                    PU_STATIC, NULL);
-    sprintf(buf, "%s - %s", gamedescription, PACKAGE_STRING);
+//    sprintf(buf, "%s - %s", gamedescription, PACKAGE_STRING);
+      sprintf(buf, "%s", PACKAGE_STRING); // [tm512] Just the pacakge_string, no need for the game name.
 
     SDL_WM_SetCaption(buf, NULL);
 

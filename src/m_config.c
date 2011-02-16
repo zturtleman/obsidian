@@ -157,8 +157,6 @@ extern int key_demo_quit;
 extern int key_multi_msg;
 extern int key_multi_msgplayer[];
 
-extern int key_scoreboard;
-
 extern int	mousebfire;
 extern int	mousebstrafe;
 extern int	mousebforward;
@@ -1154,10 +1152,6 @@ static default_t extra_defaults_list[] =
     //
 
     CONFIG_VARIABLE_KEY(key_multi_msgplayer4,      key_multi_msgplayer[3]),
-     
-    // !
-    // Show the scoreboard
-    CONFIG_VARIABLE_KEY(key_scoreboard, key_scoreboard),
 };
 
 static default_collection_t extra_defaults =
