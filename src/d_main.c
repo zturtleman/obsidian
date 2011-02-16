@@ -1169,6 +1169,7 @@ void D_DoomMain (void)
 
             // [tm512] This should be default behavior - 2/16/11
 	    // D_AddFile(filename);
+            printf(" adding %s\n", filename);
             W_MergeFile(filename);
         }
     }
