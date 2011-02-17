@@ -480,7 +480,7 @@ P_TouchSpecialThing
       case SPR_MEDI:
 	if (player->health < 25)
 	    player->message = DEH_String(GOTMEDINEED);
-	else
+	else if (player->health < 100)
 	    player->message = DEH_String(GOTMEDIKIT);
 
 	// [tm512] Picked up a medikit you REALLY need! - 2/16/11
