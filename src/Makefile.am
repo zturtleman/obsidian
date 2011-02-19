@@ -1,28 +1,9 @@
 
 gamesdir = $(prefix)/games
 
-games_PROGRAMS = obsidian obsidian-srv
+games_PROGRAMS = obsidian
 
 AM_CFLAGS = -I../opl -I../textscreen -I../pcsound -I../enet/include @SDLMIXER_CFLAGS@ @SDLNET_CFLAGS@
-
-DEDSERV_FILES=\
-d_dedicated.c                              \
-i_main.c                                   \
-i_timer.c            i_timer.h             \
-m_argv.c             m_argv.h              \
-m_misc.c             m_misc.h              \
-net_common.c         net_common.h          \
-net_dedicated.c      net_dedicated.h       \
-net_io.c             net_io.h              \
-net_packet.c         net_packet.h          \
-net_sdl.c            net_sdl.h             \
-net_query.c          net_query.h           \
-net_server.c         net_server.h          \
-net_structrw.c       net_structrw.h        \
-z_native.c           z_zone.h
-
-obsidian_srv_SOURCES=$(DEDSERV_FILES)
-obsidian_srv_LDADD = ../wince/libc_wince.a ../enet/.libs/libenet.a @LDFLAGS@ @SDLNET_LIBS@ 
 
 MAIN_SOURCE_FILES=\
 am_map.c             am_map.h              \
@@ -129,22 +110,6 @@ deh_text.c                                 \
 deh_thing.c                                \
 deh_weapon.c
 
-# source files needed for FEATURE_MULTIPLAYER
-
-FEATURE_MULTIPLAYER_SOURCE_FILES=          \
-net_client.c         net_client.h          \
-net_common.c         net_common.h          \
-net_dedicated.c      net_dedicated.h       \
-net_defs.h                                 \
-net_gui.c            net_gui.h             \
-net_io.c             net_io.h              \
-net_loop.c           net_loop.h            \
-net_packet.c         net_packet.h          \
-net_query.c          net_query.h           \
-net_sdl.c            net_sdl.h             \
-net_server.c         net_server.h          \
-net_structrw.c       net_structrw.h
-
 # source files needed for FEATURE_WAD_MERGE
 
 FEATURE_WAD_MERGE_SOURCE_FILES =           \
@@ -162,7 +127,6 @@ mus2mid.c            mus2mid.h
 
 SOURCE_FILES = $(MAIN_SOURCE_FILES)                \
                $(FEATURE_DEHACKED_SOURCE_FILES)    \
-               $(FEATURE_MULTIPLAYER_SOURCE_FILES) \
                $(FEATURE_WAD_MERGE_SOURCE_FILES)   \
                $(FEATURE_SOUND_SOURCE_FILES)
 

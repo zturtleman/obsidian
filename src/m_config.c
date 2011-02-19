@@ -47,7 +47,6 @@
 
 #include "m_menu.h"
 #include "m_argv.h"
-#include "net_client.h"
 
 #include "w_wad.h"
 
@@ -707,16 +706,14 @@ static default_t extra_defaults_list[] =
 
     CONFIG_VARIABLE_STRING(video_driver,           video_driver),
 
-#ifdef FEATURE_MULTIPLAYER
-
+/*
     //!
     // Name to use in network games for identification.  This is only 
     // used on the "waiting" screen while waiting for the game to start.
     //
 
     CONFIG_VARIABLE_STRING(player_name,            net_player_name),
-
-#endif
+*/
 
     //!
     // Joystick number to use; '0' is the first joystick.  A negative

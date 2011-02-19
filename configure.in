@@ -62,15 +62,6 @@ AC_SDL_MAIN_WORKAROUND([
         exit -1
     ])
 
-    # Check for SDL_net.
-
-    AC_CHECK_LIB(SDL_net,SDLNet_UDP_Send,[
-        SDLNET_LIBS="$SDLNET_LIBS -lSDL_net"
-    ],[
-        echo "*** Could not find SDL_net.  Please install it."
-        exit -1
-    ])
-
     # Check for libsamplerate.
 
     AC_CHECK_LIB(samplerate, src_new)
