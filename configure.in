@@ -1,4 +1,4 @@
-AC_INIT(obsidian, 0.0a, tetrismaster512@hotmail.com, obsidian)
+AC_INIT(obsidian, 0.0a-netcode, tetrismaster512@hotmail.com, obsidian)
 
 PACKAGE_SHORTDESC="Conservative Doom source port"
 PACKAGE_COPYRIGHT="Copyright (C) 1993-2010"

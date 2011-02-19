@@ -3,7 +3,7 @@ gamesdir = $(prefix)/games
 
 games_PROGRAMS = obsidian obsidian-srv
 
-AM_CFLAGS = -I../opl -I../textscreen -I../pcsound @SDLMIXER_CFLAGS@ @SDLNET_CFLAGS@
+AM_CFLAGS = -I../opl -I../textscreen -I../pcsound -I../enet/include @SDLMIXER_CFLAGS@ @SDLNET_CFLAGS@
 
 DEDSERV_FILES=\
 d_dedicated.c                              \
@@ -22,7 +22,7 @@ net_structrw.c       net_structrw.h        \
 z_native.c           z_zone.h
 
 obsidian_srv_SOURCES=$(DEDSERV_FILES)
-obsidian_srv_LDADD = ../wince/libc_wince.a @LDFLAGS@ @SDLNET_LIBS@ 
+obsidian_srv_LDADD = ../wince/libc_wince.a ../enet/.libs/libenet.a @LDFLAGS@ @SDLNET_LIBS@ 
 
 MAIN_SOURCE_FILES=\
 am_map.c             am_map.h              \
@@ -177,6 +177,7 @@ obsidian_LDADD =                               \
                        ../textscreen/libtextscreen.a \
                        ../pcsound/libpcsound.a       \
                        ../opl/libopl.a               \
+                       ../enet/.libs/libenet.a       \
                        @LDFLAGS@                     \
                        @SDLMIXER_LIBS@               \
                        @SDLNET_LIBS@
