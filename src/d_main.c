@@ -73,6 +73,7 @@
 #include "p_setup.h"
 #include "r_local.h"
 
+#include "o_server.h"
 
 #include "d_main.h"
 
@@ -1353,6 +1354,9 @@ void D_DoomMain (void)
 
     if (M_CheckParm("-nonovert"))
         novert = false;
+
+    if (M_CheckParm("-server")) // [tm512] Obsidian Dedicated Server
+        O_SV_Main();
 
     if (W_CheckNumForName("SS_START") >= 0
      || W_CheckNumForName("FF_END") >= 0)

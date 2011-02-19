@@ -47,6 +47,7 @@ m_misc.c             m_misc.h              \
 md5.c                md5.h                 \
 memio.c              memio.h               \
 m_random.c           m_random.h            \
+o_server.c           o_server.h            \
 p_ceilng.c                                 \
 p_doors.c                                  \
 p_enemy.c                                  \
