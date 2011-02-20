@@ -288,7 +288,7 @@ P_UseSpecialLine
 	switch(line->special)
 	{
 	  case 124:
-	    // Sliding door open&close
+	    // Sliding door open&normalClose
 	    // UNUSED?
 	    break;
 
@@ -426,7 +426,7 @@ P_UseSpecialLine
 	
       case 50:
 	// Close Door
-	if (EV_DoDoor(line,close))
+	if (EV_DoDoor(line,normalClose))
 	    P_ChangeSwitchTexture(line,0);
 	break;
 	
@@ -515,7 +515,7 @@ P_UseSpecialLine
 	// BUTTONS
       case 42:
 	// Close Door
-	if (EV_DoDoor(line,close))
+	if (EV_DoDoor(line,normalClose))
 	    P_ChangeSwitchTexture(line,1);
 	break;
 	

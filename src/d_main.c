@@ -398,7 +398,8 @@ void D_DoomLoop (void)
 		
     TryRunTics();
 
-    I_InitGraphics ();
+    if(!server)
+        I_InitGraphics ();
 
     R_ExecuteSetViewSize();
 

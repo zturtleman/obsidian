@@ -44,6 +44,8 @@
 #include "w_wad.h"
 #include "z_zone.h"
 
+#include "o_common.h"
+
 // when to clip out sounds
 // Does not fit the large outdoor areas.
 
@@ -264,7 +266,7 @@ void S_Init(int sfxVolume, int musicVolume)
 
     // Initialize the sound and music subsystems.
 
-    if (!nosound && !screensaver_mode)
+    if (!nosound && !screensaver_mode && !server) // [tm512] Don't initialize sound system for server - 2/20/11
     {
         if (!nosfx)
         {

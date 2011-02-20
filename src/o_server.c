@@ -55,3 +55,8 @@ int O_SV_Main (void)
 		return 0;
 	}
 }
+
+void O_SV_Ticker (void) // Dummy function for now
+{
+	return;
+}
