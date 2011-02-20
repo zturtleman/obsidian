@@ -41,6 +41,9 @@
 
 #include "deh_main.h"
 
+#include "o_server.h"
+#include "o_common.h"
+
 //
 // NETWORKING
 //
@@ -199,7 +202,6 @@ void D_StartGameLoop(void)
     lasttime = GetAdjustedTime() / ticdup;
 }
 
-
 //
 // D_CheckNetGame
 // Works out player numbers among the net participants
@@ -214,19 +216,23 @@ void D_CheckNetGame (void)
     // default values for single player
 
     consoleplayer = 0;
-    netgame = false;
+    if (!client && !server)
+        netgame = false;
+    else
+        netgame = true;
     ticdup = 1;
     extratics = 1;
     lowres_turn = false;
     offsetms = 0;
-    
+
     for (i=0; i<MAXPLAYERS; i++)
     {
         playeringame[i] = false;
        	nettics[i] = 0;
     }
 
-    playeringame[0] = true;
+//    if(!server) // Only spawn a player if this isnt a server
+        playeringame[0] = true;
 
     //!
     // @category net

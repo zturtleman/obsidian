@@ -74,6 +74,7 @@
 #include "r_local.h"
 
 #include "o_server.h"
+#include "o_common.h"
 
 #include "d_main.h"
 
@@ -236,8 +237,8 @@ void D_Display (void)
     boolean			wipe;
     boolean			redrawsbar;
 
-    if (nodrawers)
-	return;                    // for comparative timing / profiling
+    if (nodrawers /*|| server*/)
+	return;                    // for comparative timing / profiling (or server)
 		
     redrawsbar = false;
     
@@ -849,6 +850,13 @@ void D_DoomMain (void)
     modifiedgame = false;
 
     //!
+    // obsidian netcode, check to see whether we connect to anything, or if we start a server
+    //
+
+    if (M_CheckParm("-server") > 0) // Obsidian Dedicated Server
+        O_SV_Main();
+
+    //!
     // @vanilla
     //
     // Disable monsters.
@@ -1354,9 +1362,6 @@ void D_DoomMain (void)
 
     if (M_CheckParm("-nonovert"))
         novert = false;
-
-    if (M_CheckParm("-server")) // [tm512] Obsidian Dedicated Server
-        O_SV_Main();
 
     if (W_CheckNumForName("SS_START") >= 0
      || W_CheckNumForName("FF_END") >= 0)

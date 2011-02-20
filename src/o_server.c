@@ -27,6 +27,7 @@
 
 #include "doomdef.h"
 #include "doomstat.h"
+#include "d_net.h"
 
 #include "o_server.h"
 #include "o_common.h"
@@ -49,6 +50,8 @@ int O_SV_Main (void)
 		printf("Obsidian Dedicated Server started on port %i\n", addr.port);
 		if(!autostart) // Set game to autostart, we don't want the server going to the title screen.
 			autostart = 1;
+		server = 1;
+		client = 0;
 		return 0;
 	}
 }

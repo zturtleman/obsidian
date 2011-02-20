@@ -27,4 +27,7 @@
 
 #include "enet/enet.h"
 
+boolean server;
+boolean client;
+
 #endif
