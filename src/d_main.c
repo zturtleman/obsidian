@@ -237,8 +237,8 @@ void D_Display (void)
     boolean			wipe;
     boolean			redrawsbar;
 
-    if (nodrawers /*|| server*/)
-	return;                    // for comparative timing / profiling (or server)
+    if (nodrawers)
+	return;                    // for comparative timing / profiling
 		
     redrawsbar = false;
     
@@ -398,7 +398,7 @@ void D_DoomLoop (void)
 		
     TryRunTics();
 
-    if(!server)
+    if(!server || M_CheckParm("-vidserver")) // debug shit
         I_InitGraphics ();
 
     R_ExecuteSetViewSize();
