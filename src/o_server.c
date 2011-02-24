@@ -59,7 +59,7 @@ int O_SV_Main (void)
 void O_SV_Loop (void)
 {
 	ENetEvent event;
-	if (enet_host_service(srv, &event, 1000/35) > 0)
+	while (enet_host_service(srv, &event, 5) > 0)
 	{
 		switch(event.type)
 		{
