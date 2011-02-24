@@ -27,6 +27,8 @@
 
 #include "enet/enet.h"
 
+#define MAXPLAYERNAME 10
+
 boolean server;
 boolean client;
 

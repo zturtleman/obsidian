@@ -26,6 +26,7 @@
 #define O_SERVER_H
 
 #include "enet/enet.h"
+#include "o_common.h"
 
 // Functions
 int O_SV_Main(void);
@@ -33,5 +34,12 @@ int O_SV_Main(void);
 // Variables
 ENetAddress addr;
 ENetHost *srv;
+
+typedef struct
+{
+	int type;
+	ENetPeer *peer;
+//	char name[MAXPLAYERNAME];
+} client_t;
 
 #endif

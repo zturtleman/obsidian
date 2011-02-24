@@ -56,7 +56,21 @@ int O_SV_Main (void)
 	}
 }
 
-void O_SV_Ticker (void) // Dummy function for now
+void O_SV_Loop (void)
 {
-	return;
+	ENetEvent event;
+	while (enet_host_service(srv, &event, 10) > 0)
+	{
+		switch(event.type)
+		{
+			case ENET_EVENT_TYPE_CONNECT:
+			{
+				client_t c;
+				c.peer = event.peer;
+				char hn[512];
+				printf("Client connected! (%s)\n", (enet_address_get_host(&c.peer->address, hn, sizeof(hn))==0) ? hn : "localhost");
+				break;
+			}
+		}
+	}
 }

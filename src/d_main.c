@@ -438,6 +438,10 @@ void D_DoomLoop (void)
 	// Update display, next frame, with current state.
         if (screenvisible)
             D_Display ();
+
+        // Server Loop stuff:
+        if(server)
+            O_SV_Loop();
     }
 }
 
