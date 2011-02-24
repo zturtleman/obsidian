@@ -34,7 +34,7 @@
 
 int O_SV_Main (void) 
 {
-	if (enet_initialize() < 0) 
+	if (enet_initialize() != 0) 
 		return 1; // Initialize enet, if it fails, return 1
 
 	atexit(enet_deinitialize);

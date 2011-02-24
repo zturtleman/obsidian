@@ -29,6 +29,9 @@ ENetHost *localclient;
 
 void O_CL_Connect (char *srv_hn)
 {
+        if (enet_initialize() != 0)
+                return 1; // Initialize enet, if it fails, return 1
+
 	printf("Connecting obsidian client to %s\n", srv_hn);
 	ENetAddress addr = { ENET_HOST_ANY, 11666 };
 	ENetPeer *peer;
