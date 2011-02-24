@@ -75,6 +75,7 @@
 
 #include "o_server.h"
 #include "o_common.h"
+#include "o_client.h"
 
 #include "d_main.h"
 
@@ -860,6 +861,13 @@ void D_DoomMain (void)
 
     if (M_CheckParm("-server") > 0) // Obsidian Dedicated Server
         O_SV_Main();
+
+    {
+        int i = M_CheckParmWithArgs ("-connect", 1);
+
+        if(i > 0 && !server)
+             O_CL_Connect(myargv[i+1]);
+    }
 
     //!
     // @vanilla
