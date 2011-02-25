@@ -48,7 +48,10 @@ void O_CL_Connect (char *srv_hn)
 	localclient = enet_host_create (NULL, 1, 2, 0, 0);
 	peer = enet_host_connect (localclient, &addr, 2, 0);
 	if(enet_host_service (localclient, &event, 5000) > 0 && event.type == ENET_EVENT_TYPE_CONNECT)
+	{
 		printf("connection succeeded\n");
+		enet_host_flush(localclient);
+	}
 	else
 		printf("connection failed\n");
 }
