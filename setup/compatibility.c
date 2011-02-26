@@ -29,6 +29,7 @@
 
 int vanilla_savegame_limit = 1;
 int vanilla_demo_limit = 1;
+int vanilla_zero_tag = 1;
 
 void CompatibilitySettings(void)
 {
@@ -41,6 +42,8 @@ void CompatibilitySettings(void)
                                    &vanilla_savegame_limit),
                    TXT_NewCheckBox("Vanilla demo limit",
                                    &vanilla_demo_limit),
+                   TXT_NewCheckBox("Vanilla 0-tag behavior",
+                                   &vanilla_zero_tag),
                    NULL);
 }
 

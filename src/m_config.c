@@ -196,6 +196,7 @@ extern char*	chat_macros[];
 extern int      show_endoom;
 extern int      vanilla_savegame_limit;
 extern int      vanilla_demo_limit;
+extern int	vanilla_zero_tag;
 
 extern int snd_musicdevice;
 extern int snd_sfxdevice;
@@ -691,6 +692,14 @@ static default_t extra_defaults_list[] =
     //
 
     CONFIG_VARIABLE_INT(vanilla_demo_limit,        vanilla_demo_limit),
+
+    //!
+    // If non-zero, linedefs which are tagged 0 will have the vanilla
+    // effect of affecting all 0-tagged sectors, otherwise, obsidian
+    // will use the ZDoom behavior of only affecting the backsector
+    // of the linedef.
+
+    CONFIG_VARIABLE_INT(vanilla_zero_tag,    vanilla_zero_tag),
 
     //!
     // If non-zero, the game behaves like Vanilla Doom, always assuming

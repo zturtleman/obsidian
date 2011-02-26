@@ -69,6 +69,7 @@ static void SensibleDefaults(void)
     vanilla_savegame_limit = 0;
     vanilla_keyboard_mapping = 0;
     vanilla_demo_limit = 0;
+    vanilla_zero_tag = 0;
     show_endoom = 0;
     dclick_use = 0;
     novert = 1;

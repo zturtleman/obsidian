@@ -448,16 +448,29 @@ fixed_t	P_FindHighestCeilingSurrounding(sector_t* sec)
 //
 // RETURN NEXT SECTOR # THAT LINE TAG REFERS TO
 //
+// [tm512] Nasty hack to make this return the backsector if the line's tag is 0 - 2/26/11
+
+int vanilla_zero_tag;
+
 int
 P_FindSectorFromLineTag
 ( line_t*	line,
   int		start )
 {
     int	i;
-	
-    for (i=start+1;i<numsectors;i++)
-	if (sectors[i].tag == line->tag)
-	    return i;
+
+    if(line->tag || (vanilla_zero_tag && !netgame))
+    {	
+        for (i=start+1;i<numsectors;i++)
+	    if (sectors[i].tag == line->tag)
+	        return i;
+    }
+    else
+    {
+        for (i=start+1;i<numsectors;i++)
+            if (&sectors[i] == line->backsector)
+                return i;
+    }
     
     return -1;
 }
