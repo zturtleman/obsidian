@@ -27,6 +27,7 @@
 
 #include "enet/enet.h"
 #include "o_common.h"
+#include "d_player.h"
 
 // Functions
 int O_SV_Main(void);
@@ -39,7 +40,8 @@ typedef struct
 {
 	int type;
 	ENetPeer *peer;
-//	char name[MAXPLAYERNAME];
+	player_t *player;
+	char name[MAXPLAYERNAME + 1];
 } client_t;
 
 #endif

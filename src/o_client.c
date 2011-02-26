@@ -23,9 +23,13 @@
 */
 
 #include "enet/enet.h"
+#include "doomstat.h"
 #include "o_client.h"
+#include "o_common.h"
 
 ENetHost *localclient;
+boolean server;
+boolean client;
 
 void O_CL_Connect (char *srv_hn)
 {
@@ -51,6 +55,9 @@ void O_CL_Connect (char *srv_hn)
 	{
 		printf("connection succeeded\n");
 		enet_host_flush(localclient);
+		autostart = 1;
+		client = 1;
+		server = 0;
 	}
 	else
 		printf("connection failed\n");

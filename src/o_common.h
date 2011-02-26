@@ -29,7 +29,7 @@
 
 #define MAXPLAYERNAME 10
 
-boolean server;
-boolean client;
+extern boolean server;
+extern boolean client;
 
 #endif
