@@ -27,6 +27,8 @@
 
 #include "enet/enet.h"
 
+ENetHost *localclient;
+
 void O_CL_Connect (char *srv_hn);
 
 #endif

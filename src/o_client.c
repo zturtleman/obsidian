@@ -27,7 +27,6 @@
 #include "o_client.h"
 #include "o_common.h"
 
-ENetHost *localclient;
 boolean server;
 boolean client;
 
@@ -36,7 +35,6 @@ void O_CL_Connect (char *srv_hn)
         if (enet_initialize() != 0)
                 return 1; // Initialize enet, if it fails, return 1
 
-	printf("Connecting obsidian client to %s\n", srv_hn);
 	ENetAddress addr = { ENET_HOST_ANY, 11666 };
 	ENetPeer *peer;
 	ENetEvent event;
@@ -47,13 +45,12 @@ void O_CL_Connect (char *srv_hn)
 		return;
 	}
 
-	printf("%i\n", addr.port);
+	printf("Attempting to connect to %s:%i\n", srv_hn, addr.port);
 
 	localclient = enet_host_create (NULL, 1, 2, 0, 0);
 	peer = enet_host_connect (localclient, &addr, 2, 0);
 	if(enet_host_service (localclient, &event, 5000) > 0 && event.type == ENET_EVENT_TYPE_CONNECT)
 	{
-		printf("connection succeeded\n");
 		enet_host_flush(localclient);
 		autostart = 1;
 		client = 1;
