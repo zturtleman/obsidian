@@ -41,14 +41,8 @@
 
 #include "deh_main.h"
 
-#include "net_client.h"
-#include "net_gui.h"
-#include "net_io.h"
-#include "net_query.h"
-#include "net_server.h"
-#include "net_sdl.h"
-#include "net_loop.h"
-
+#include "o_server.h"
+#include "o_common.h"
 
 //
 // NETWORKING
@@ -129,15 +123,6 @@ void NetUpdate (void)
 
     if (singletics)
         return;
-    
-#ifdef FEATURE_MULTIPLAYER
-
-    // Run network subsystems
-
-    NET_CL_Run();
-    NET_SV_Run();
-
-#endif
 
     // check time
     nowtime = GetAdjustedTime() / ticdup;
@@ -199,14 +184,6 @@ void NetUpdate (void)
 	//printf ("mk:%i ",maketic);
 	G_BuildTiccmd(&cmd);
 
-#ifdef FEATURE_MULTIPLAYER
-
-        if (net_client_connected)
-        {
-            NET_CL_SendTiccmd(&cmd, maketic);
-        }
-
-#endif
         netcmds[consoleplayer][maketic % BACKUPTICS] = cmd;
 
 	++maketic;
@@ -225,7 +202,6 @@ void D_StartGameLoop(void)
     lasttime = GetAdjustedTime() / ticdup;
 }
 
-
 //
 // D_CheckNetGame
 // Works out player numbers among the net participants
@@ -240,19 +216,23 @@ void D_CheckNetGame (void)
     // default values for single player
 
     consoleplayer = 0;
-    netgame = false;
+    if (!client && !server)
+        netgame = false;
+    else
+        netgame = true;
     ticdup = 1;
     extratics = 1;
     lowres_turn = false;
     offsetms = 0;
-    
+
     for (i=0; i<MAXPLAYERS; i++)
     {
         playeringame[i] = false;
        	nettics[i] = 0;
     }
 
-    playeringame[0] = true;
+//    if(!server) // Only spawn a player if this isnt a server
+        playeringame[0] = true;
 
     //!
     // @category net
@@ -266,115 +246,6 @@ void D_CheckNetGame (void)
     {
         netgame = true;
     }
-
-#ifdef FEATURE_MULTIPLAYER
-
-    {
-        net_addr_t *addr = NULL;
-
-        //!
-        // @category net
-        //
-        // Start a multiplayer server, listening for connections.
-        //
-
-        if (M_CheckParm("-server") > 0)
-        {
-            NET_SV_Init();
-            NET_SV_AddModule(&net_loop_server_module);
-            NET_SV_AddModule(&net_sdl_module);
-            NET_SV_RegisterWithMaster();
-
-            net_loop_client_module.InitClient();
-            addr = net_loop_client_module.ResolveAddress(NULL);
-        }
-        else
-        {
-            //! 
-            // @category net
-            //
-            // Automatically search the local LAN for a multiplayer
-            // server and join it.
-            //
-
-            i = M_CheckParm("-autojoin");
-
-            if (i > 0)
-            {
-                addr = NET_FindLANServer();
-
-                if (addr == NULL)
-                {
-                    I_Error("No server found on local LAN");
-                }
-            }
-
-            //!
-            // @arg <address>
-            // @category net
-            //
-            // Connect to a multiplayer server running on the given 
-            // address.
-            //
-            
-            i = M_CheckParmWithArgs("-connect", 1);
-
-            if (i > 0)
-            {
-                net_sdl_module.InitClient();
-                addr = net_sdl_module.ResolveAddress(myargv[i+1]);
-
-                if (addr == NULL)
-                {
-                    I_Error("Unable to resolve '%s'\n", myargv[i+1]);
-                }
-            }
-        }
-
-        if (addr != NULL)
-        {
-            if (M_CheckParm("-drone") > 0)
-            {
-                drone = true;
-            }
-
-            //!
-            // @category net
-            //
-            // Run as the left screen in three screen mode.
-            //
-
-            if (M_CheckParm("-left") > 0)
-            {
-                viewangleoffset = ANG90;
-                drone = true;
-            }
-
-            //! 
-            // @category net
-            //
-            // Run as the right screen in three screen mode.
-            //
-
-            if (M_CheckParm("-right") > 0)
-            {
-                viewangleoffset = ANG270;
-                drone = true;
-            }
-
-            if (!NET_CL_Connect(addr))
-            {
-                I_Error("D_CheckNetGame: Failed to connect to %s\n", 
-                        NET_AddrToString(addr));
-            }
-
-            printf("D_CheckNetGame: Connected to %s\n", NET_AddrToString(addr));
-
-            NET_WaitForStart();
-        }
-    }
-
-#endif
 
     num_players = 0;
 
@@ -419,13 +290,7 @@ void D_CheckNetGame (void)
 //
 void D_QuitNetGame (void)
 {
-#ifdef FEATURE_MULTIPLAYER
-
-    NET_SV_Shutdown();
-    NET_CL_Disconnect();
-
-#endif
-
+    return;
 }
 
 // Returns true if there are currently any players in the game.
@@ -450,22 +315,6 @@ static int GetLowTic(void)
     int i;
     int lowtic;
 
-#ifdef FEATURE_MULTIPLAYER
-    if (net_client_connected)
-    {
-        lowtic = INT_MAX;
-    
-        for (i=0; i<MAXPLAYERS; ++i)
-        {
-            if (playeringame[i])
-            {
-                if (nettics[i] < lowtic)
-                    lowtic = nettics[i];
-            }
-        }
-    }
-    else
-#endif
     {
         lowtic = maketic;
     }

@@ -69,13 +69,13 @@
 #include "wi_stuff.h"
 #include "st_stuff.h"
 #include "am_map.h"
-#include "net_client.h"
-#include "net_dedicated.h"
-#include "net_query.h"
 
 #include "p_setup.h"
 #include "r_local.h"
 
+#include "o_server.h"
+#include "o_common.h"
+#include "o_client.h"
 
 #include "d_main.h"
 
@@ -399,7 +399,8 @@ void D_DoomLoop (void)
 		
     TryRunTics();
 
-    I_InitGraphics ();
+    if(!server || M_CheckParm("-vidserver")) // debug shit
+        I_InitGraphics ();
 
     R_ExecuteSetViewSize();
 
@@ -438,6 +439,10 @@ void D_DoomLoop (void)
 	// Update display, next frame, with current state.
         if (screenvisible)
             D_Display ();
+
+        // Server Loop stuff:
+        if(server)
+            O_SV_Loop();
     }
 }
 
@@ -832,69 +837,6 @@ void D_DoomMain (void)
 
     DEH_printf("Z_Init: Init zone memory allocation daemon. \n");
     Z_Init ();
-
-#ifdef FEATURE_MULTIPLAYER
-    //!
-    // @category net
-    //
-    // Start a dedicated server, routing packets but not participating
-    // in the game itself.
-    //
-
-    if (M_CheckParm("-dedicated") > 0)
-    {
-        printf("Dedicated server mode.\n");
-        NET_DedicatedServer();
-
-        // Never returns
-    }
-
-    //!
-    // @category net
-    //
-    // Query the Internet master server for a global list of active
-    // servers.
-    //
-
-    if (M_CheckParm("-search"))
-    {
-        printf("\nSearching for servers on Internet ...\n");
-        p = NET_MasterQuery(NET_QueryPrintCallback, NULL);
-        printf("\n%i server(s) found.\n", p);
-        exit(0);
-    }
-
-    //!
-    // @arg <address>
-    // @category net
-    //
-    // Query the status of the server running on the given IP
-    // address.
-    //
-
-    p = M_CheckParmWithArgs("-query", 1);
-
-    if (p)
-    {
-        NET_QueryAddress(myargv[p+1]);
-        exit(0);
-    }
-
-    //!
-    // @category net
-    //
-    // Search the local LAN for running servers.
-    //
-
-    if (M_CheckParm("-localsearch"))
-    {
-        printf("\nSearching for servers on local LAN ...\n");
-        p = NET_LANQuery(NET_QueryPrintCallback, NULL);
-        printf("\n%i server(s) found.\n", p);
-        exit(0);
-    }
-
-#endif
             
 #ifdef FEATURE_DEHACKED
     printf("DEH_Init: Init Dehacked support.\n");
@@ -912,6 +854,20 @@ void D_DoomMain (void)
     }
 
     modifiedgame = false;
+
+    //!
+    // obsidian netcode, check to see whether we connect to anything, or if we start a server
+    //
+
+    if (M_CheckParm("-server") > 0) // Obsidian Dedicated Server
+        O_SV_Main();
+
+    {
+        int i = M_CheckParmWithArgs ("-connect", 1);
+
+        if(i > 0 && !server)
+             O_CL_Connect(myargv[i+1]);
+    }
 
     //!
     // @vanilla
@@ -1457,11 +1413,6 @@ void D_DoomMain (void)
 
     DEH_printf("I_Init: Setting up machine state.\n");
     I_Init ();
-
-#ifdef FEATURE_MULTIPLAYER
-    printf ("NET_Init: Init network subsystem.\n");
-    NET_Init ();
-#endif
 
     DEH_printf("S_Init: Setting up sound.\n");
     S_Init (sfxVolume * 8, musicVolume * 8);

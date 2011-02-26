@@ -333,8 +333,8 @@ void    P_ActivateInStasis(int tag);
 typedef enum
 {
     normal,
-    close30ThenOpen,
-    close,
+    normalClose30ThenOpen,
+    normalClose,
     open,
     raiseIn5Mins,
     blazeRaise,
@@ -412,7 +412,7 @@ typedef enum
 typedef enum
 {
     sdt_openOnly,
-    sdt_closeOnly,
+    sdt_normalCloseOnly,
     sdt_openAndClose
 
 } sdt_e;
