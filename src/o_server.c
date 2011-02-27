@@ -126,7 +126,6 @@ player_t* O_SV_FindEmptyPlayer(void) // Should be unnecessary
 
 void O_SV_ClientWelcome (client_t* cl)
 {
-	printf("DBG: client type is %i!\n", cl->type);
 	playeringame[cl->id + 1] = true; // + 1 since server is in game at this stage in dev
 	players[cl->id + 1].playerstate = PST_REBORN;
 	return;
