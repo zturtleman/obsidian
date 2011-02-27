@@ -76,8 +76,9 @@ void O_SV_Loop (void)
 				if (c < 0) 
 				{ enet_peer_reset(event.peer); break; }
 				clients[c].type = CT_CONNECT;
+				clients[c].id = c;
 				clients[c].peer = event.peer;
-				clients[c].player = O_SV_FindEmptyPlayer();
+				clients[c].player = &players[c];
 				if(!clients[c].player) 
 				{
 					enet_peer_reset(clients[c].peer);
@@ -85,6 +86,7 @@ void O_SV_Loop (void)
 				}
 				char hn[512];
 				printf("connected: %s\n", (enet_address_get_host(&clients[c].peer->address, hn, sizeof(hn))==0) ? hn : "localhost");
+				O_SV_ClientWelcome(&clients[c]);
 				break;
 			}
 		}
@@ -107,7 +109,7 @@ int O_SV_FindEmptyClientNum(void)
 	return -1;
 }
 		
-player_t* O_SV_FindEmptyPlayer(void)
+player_t* O_SV_FindEmptyPlayer(void) // Should be unnecessary
 {
 	int i;
 	for(i = 0; i < MAXPLAYERS; i++)
@@ -120,4 +122,12 @@ player_t* O_SV_FindEmptyPlayer(void)
 		}
 	}
 	return NULL; // No player found
+}
+
+void O_SV_ClientWelcome (client_t* cl)
+{
+	printf("DBG: client type is %i!\n", cl->type);
+	playeringame[cl->id + 1] = true; // + 1 since server is in game at this stage in dev
+	players[cl->id + 1].playerstate = PST_REBORN;
+	return;
 }

@@ -49,11 +49,13 @@ ENetHost *srv;
 typedef struct
 {
 	int type;
+	int id;
 	ENetPeer *peer;
 	player_t *player;
 	char name[MAXPLAYERNAME + 1];
 } client_t;
 
 client_t clients[MAXPLAYERS];
+void O_SV_ClientWelcome (client_t *cl);
 
 #endif
