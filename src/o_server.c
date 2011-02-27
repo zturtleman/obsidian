@@ -89,8 +89,12 @@ player_t* O_SV_FindEmptyPlayer(void)
 	int i;
 	for(i = 0; i < MAXPLAYERS; i++)
 	{
+		printf("DBG: Searching for a player for new client: %i\n", i);
 		if(!playeringame[i]) // Found an empty player slot, let's return it.
-			printf("DBG: Giving new client players[%i]\n", i); return &players[i];
+		{
+			printf("DBG: Giving new client players[%i]\n", i); 
+			return &players[i];
+		}
 	}
-	return; // No player found
+	return NULL; // No player found
 }
