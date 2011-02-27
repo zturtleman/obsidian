@@ -32,9 +32,17 @@
 // Functions
 int O_SV_Main(void);
 void O_SV_Loop(void);
+int O_SV_FindEmptyClientNum(void);
 player_t* O_SV_FindEmptyPlayer(void);
 
 // Variables
+
+enum {
+CT_EMPTY,
+CT_CONNECT,
+CT_ACTIVE
+};
+
 ENetAddress addr;
 ENetHost *srv;
 
@@ -45,5 +53,7 @@ typedef struct
 	player_t *player;
 	char name[MAXPLAYERNAME + 1];
 } client_t;
+
+client_t clients[MAXPLAYERS];
 
 #endif

@@ -56,6 +56,11 @@ int O_SV_Main (void)
 		client = 0;
 		return 0;
 	}
+
+	// Not liking how this is, but since it seems I can't do anything about setting client's "type" in the header...
+	int i;
+	for(i = 0; i < MAXPLAYERS; i++)
+		clients[i].type = CT_EMPTY;
 }
 
 void O_SV_Loop (void)
@@ -67,16 +72,19 @@ void O_SV_Loop (void)
 		{
 			case ENET_EVENT_TYPE_CONNECT:
 			{
-				client_t c;
-				c.peer = event.peer;
-				c.player = O_SV_FindEmptyPlayer();
-				if(!c.player) 
+				int c = O_SV_FindEmptyClientNum(); // Find an empty client for this guy, or kick him out
+				if (c < 0) 
+				{ enet_peer_reset(event.peer); break; }
+				clients[c].type = CT_CONNECT;
+				clients[c].peer = event.peer;
+				clients[c].player = O_SV_FindEmptyPlayer();
+				if(!clients[c].player) 
 				{
-					enet_peer_reset(c.peer);
+					enet_peer_reset(clients[c].peer);
 					break;
 				}
 				char hn[512];
-				printf("Client connected! (%s)\n", (enet_address_get_host(&c.peer->address, hn, sizeof(hn))==0) ? hn : "localhost");
+				printf("connected: %s\n", (enet_address_get_host(&clients[c].peer->address, hn, sizeof(hn))==0) ? hn : "localhost");
 				break;
 			}
 		}
@@ -84,6 +92,21 @@ void O_SV_Loop (void)
 	return;
 }
 
+int O_SV_FindEmptyClientNum(void)
+{
+	int i;
+	for(i = 0; i < MAXPLAYERS; i++)
+	{
+		printf("DBG: New Client connected, finding a client_t for him...\n");
+		if(clients[i].type == CT_EMPTY)
+		{
+			printf("client_t found! Returning %i\n", i);
+			return i;
+		}
+	}
+	return -1;
+}
+		
 player_t* O_SV_FindEmptyPlayer(void)
 {
 	int i;
