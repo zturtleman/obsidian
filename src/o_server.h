@@ -31,6 +31,8 @@
 
 // Functions
 int O_SV_Main(void);
+void O_SV_Loop(void);
+player_t* O_SV_FindEmptyPlayer(void);
 
 // Variables
 ENetAddress addr;

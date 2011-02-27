@@ -69,6 +69,12 @@ void O_SV_Loop (void)
 			{
 				client_t c;
 				c.peer = event.peer;
+				c.player = O_SV_FindEmptyPlayer();
+				if(!c.player) 
+				{
+					enet_peer_reset(c.peer);
+					break;
+				}
 				char hn[512];
 				printf("Client connected! (%s)\n", (enet_address_get_host(&c.peer->address, hn, sizeof(hn))==0) ? hn : "localhost");
 				break;
@@ -76,4 +82,15 @@ void O_SV_Loop (void)
 		}
 	}
 	return;
+}
+
+player_t* O_SV_FindEmptyPlayer(void)
+{
+	int i;
+	for(i = 0; i < MAXPLAYERS; i++)
+	{
+		if(!playeringame[i]) // Found an empty player slot, let's return it.
+			printf("DBG: Giving new client players[%i]\n", i); return &players[i];
+	}
+	return; // No player found
 }
