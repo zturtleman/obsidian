@@ -99,29 +99,13 @@ int O_SV_FindEmptyClientNum(void)
 	int i;
 	for(i = 0; i < MAXPLAYERS; i++)
 	{
-		printf("DBG: New Client connected, finding a client_t for him...\n");
 		if(clients[i].type == CT_EMPTY)
 		{
-			printf("client_t found! Returning %i\n", i);
+			printf("DBG: client_t for new player found! Assigning #%i\n", i);
 			return i;
 		}
 	}
 	return -1;
-}
-		
-player_t* O_SV_FindEmptyPlayer(void) // Should be unnecessary
-{
-	int i;
-	for(i = 0; i < MAXPLAYERS; i++)
-	{
-		printf("DBG: Searching for a player for new client: %i\n", i);
-		if(!playeringame[i]) // Found an empty player slot, let's return it.
-		{
-			printf("DBG: Giving new client players[%i]\n", i); 
-			return &players[i];
-		}
-	}
-	return NULL; // No player found
 }
 
 void O_SV_ClientWelcome (client_t* cl)
