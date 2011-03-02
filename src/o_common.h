@@ -28,8 +28,11 @@
 #include "enet/enet.h"
 
 #define MAXPLAYERNAME 10
+#define OBS_PROTO 1
 
 extern boolean server;
 extern boolean client;
+
+void WriteInt32(int32_t** const Dest, int32_t Value);
 
 #endif

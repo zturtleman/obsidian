@@ -112,5 +112,11 @@ void O_SV_ClientWelcome (client_t* cl)
 {
 	playeringame[cl->id + 1] = true; // + 1 since server is in game at this stage in dev
 	players[cl->id + 1].playerstate = PST_REBORN;
+	ENetPacket *pk = enet_packet_create(NULL, 32, ENET_PACKET_FLAG_RELIABLE);
+	void *start = pk->data;
+	void *p = start;
+	WriteInt32((int32_t**)&p, 1234);
+	enet_packet_resize(pk, p-start);
+	enet_peer_send(cl->peer, 0, pk);
 	return;
 }
