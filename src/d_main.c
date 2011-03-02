@@ -1383,22 +1383,10 @@ void D_DoomMain (void)
         printf(" WARNING: The loaded WAD file contains modified sprites or\n"
                " floor textures.  You may want to use the '-merge' command\n"
                " line option instead of '-file'.\n");
+        printf ("===========================================================================\n");
     }
-    
-    printf ("===========================================================================\n");
 
     PrintBanner(gamedescription);
-
-    
-    printf (
-	    "===========================================================================\n"
-	    " " PACKAGE_NAME " is free software, covered by the GNU General Public\n"
-            " License.  There is NO warranty; not even for MERCHANTABILITY or FITNESS\n"
-            " FOR A PARTICULAR PURPOSE. You are welcome to change and distribute\n"
-            " copies under certain conditions. See the source for more information.\n"
-
-	    "===========================================================================\n"
-	);
 
     PrintDehackedBanners();
 
