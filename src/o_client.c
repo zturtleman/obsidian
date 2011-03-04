@@ -49,6 +49,7 @@ void O_CL_Connect (char *srv_hn)
 
 	localclient = enet_host_create (NULL, 1, 2, 0, 0);
 	peer = enet_host_connect (localclient, &addr, 2, 0);
+
 	if(enet_host_service (localclient, &event, 5000) > 0 && event.type == ENET_EVENT_TYPE_CONNECT)
 	{
 		enet_host_flush(localclient);
@@ -58,4 +59,11 @@ void O_CL_Connect (char *srv_hn)
 	}
 	else
 		printf("connection failed\n");
+
+	if(enet_host_service (localclient, &event, 5000) > 0 && event.type == ENET_EVENT_TYPE_RECEIVE
+	   && ReadUInt8((uint8_t**)&event.packet->data) == MSG_WELCOME) // Wait for server's greeting, set localid to the second marker we get.
+	{
+		localid = ReadUInt8((uint8_t**)&event.packet->data);
+		printf("DBG: Setting client's id to: %i\n", localid);
+	}
 }

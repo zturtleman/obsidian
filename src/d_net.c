@@ -43,6 +43,7 @@
 
 #include "o_server.h"
 #include "o_common.h"
+#include "o_client.h"
 
 //
 // NETWORKING
@@ -214,8 +215,11 @@ void D_CheckNetGame (void)
     int num_players;
 
     // default values for single player
+    if(client)
+        consoleplayer = localid;
+    else
+        consoleplayer = 0;
 
-    consoleplayer = 0;
     if (!client && !server)
         netgame = false;
     else
@@ -232,7 +236,7 @@ void D_CheckNetGame (void)
     }
 
 //    if(!server) // Only spawn a player if this isnt a server
-        playeringame[0] = true;
+        playeringame[consoleplayer] = true;
 
     //!
     // @category net

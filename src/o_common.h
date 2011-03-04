@@ -33,6 +33,15 @@
 extern boolean server;
 extern boolean client;
 
-void WriteInt32(int32_t** const Dest, int32_t Value);
+// void WriteInt32(int32_t** const Dest, int32_t Value);
+
+// Protocol
+
+enum
+{
+	MSG_NULL,
+
+	MSG_WELCOME
+};
 
 #endif
