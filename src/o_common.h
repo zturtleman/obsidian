@@ -41,7 +41,9 @@ enum
 {
 	MSG_NULL,
 
-	MSG_WELCOME
+	MSG_WELCOME,
+
+	MSG_POS
 };
 
 #endif

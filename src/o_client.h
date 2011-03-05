@@ -31,5 +31,6 @@ ENetHost *localclient;
 int localid;
 
 void O_CL_Connect (char *srv_hn);
+void O_CL_SendPosUpdate(fixed_t x, fixed_t y, fixed_t z, fixed_t ang);
 
 #endif

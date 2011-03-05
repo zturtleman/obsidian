@@ -2,10 +2,15 @@
 = Proposed Obsidian Protocol =
 ==============================
 
+Message: MSG_NULL
+Server Use: Ping
+Client Use: Ping
+Data: None
+
 Message: MSG_WELCOME
 Server Use: Sent to client upon connection, client should be able to gain an idea of what the game is like from this info.
 Client Use: Client will never send this message.
-Data: 1 Unsigned 8-bit integer containing the players id (for consoleplayer), 1 unsigned 8-bit integer containing info about which players are in game (bitmask: player 0 = 1, player 2 = 2, player 3 = 4, etc.)
+Data: 1 Unsigned 8-bit integer containing the server's protocol, 1 Unsigned 8-bit integer containing the players id (for consoleplayer), 1 unsigned 8-bit integer containing info about which players are in game (bitmask: player 0 = 1, player 2 = 2, player 3 = 4, etc.)
 
 Message: MSG_POS
 Server Use: Update a particular client on the positions of the other clients.

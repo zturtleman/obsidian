@@ -30,13 +30,14 @@
 boolean server;
 boolean client;
 
+ENetPeer *srvpeer;
+
 void O_CL_Connect (char *srv_hn)
 {
         if (enet_initialize() != 0)
                 return 1; // Initialize enet, if it fails, return 1
 
 	ENetAddress addr = { ENET_HOST_ANY, 11666 };
-	ENetPeer *peer;
 	ENetEvent event;
 
 	if (enet_address_set_host (&addr, srv_hn) < 0)
@@ -48,7 +49,7 @@ void O_CL_Connect (char *srv_hn)
 	printf("Attempting to connect to %s:%i\n", srv_hn, addr.port);
 
 	localclient = enet_host_create (NULL, 1, 2, 0, 0);
-	peer = enet_host_connect (localclient, &addr, 2, 0);
+	srvpeer = enet_host_connect (localclient, &addr, 2, 0);
 
 	if(enet_host_service (localclient, &event, 5000) > 0 && event.type == ENET_EVENT_TYPE_CONNECT)
 	{
@@ -66,4 +67,18 @@ void O_CL_Connect (char *srv_hn)
 		localid = ReadUInt8((uint8_t**)&event.packet->data);
 		printf("DBG: Setting client's id to: %i\n", localid);
 	}
+}
+
+void O_CL_SendPosUpdate(fixed_t x, fixed_t y, fixed_t z, fixed_t ang)
+{
+	ENetPacket *pk = enet_packet_create(NULL, 32, 0);
+	void *start = pk->data;
+	void *p = start;
+	WriteUInt8((uint8_t**)&p, MSG_POS);
+	WriteInt32((int32_t**)&p, x);
+	WriteInt32((int32_t**)&p, y);
+	WriteInt32((int32_t**)&p, z);
+	WriteInt32((int32_t**)&p, ang);
+	enet_packet_resize(pk, p-start);
+	enet_peer_send(srvpeer, 0, pk);
 }
