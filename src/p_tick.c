@@ -31,6 +31,8 @@
 
 #include "doomstat.h"
 
+#include "o_client.h"
+#include "o_common.h"
 
 int	leveltime;
 
@@ -153,6 +155,10 @@ void P_Ticker (void)
     P_RunThinkers ();
     P_UpdateSpecials ();
     P_RespawnSpecials ();
+
+    // [tm512] Update the server about our player - 3/5/11
+    if(client)
+        O_CL_SendPosUpdate(players[consoleplayer].mo->x, players[consoleplayer].mo->y, players[consoleplayer].mo->z, players[consoleplayer].mo->angle);
 
     // for par times
     leveltime++;	

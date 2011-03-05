@@ -89,6 +89,11 @@ void O_SV_Loop (void)
 				O_SV_ClientWelcome(&clients[c]);
 				break;
 			}
+			case ENET_EVENT_TYPE_RECEIVE:
+			{
+				O_SV_ParsePacket(*event.packet);
+				break;
+			}
 		}
 	}
 	return;
@@ -119,5 +124,16 @@ void O_SV_ClientWelcome (client_t* cl)
 	WriteUInt8((uint8_t**)&p, cl->id +1); // client will set this to consoleplayer
 	enet_packet_resize(pk, p-start);
 	enet_peer_send(cl->peer, 0, pk);
+	cl->type = CT_ACTIVE;
+	return;
+}
+
+void O_SV_ParsePacket (ENetPacket pk)
+{
+	switch(ReadUInt8((uint8_t**)&pk.data))
+	{
+		case MSG_POS:
+		break;
+	}
 	return;
 }

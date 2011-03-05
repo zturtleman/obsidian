@@ -34,6 +34,7 @@ int O_SV_Main(void);
 void O_SV_Loop(void);
 int O_SV_FindEmptyClientNum(void);
 player_t* O_SV_FindEmptyPlayer(void);
+void O_SV_ParsePacket (ENetPacket pk);
 
 // Variables
 
