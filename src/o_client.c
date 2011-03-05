@@ -82,5 +82,4 @@ void O_CL_SendPosUpdate(fixed_t x, fixed_t y, fixed_t z, fixed_t ang)
 	enet_packet_resize(pk, p-start);
 	enet_host_broadcast(localclient, 0, pk);
 	enet_host_flush(localclient);
-//	enet_peer_send(srvpeer, 0, pk);
 }

@@ -91,7 +91,7 @@ void O_SV_Loop (void)
 			}
 			case ENET_EVENT_TYPE_RECEIVE:
 			{
-				O_SV_ParsePacket(*event.packet);
+				O_SV_ParsePacket(*event.packet, event.peer->connectID);
 				break;
 			}
 		}
@@ -128,12 +128,31 @@ void O_SV_ClientWelcome (client_t* cl)
 	return;
 }
 
-void O_SV_ParsePacket (ENetPacket pk)
+void O_SV_ParsePacket (ENetPacket pk, int peerNum)
 {
-	switch(ReadUInt8((uint8_t**)&pk.data))
+	int from = O_SV_ClientNumForPeer(peerNum);
+	uint8_t msg = ReadUInt8((uint8_t**)&pk.data);
+	switch(msg)
 	{
 		case MSG_POS:
+		if(clients[from].player && clients[from].player->mo)
+		{
+			clients[from].player->mo->x = ReadInt32((int32_t**)&pk.data);
+                        clients[from].player->mo->y = ReadInt32((int32_t**)&pk.data);
+                        clients[from].player->mo->z = ReadInt32((int32_t**)&pk.data);
+                        clients[from].player->mo->angle = ReadInt32((int32_t**)&pk.data);
+		}
 		break;
 	}
 	return;
+}
+
+int O_SV_ClientNumForPeer(int peerNum)
+{
+	int i;
+	for (i = 0; i < MAXPLAYERS; i++)
+	{
+		if(clients[i].peer->connectID == peerNum)
+			return i;
+	}
 }
