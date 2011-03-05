@@ -67,6 +67,8 @@ int O_SV_Main (void)
 
 void O_SV_Loop (void)
 {
+
+	if(!(gametic % 3500)) printf("10 tics\n");
 	ENetEvent event;
 	while (enet_host_service(srv, &event, 5) > 0)
 	{

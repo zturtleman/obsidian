@@ -443,6 +443,8 @@ void D_DoomLoop (void)
         // Server Loop stuff:
         if(server)
             O_SV_Loop();
+        else if (client) // Client loop stuff:
+            O_CL_Loop();
     }
 }
 

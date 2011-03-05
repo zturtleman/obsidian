@@ -69,6 +69,17 @@ void O_CL_Connect (char *srv_hn)
 	}
 }
 
+void O_CL_Loop(void)
+{
+	ENetEvent event;
+	while (enet_host_service(localclient, &event, 5) > 0)
+	{
+		switch(event.type)
+		{}
+	}
+	return;
+}
+
 void O_CL_SendPosUpdate(fixed_t x, fixed_t y, fixed_t z, fixed_t ang)
 {
 	ENetPacket *pk = enet_packet_create(NULL, 32, 0);
