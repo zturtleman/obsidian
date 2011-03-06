@@ -68,7 +68,6 @@ int O_SV_Main (void)
 void O_SV_Loop (void)
 {
 
-	if(!(gametic % 3500)) printf("10 tics\n");
 	ENetEvent event;
 	while (enet_host_service(srv, &event, 5) > 0)
 	{
@@ -78,18 +77,21 @@ void O_SV_Loop (void)
 			{
 				int c = O_SV_FindEmptyClientNum(); // Find an empty client for this guy, or kick him out
 				if (c < 0) 
-				{ enet_peer_reset(event.peer); break; }
+				{ 
+					enet_peer_reset(event.peer); 
+					break;
+				}
 				clients[c].type = CT_CONNECT;
 				clients[c].id = c;
 				clients[c].peer = event.peer;
-				clients[c].player = &players[c]; // +1 since server is in game
+				clients[c].player = &players[c];
 				if(!clients[c].player) 
 				{
 					enet_peer_reset(clients[c].peer);
 					break;
 				}
 				char hn[512];
-				printf("connected: %s\n", (enet_address_get_host(&clients[c].peer->address, hn, sizeof(hn))==0) ? hn : "localhost");
+				printf("connected: %s - %i\n", (enet_address_get_host(&clients[c].peer->address, hn, sizeof(hn))==0) ? hn : "localhost", event.peer->connectID);
 				O_SV_ClientWelcome(&clients[c]);
 				break;
 			}
@@ -109,23 +111,20 @@ int O_SV_FindEmptyClientNum(void)
 	for(i = 0; i < MAXPLAYERS; i++)
 	{
 		if(clients[i].type == CT_EMPTY)
-		{
-			printf("DBG: client_t for new player found! Assigning #%i\n", i);
 			return i;
-		}
 	}
 	return -1;
 }
 
 void O_SV_ClientWelcome (client_t* cl)
 {
-	playeringame[cl->id + 1] = true; // + 1 since server is in game at this stage in dev
-	players[cl->id + 1].playerstate = PST_REBORN;
+	playeringame[cl->id] = true; // + 1 since server is in game at this stage in dev
+	players[cl->id].playerstate = PST_REBORN;
 	ENetPacket *pk = enet_packet_create(NULL, 32, ENET_PACKET_FLAG_RELIABLE);
 	void *start = pk->data;
 	void *p = start;
 	WriteUInt8((uint8_t**)&p, MSG_WELCOME); // put a greeting marker on it
-	WriteUInt8((uint8_t**)&p, cl->id +1); // client will set this to consoleplayer
+	WriteUInt8((uint8_t**)&p, cl->id); // client will set this to consoleplayer
 	enet_packet_resize(pk, p-start);
 	enet_peer_send(cl->peer, 0, pk);
 	cl->type = CT_ACTIVE;

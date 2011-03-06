@@ -235,7 +235,7 @@ void D_CheckNetGame (void)
        	nettics[i] = 0;
     }
 
-//    if(!server) // Only spawn a player if this isnt a server
+    if(!server) // Only spawn a player if this isnt a server
         playeringame[consoleplayer] = true;
 
     //!
