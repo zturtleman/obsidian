@@ -58,15 +58,17 @@ void O_CL_Connect (char *srv_hn)
 		client = 1;
 		server = 0;
 	}
-	else
-		printf("connection failed\n");
 
 	if(enet_host_service (localclient, &event, 5000) > 0 && event.type == ENET_EVENT_TYPE_RECEIVE
 	   && ReadUInt8((uint8_t**)&event.packet->data) == MSG_WELCOME) // Wait for server's greeting, set localid to the second marker we get.
 	{
 		localid = ReadUInt8((uint8_t**)&event.packet->data);
+		inGameMask = ReadUInt8((uint8_t**)&event.packet->data);
 		printf("DBG: Setting client's id to: %i\n", localid);
+		return;
 	}
+
+	printf("Connection to %s failed!\n", srv_hn);
 }
 
 void O_CL_Loop(void)

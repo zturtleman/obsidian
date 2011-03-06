@@ -125,6 +125,13 @@ void O_SV_ClientWelcome (client_t* cl)
 	void *p = start;
 	WriteUInt8((uint8_t**)&p, MSG_WELCOME); // put a greeting marker on it
 	WriteUInt8((uint8_t**)&p, cl->id); // client will set this to consoleplayer
+	uint8_t inGame = 0;
+	uint8_t i;
+	for (i = 0; i < MAXPLAYERS; i++)
+		if(playeringame[i])
+			inGame += 1 << i;
+	printf("DBG: players in game bitmask: %i\n", inGame);
+	WriteUInt8((uint8_t**)&p, inGame);
 	enet_packet_resize(pk, p-start);
 	enet_peer_send(cl->peer, 0, pk);
 	cl->type = CT_ACTIVE;

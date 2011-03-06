@@ -231,7 +231,10 @@ void D_CheckNetGame (void)
 
     for (i=0; i<MAXPLAYERS; i++)
     {
-        playeringame[i] = false;
+        if(client && (inGameMask & 1<<i))
+            playeringame[i] = true;
+        else
+            playeringame[i] = false;
        	nettics[i] = 0;
     }
 
