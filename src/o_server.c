@@ -29,7 +29,6 @@
 #include "doomstat.h"
 #include "d_net.h"
 #include "r_defs.h"
-//#include "p_mobj.h"
 
 #include "o_server.h"
 #include "o_common.h"
@@ -67,7 +66,13 @@ int O_SV_Main (void)
 
 void O_SV_Loop (void)
 {
-
+	if(!(gametic % 35)&&0) // movement stats
+	{
+		int i;
+		for (i=0;i<MAXPLAYERS;i++)
+			if(playeringame[i])
+				printf("%i: %i %i %i\n", i, players[i].mo->x, players[i].mo->y, players[i].mo->z);
+	}
 	ENetEvent event;
 	while (enet_host_service(srv, &event, 5) > 0)
 	{
@@ -111,7 +116,10 @@ int O_SV_FindEmptyClientNum(void)
 	for(i = 0; i < MAXPLAYERS; i++)
 	{
 		if(clients[i].type == CT_EMPTY)
+		{
+			printf("DBG: client_t for new player found! Assigning #%i\n", i);
 			return i;
+		}
 	}
 	return -1;
 }
@@ -141,6 +149,7 @@ void O_SV_ClientWelcome (client_t* cl)
 void O_SV_ParsePacket (ENetPacket pk, int peerNum)
 {
 	int from = O_SV_ClientNumForPeer(peerNum);
+	printf("%i\n",from);
 	uint8_t msg = ReadUInt8((uint8_t**)&pk.data);
 	switch(msg)
 	{
