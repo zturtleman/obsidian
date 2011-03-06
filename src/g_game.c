@@ -1285,9 +1285,12 @@ G_CheckSpot
     unsigned		an; 
     mobj_t*		mo; 
     int			i;
+
+    printf("%i\n",playernum);
 	
     if (!players[playernum].mo)
     {
+	return false;
 	// first spawn of level, before corpses
 	for (i=0 ; i<playernum ; i++)
 	    if (players[i].mo->x == mthing->x << FRACBITS

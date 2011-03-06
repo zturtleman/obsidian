@@ -135,14 +135,13 @@ void O_SV_ClientWelcome (client_t* cl)
 void O_SV_ParsePacket (ENetPacket pk, int peerNum)
 {
 	int from = O_SV_ClientNumForPeer(peerNum);
-	printf("%i\n", from);
 	uint8_t msg = ReadUInt8((uint8_t**)&pk.data);
 	switch(msg)
 	{
 		case MSG_POS:
 		if(clients[from].player && clients[from].player->mo)
 		{
-		//	P_TransportThing(clients[from].player->mo, ReadInt32((int32_t**)&pk.data), ReadInt32((int32_t**)&pk.data), ReadInt32((int32_t**)&pk.data));
+			P_UnsetThingPosition(clients[from].player->mo);
 			clients[from].player->mo->x = ReadInt32((int32_t**)&pk.data);
                         clients[from].player->mo->y = ReadInt32((int32_t**)&pk.data);
                         clients[from].player->mo->z = ReadInt32((int32_t**)&pk.data);
@@ -150,8 +149,9 @@ void O_SV_ParsePacket (ENetPacket pk, int peerNum)
 		        clients[from].player->mo->floorz = clients[from].player->mo->subsector->sector->floorheight;
 		        clients[from].player->mo->ceilingz = clients[from].player->mo->subsector->sector->ceilingheight;
                         clients[from].player->mo->angle = ReadInt32((int32_t**)&pk.data);
+			P_SetThingPosition(clients[from].player->mo);
 			P_CheckPosition(clients[from].player->mo, clients[from].player->mo->x, clients[from].player->mo->y);
-		} else { printf("Player does NOT have a player! D:\n"); }
+		}
 		break;
 	}
 	return;
