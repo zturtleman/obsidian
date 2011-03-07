@@ -416,7 +416,6 @@ int DEH_LoadLumpByName(char *name)
 
     if (lumpnum == -1)
     {
-        fprintf(stderr, "DEH_LoadLumpByName: '%s' lump not found\n", name);
         return 0;
     }
 
