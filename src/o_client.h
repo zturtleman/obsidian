@@ -36,5 +36,6 @@ void O_CL_Loop(void);
 
 void O_CL_SendPosUpdate(fixed_t x, fixed_t y, fixed_t z, fixed_t ang);
 void O_CL_SendUseCmd(void);
+void O_CL_SendTic(ticcmd_t *cmd);
 
 #endif

@@ -326,8 +326,8 @@ void P_PlayerThink (player_t* player)
 	if (!player->usedown)
 	{
 	    P_UseLines (player);
-        if(client)
-            O_CL_SendUseCmd();
+//        if(client)
+//            O_CL_SendUseCmd();
 	    player->usedown = true;
 	}
     }
@@ -385,6 +385,9 @@ void P_PlayerThink (player_t* player)
     }
     else
 	player->fixedcolormap = 0;
+
+    if(client)
+        O_CL_SendTic(cmd);
 }
 
 
