@@ -43,7 +43,11 @@ enum
 
 	MSG_WELCOME,
 
-	MSG_POS
+	MSG_POS,
+
+	MSG_JOIN,
+
+	MSG_USE
 };
 
 #endif

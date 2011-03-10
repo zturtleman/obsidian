@@ -33,6 +33,8 @@ uint8_t inGameMask;
 
 void O_CL_Connect (char *srv_hn);
 void O_CL_Loop(void);
+
 void O_CL_SendPosUpdate(fixed_t x, fixed_t y, fixed_t z, fixed_t ang);
+void O_CL_SendUseCmd(void);
 
 #endif

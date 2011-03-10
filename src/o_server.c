@@ -66,13 +66,6 @@ int O_SV_Main (void)
 
 void O_SV_Loop (void)
 {
-	if(!(gametic % 35)&&0) // movement stats
-	{
-		int i;
-		for (i=0;i<MAXPLAYERS;i++)
-			if(playeringame[i])
-				printf("%i: %i %i %i\n", i, players[i].mo->x, players[i].mo->y, players[i].mo->z);
-	}
 	ENetEvent event;
 	while (enet_host_service(srv, &event, 5) > 0)
 	{
@@ -158,15 +151,20 @@ void O_SV_ParsePacket (ENetPacket pk, ENetPeer *p)
 		{
 			P_UnsetThingPosition(clients[from].player->mo);
 			clients[from].player->mo->x = ReadInt32((int32_t**)&pk.data);
-                        clients[from].player->mo->y = ReadInt32((int32_t**)&pk.data);
-                        clients[from].player->mo->z = ReadInt32((int32_t**)&pk.data);
+			clients[from].player->mo->y = ReadInt32((int32_t**)&pk.data);
+			clients[from].player->mo->z = ReadInt32((int32_t**)&pk.data);
 			clients[from].player->mo->subsector = R_PointInSubsector(clients[from].player->mo->x, clients[from].player->mo->y);
-		        clients[from].player->mo->floorz = clients[from].player->mo->subsector->sector->floorheight;
-		        clients[from].player->mo->ceilingz = clients[from].player->mo->subsector->sector->ceilingheight;
-                        clients[from].player->mo->angle = ReadInt32((int32_t**)&pk.data);
+			clients[from].player->mo->floorz = clients[from].player->mo->subsector->sector->floorheight;
+			clients[from].player->mo->ceilingz = clients[from].player->mo->subsector->sector->ceilingheight;
+			clients[from].player->mo->angle = ReadInt32((int32_t**)&pk.data);
 			P_SetThingPosition(clients[from].player->mo);
 			P_CheckPosition(clients[from].player->mo, clients[from].player->mo->x, clients[from].player->mo->y);
 		}
+		break;
+
+		case MSG_USE:
+		if(clients[from].player)
+			P_UseLines(clients[from].player);
 		break;
 	}
 	return;

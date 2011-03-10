@@ -96,3 +96,13 @@ void O_CL_SendPosUpdate(fixed_t x, fixed_t y, fixed_t z, fixed_t ang)
 	enet_host_broadcast(localclient, 0, pk);
 	enet_host_flush(localclient);
 }
+
+void O_CL_SendUseCmd(void)
+{
+	ENetPacket *pk = enet_packet_create(NULL, 1, ENET_PACKET_FLAG_RELIABLE);
+	void *start = pk->data;
+	void *p = start;
+	WriteUInt8((uint8_t**)&p, MSG_USE);
+    enet_host_broadcast(localclient, 0, pk);
+    enet_host_flush(localclient);
+}
