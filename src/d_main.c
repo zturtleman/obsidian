@@ -800,17 +800,20 @@ static void LoadChexDeh(void)
     }
 }
 
-static void LoadHacxDeh(void)
+static void LoadDehLump(void)
 {
-    // If this is the HACX IWAD, we need to load the DEHACKED lump.
+    boolean dehloaded = false;
 
-    if (gameversion == exe_hacx)
+    if(DEH_LoadLumpByName("DEHACKED"))
     {
-        if (!DEH_LoadLumpByName("DEHACKED"))
-        {
+        dehloaded = true;
+        printf("D_Main: DEHACKED lump loaded.\n");
+    }
+
+    if (gameversion == exe_hacx && !dehloaded) // Hacx needs the dehacked lump
+    {
             I_Error("DEHACKED lump not found.  Please check that this is the "
                     "Hacx v1.2 IWAD.");
-        }
     }
 }
 
@@ -1198,7 +1201,7 @@ void D_DoomMain (void)
     D_IdentifyVersion();
     InitGameVersion();
     LoadChexDeh();
-    LoadHacxDeh();
+    LoadDehLump();
     D_SetGameDescription();
     D_SetSaveGameDir();
 
