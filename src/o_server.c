@@ -153,12 +153,15 @@ void O_SV_ParsePacket (ENetPacket pk, ENetPeer *p)
 			clients[from].player->mo->x = ReadInt32((int32_t**)&pk.data);
 			clients[from].player->mo->y = ReadInt32((int32_t**)&pk.data);
 			clients[from].player->mo->z = ReadInt32((int32_t**)&pk.data);
+			clients[from].player->mo->angle = ReadInt32((int32_t**)&pk.data);
+			clients[from].player->mo->momx = ReadInt32((int32_t**)&pk.data);
+			clients[from].player->mo->momy = ReadInt32((int32_t**)&pk.data);
+			clients[from].player->mo->momz = ReadInt32((int32_t**)&pk.data);
 			clients[from].player->mo->subsector = R_PointInSubsector(clients[from].player->mo->x, clients[from].player->mo->y);
 			clients[from].player->mo->floorz = clients[from].player->mo->subsector->sector->floorheight;
 			clients[from].player->mo->ceilingz = clients[from].player->mo->subsector->sector->ceilingheight;
-			clients[from].player->mo->angle = ReadInt32((int32_t**)&pk.data);
 			P_SetThingPosition(clients[from].player->mo);
-			P_CheckPosition(clients[from].player->mo, clients[from].player->mo->x, clients[from].player->mo->y);
+//			P_CheckPosition(clients[from].player->mo, clients[from].player->mo->x, clients[from].player->mo->y);
 		}
 		break;
 

@@ -82,7 +82,7 @@ void O_CL_Loop(void)
 	return;
 }
 
-void O_CL_SendPosUpdate(fixed_t x, fixed_t y, fixed_t z, fixed_t ang)
+void O_CL_SendPosUpdate(fixed_t x, fixed_t y, fixed_t z, fixed_t ang, fixed_t momx, fixed_t momy, fixed_t momz)
 {
 	ENetPacket *pk = enet_packet_create(NULL, 32, 0);
 	void *start = pk->data;
@@ -92,6 +92,9 @@ void O_CL_SendPosUpdate(fixed_t x, fixed_t y, fixed_t z, fixed_t ang)
 	WriteInt32((int32_t**)&p, y);
 	WriteInt32((int32_t**)&p, z);
 	WriteInt32((int32_t**)&p, ang);
+	WriteInt32((int32_t**)&p, momx);
+	WriteInt32((int32_t**)&p, momy);
+	WriteInt32((int32_t**)&p, momz);
 	enet_packet_resize(pk, p-start);
 	enet_host_broadcast(localclient, 0, pk);
 	enet_host_flush(localclient);
