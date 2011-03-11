@@ -37,7 +37,7 @@ void O_CL_Connect (char *srv_hn)
         if (enet_initialize() != 0)
                 return 1; // Initialize enet, if it fails, return 1
 
-	ENetAddress addr = { ENET_HOST_ANY, 11667 };
+	ENetAddress addr = { ENET_HOST_ANY, 11666 };
 	ENetEvent event;
 
 	if (enet_address_set_host (&addr, srv_hn) < 0)
@@ -103,36 +103,6 @@ void O_CL_SendUseCmd(void)
 	void *start = pk->data;
 	void *p = start;
 	WriteUInt8((uint8_t**)&p, MSG_USE);
-	enet_host_broadcast(localclient, 0, pk);
-	enet_host_flush(localclient);
-}
-
-
-/*
-typedef struct
-{
-    signed char forwardmove;    // *2048 for move
-    signed char sidemove;   // *2048 for move
-    short   angleturn;  // <<16 for angle delta
-    byte    chatchar;
-    byte    buttons;
-    byte        consistancy;    // checks for net game
-} ticcmd_t;
-*/
-
-void O_CL_SendTic(ticcmd_t *cmd)
-{
-	ENetPacket *pk = enet_packet_create(NULL, 32, 0);
-	void *start = pk->data;
-	void *p = start;
-	WriteUInt8((uint8_t**)&p, MSG_TIC);
-	WriteInt8((int8_t**)&p, cmd->forwardmove);
-	WriteInt8((int8_t**)&p, cmd->sidemove);
-	WriteInt16((int16_t**)&p, cmd->angleturn);
-	WriteInt8((int8_t**)&p, cmd->chatchar);
-	WriteInt8((int8_t**)&p, cmd->buttons);
-	WriteInt8((int8_t**)&p, cmd->consistancy);
-	enet_packet_resize(pk, p-start);
 	enet_host_broadcast(localclient, 0, pk);
 	enet_host_flush(localclient);
 }

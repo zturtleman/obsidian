@@ -163,22 +163,9 @@ void O_SV_ParsePacket (ENetPacket pk, ENetPeer *p)
 		break;
 
 		case MSG_USE:
-		if(clients[from].player&&0)
+		if(clients[from].player)
 			P_UseLines(clients[from].player);
 		break;
-
-		case MSG_TIC:
-		if(clients[from].player)
-		{
-			ticcmd_t *cmd = &clients[from].player->cmd;
-			cmd->forwardmove = ReadInt8((int8_t**)&pk.data);
-			cmd->sidemove = ReadInt8((int8_t**)&pk.data);
-			cmd->angleturn = ReadInt16((int16_t**)&pk.data);
-			cmd->chatchar = ReadInt8((int8_t**)&pk.data);
-			cmd->buttons = ReadInt8((int8_t**)&pk.data);
-			cmd->consistancy = ReadInt8((int8_t**)&pk.data);
-			P_PlayerThink(clients[from].player);
-		}
 	}
 	return;
 }
