@@ -29,6 +29,7 @@
 #include "doomstat.h"
 #include "d_net.h"
 #include "r_defs.h"
+#include "r_main.h"
 
 #include "o_server.h"
 #include "o_common.h"
