@@ -170,6 +170,10 @@ void O_SV_ParsePacket (ENetPacket pk, ENetPeer *p)
 		if(clients[from].player)
 			P_UseLines(clients[from].player);
 		break;
+		case MSG_STATE:
+		if(clients[from].player->mo)
+			P_SetMobjState(clients[from].player->mo, (statenum_t)ReadUInt16((uint16_t**)&pk.data));
+		break;
 	}
 	return;
 }

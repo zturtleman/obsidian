@@ -47,7 +47,9 @@ enum
 
 	MSG_JOIN,
 
-	MSG_USE
+	MSG_USE,
+
+	MSG_STATE
 };
 
 #endif

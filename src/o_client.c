@@ -109,3 +109,14 @@ void O_CL_SendUseCmd(void)
 	enet_host_broadcast(localclient, 0, pk);
 	enet_host_flush(localclient);
 }
+
+void O_CL_SendStateUpdate(uint16_t state)
+{
+	ENetPacket *pk = enet_packet_create(NULL, 3, 0);
+	void *start = pk->data;
+	void *p = start;
+	WriteUInt8((uint8_t**)&p, MSG_STATE);
+	WriteUInt16((uint16_t**)&p, state);
+	enet_host_broadcast(localclient, 0, pk);
+	enet_host_flush(localclient);
+}
