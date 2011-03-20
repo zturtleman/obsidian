@@ -82,7 +82,7 @@ void O_CL_Loop(void)
 	return;
 }
 
-void O_CL_SendPosUpdate(fixed_t x, fixed_t y, fixed_t z, fixed_t ang)
+void O_CL_SendPosUpdate(fixed_t x, fixed_t y, fixed_t z, fixed_t ang, fixed_t momx, fixed_t momy, fixed_t momz)
 {
 	ENetPacket *pk = enet_packet_create(NULL, 32, 0);
 	void *start = pk->data;
@@ -92,6 +92,9 @@ void O_CL_SendPosUpdate(fixed_t x, fixed_t y, fixed_t z, fixed_t ang)
 	WriteInt32((int32_t**)&p, y);
 	WriteInt32((int32_t**)&p, z);
 	WriteInt32((int32_t**)&p, ang);
+	WriteInt32((int32_t**)&p, momx);
+	WriteInt32((int32_t**)&p, momy);
+	WriteInt32((int32_t**)&p, momz);
 	enet_packet_resize(pk, p-start);
 	enet_host_broadcast(localclient, 0, pk);
 	enet_host_flush(localclient);
@@ -103,35 +106,6 @@ void O_CL_SendUseCmd(void)
 	void *start = pk->data;
 	void *p = start;
 	WriteUInt8((uint8_t**)&p, MSG_USE);
-	enet_host_broadcast(localclient, 0, pk);
-	enet_host_flush(localclient);
-}
-
-
-/*
-typedef struct
-{
-    signed char forwardmove;    // *2048 for move
-    signed char sidemove;   // *2048 for move
-    short   angleturn;  // <<16 for angle delta
-    byte    chatchar;
-    byte    buttons;
-    byte        consistancy;    // checks for net game
-} ticcmd_t;
-*/
-
-void O_CL_SendTic(ticcmd_t *cmd)
-{
-	ENetPacket *pk = enet_packet_create(NULL, 32, 0);
-	void *start = pk->data;
-	void *p = start;
-	WriteUInt8((uint8_t**)&p, MSG_TIC);
-	WriteInt8((int8_t**)&p, cmd->forwardmove);
-	WriteInt8((int8_t**)&p, cmd->sidemove);
-	WriteInt16((int16_t**)&p, cmd->angleturn);
-	WriteInt8((int8_t**)&p, cmd->chatchar);
-	WriteInt8((int8_t**)&p, cmd->buttons);
-	enet_packet_resize(pk, p-start);
 	enet_host_broadcast(localclient, 0, pk);
 	enet_host_flush(localclient);
 }

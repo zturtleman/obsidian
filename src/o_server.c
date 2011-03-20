@@ -154,32 +154,22 @@ void O_SV_ParsePacket (ENetPacket pk, ENetPeer *p)
 			clients[from].player->mo->x = ReadInt32((int32_t**)&pk.data);
 			clients[from].player->mo->y = ReadInt32((int32_t**)&pk.data);
 			clients[from].player->mo->z = ReadInt32((int32_t**)&pk.data);
+			clients[from].player->mo->angle = ReadInt32((int32_t**)&pk.data);
+			clients[from].player->mo->momx = ReadInt32((int32_t**)&pk.data);
+			clients[from].player->mo->momy = ReadInt32((int32_t**)&pk.data);
+			clients[from].player->mo->momz = ReadInt32((int32_t**)&pk.data);
 			clients[from].player->mo->subsector = R_PointInSubsector(clients[from].player->mo->x, clients[from].player->mo->y);
 			clients[from].player->mo->floorz = clients[from].player->mo->subsector->sector->floorheight;
 			clients[from].player->mo->ceilingz = clients[from].player->mo->subsector->sector->ceilingheight;
-			clients[from].player->mo->angle = ReadInt32((int32_t**)&pk.data);
 			P_SetThingPosition(clients[from].player->mo);
-			P_CheckPosition(clients[from].player->mo, clients[from].player->mo->x, clients[from].player->mo->y);
+//			P_CheckPosition(clients[from].player->mo, clients[from].player->mo->x, clients[from].player->mo->y);
 		}
 		break;
 
 		case MSG_USE:
-		if(clients[from].player&&0)
+		if(clients[from].player)
 			P_UseLines(clients[from].player);
 		break;
-
-		case MSG_TIC:
-		if(clients[from].player)
-		{
-			ticcmd_t *cmd = &clients[from].player->cmd;
-			cmd->forwardmove = ReadInt8((int8_t**)&pk.data);
-			cmd->sidemove = ReadInt8((int8_t**)&pk.data);
-			cmd->angleturn = ReadInt16((int16_t**)&pk.data);
-			cmd->chatchar = ReadInt8((int8_t**)&pk.data);
-			cmd->buttons = ReadInt8((int8_t**)&pk.data);
-			cmd->consistancy = 0;
-			P_PlayerThink(clients[from].player);
-		}
 	}
 	return;
 }
