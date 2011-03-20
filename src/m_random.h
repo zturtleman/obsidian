@@ -31,7 +31,7 @@
 
 #include "doomtype.h"
 
-
+int rndindex, prndindex;
 
 // Returns a number from 0 to 255,
 // from a lookup table.

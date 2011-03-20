@@ -37,7 +37,7 @@ void O_CL_Connect (char *srv_hn)
         if (enet_initialize() != 0)
                 return 1; // Initialize enet, if it fails, return 1
 
-	ENetAddress addr = { ENET_HOST_ANY, 11667 };
+	ENetAddress addr = { ENET_HOST_ANY, 11666 };
 	ENetEvent event;
 
 	if (enet_address_set_host (&addr, srv_hn) < 0)
@@ -131,7 +131,6 @@ void O_CL_SendTic(ticcmd_t *cmd)
 	WriteInt16((int16_t**)&p, cmd->angleturn);
 	WriteInt8((int8_t**)&p, cmd->chatchar);
 	WriteInt8((int8_t**)&p, cmd->buttons);
-	WriteInt8((int8_t**)&p, cmd->consistancy);
 	enet_packet_resize(pk, p-start);
 	enet_host_broadcast(localclient, 0, pk);
 	enet_host_flush(localclient);

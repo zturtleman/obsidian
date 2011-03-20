@@ -177,7 +177,7 @@ void O_SV_ParsePacket (ENetPacket pk, ENetPeer *p)
 			cmd->angleturn = ReadInt16((int16_t**)&pk.data);
 			cmd->chatchar = ReadInt8((int8_t**)&pk.data);
 			cmd->buttons = ReadInt8((int8_t**)&pk.data);
-			cmd->consistancy = ReadInt8((int8_t**)&pk.data);
+			cmd->consistancy = 0;
 			P_PlayerThink(clients[from].player);
 		}
 	}
