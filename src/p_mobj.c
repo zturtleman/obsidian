@@ -40,6 +40,8 @@
 
 #include "doomstat.h"
 
+#include "o_common.h"
+#include "o_client.h"
 
 void G_PlayerReborn (int player);
 void P_SpawnMapThing (mapthing_t*	mthing);
@@ -57,6 +59,9 @@ P_SetMobjState
   statenum_t	state )
 {
     state_t*	st;
+
+    if(client && mobj == players[consoleplayer].mo)
+        O_CL_SendStateUpdate((uint16_t)state);
 
     do
     {

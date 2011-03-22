@@ -1,0 +1,28 @@
+==============================
+= Proposed Obsidian Protocol =
+==============================
+
+Message: MSG_NULL
+Server Use: Ping
+Client Use: Ping
+Data: None
+
+Message: MSG_WELCOME (reliable)
+Server Use: Sent to client upon connection, client should be able to gain an idea of what the game is like from this info.
+Client Use: Client will never send this message.
+Data: 1 Unsigned 8-bit integer containing the server's protocol, 1 Unsigned 8-bit integer containing the players id (for consoleplayer), 1 unsigned 8-bit integer containing info about which players are in game (bitmask: player 0 = 1, player 2 = 2, player 3 = 4, etc.)
+
+Message: MSG_POS
+Server Use: Update a particular client on the positions of the other clients.
+Client Use: Update the server with our current position.
+Data: 4 signed 32-bit integers, containing x, y, z, and angle. If the server is sending this, there will be an additional unsigned 8-bit integer containing which player this affects.
+
+Message: MSG_JOIN (reliable)
+Server Use: Inform a client of a new client's connection.
+Client Use: <none>
+Data: 1 unsigned 8-bit integer containing the new client's id.
+
+Message: MSG_USE (reliable)
+Server Use: Inform a client that another client used something (lifts, doors, etc).
+Client Use: Inform the server that we just used something.
+Data: None from the client, but the server will send an unsigned 8-bit integer to use as the player number.

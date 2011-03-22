@@ -36,7 +36,8 @@
 
 #include "doomstat.h"
 
-
+#include "o_client.h"
+#include "o_common.h"
 
 // Index of the special effects (INVUL inverse) map.
 #define INVERSECOLORMAP		32
@@ -325,6 +326,8 @@ void P_PlayerThink (player_t* player)
 	if (!player->usedown)
 	{
 	    P_UseLines (player);
+        if(client)
+            O_CL_SendUseCmd();
 	    player->usedown = true;
 	}
     }

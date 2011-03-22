@@ -84,7 +84,7 @@ void T_VerticalDoor (vldoor_t* door)
 		S_StartSound(&door->sector->soundorg, sfx_dorcls);
 		break;
 		
-	      case close30ThenOpen:
+	      case normalClose30ThenOpen:
 		door->direction = 1;
 		S_StartSound(&door->sector->soundorg, sfx_doropn);
 		break;
@@ -130,12 +130,12 @@ void T_VerticalDoor (vldoor_t* door)
 		break;
 		
 	      case normal:
-	      case close:
+	      case normalClose:
 		door->sector->specialdata = NULL;
 		P_RemoveThinker (&door->thinker);  // unlink and free
 		break;
 		
-	      case close30ThenOpen:
+	      case normalClose30ThenOpen:
 		door->direction = 0;
 		door->topcountdown = TICRATE*30;
 		break;
@@ -149,7 +149,7 @@ void T_VerticalDoor (vldoor_t* door)
 	    switch(door->type)
 	    {
 	      case blazeClose:
-	      case close:		// DO NOT GO BACK UP!
+	      case normalClose:		// DO NOT GO BACK UP!
 		break;
 		
 	      default:
@@ -177,7 +177,7 @@ void T_VerticalDoor (vldoor_t* door)
 		door->topcountdown = door->topwait;
 		break;
 		
-	      case close30ThenOpen:
+	      case normalClose30ThenOpen:
 	      case blazeOpen:
 	      case open:
 		door->sector->specialdata = NULL;
@@ -296,14 +296,14 @@ EV_DoDoor
 	    S_StartSound(&door->sector->soundorg, sfx_bdcls);
 	    break;
 	    
-	  case close:
+	  case normalClose:
 	    door->topheight = P_FindLowestCeilingSurrounding(sec);
 	    door->topheight -= 4*FRACUNIT;
 	    door->direction = -1;
 	    S_StartSound(&door->sector->soundorg, sfx_dorcls);
 	    break;
 	    
-	  case close30ThenOpen:
+	  case normalClose30ThenOpen:
 	    door->topheight = sec->ceilingheight;
 	    door->direction = -1;
 	    S_StartSound(&door->sector->soundorg, sfx_dorcls);
@@ -446,7 +446,7 @@ EV_VerticalDoor
                 {
                     // This isn't a door OR a plat.  Now we're in trouble.
 
-                    fprintf(stderr, "EV_VerticalDoor: Tried to close "
+                    fprintf(stderr, "EV_VerticalDoor: Tried to normalClose "
                                     "something that wasn't a door.\n");
 
                     // Try closing it anyway. At least it will work on 32-bit

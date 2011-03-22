@@ -1105,17 +1105,17 @@ void G_Ticker (void)
 			
 	    if (netgame && !netdemo && !(gametic%ticdup) ) 
 	    { 
-		if (gametic > BACKUPTICS 
+		/*if (gametic > BACKUPTICS 
 		    && consistancy[i][buf] != cmd->consistancy) 
 		{ 
 		    I_Error ("consistency failure (%i should be %i)",
 			     cmd->consistancy, consistancy[i][buf]); 
-		} 
+		} */
 		if (players[i].mo) 
 		    consistancy[i][buf] = players[i].mo->x; 
 		else 
 		    consistancy[i][buf] = rndindex; 
-	    } 
+	    }
 	}
     }
     
@@ -1358,7 +1358,7 @@ void G_DeathMatchSpawnPlayer (int playernum)
 void G_DoReborn (int playernum) 
 { 
     int                             i; 
-	 
+
     if (!netgame)
     {
 	// reload the level from scratch
@@ -1369,7 +1369,8 @@ void G_DoReborn (int playernum)
 	// respawn at the start
 
 	// first dissasociate the corpse 
-	players[playernum].mo->player = NULL;   
+	if(players[playernum].mo) 
+		players[playernum].mo->player = NULL;   
 		 
 	// spawn at random spot if in death match 
 	if (deathmatch) 
