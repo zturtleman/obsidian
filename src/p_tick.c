@@ -158,7 +158,7 @@ void P_Ticker (void)
 
     // [tm512] Update the server about our player - 3/5/11
     if(client)
-        O_CL_SendPosUpdate(players[consoleplayer].mo->x, players[consoleplayer].mo->y, players[consoleplayer].mo->z, players[consoleplayer].mo->angle, players[consoleplayer].mo->momx, players[consoleplayer].mo->momy, players[consoleplayer].mo->momz);
+        CL_SendPosUpdate(players[consoleplayer].mo->x, players[consoleplayer].mo->y, players[consoleplayer].mo->z, players[consoleplayer].mo->angle, players[consoleplayer].mo->momx, players[consoleplayer].mo->momy, players[consoleplayer].mo->momz);
 
     // for par times
     leveltime++;	

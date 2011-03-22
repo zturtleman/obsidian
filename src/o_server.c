@@ -37,7 +37,7 @@
 boolean server;
 boolean client;
 
-int O_SV_Main (void) 
+int SV_Main (void) 
 {
 	if (enet_initialize() != 0) 
 		return 1; // Initialize enet, if it fails, return 1
@@ -65,7 +65,7 @@ int O_SV_Main (void)
 		clients[i].type = CT_EMPTY;
 }
 
-void O_SV_Loop (void)
+void SV_Loop (void)
 {
 	ENetEvent event;
 	while (enet_host_service(srv, &event, 5) > 0)
@@ -74,7 +74,7 @@ void O_SV_Loop (void)
 		{
 			case ENET_EVENT_TYPE_CONNECT:
 			{
-				int c = O_SV_FindEmptyClientNum(); // Find an empty client for this guy, or kick him out
+				int c = SV_FindEmptyClientNum(); // Find an empty client for this guy, or kick him out
 				if (c < 0) 
 				{ 
 					enet_peer_reset(event.peer); 
@@ -91,12 +91,12 @@ void O_SV_Loop (void)
 				}
 				char hn[512];
 				printf("connected: %s - %i\n", (enet_address_get_host(&clients[c].peer->address, hn, sizeof(hn))==0) ? hn : "localhost", event.peer->connectID);
-				O_SV_ClientWelcome(&clients[c]);
+				SV_ClientWelcome(&clients[c]);
 				break;
 			}
 			case ENET_EVENT_TYPE_RECEIVE:
 			{
-				O_SV_ParsePacket(*event.packet, event.peer);
+				SV_ParsePacket(*event.packet, event.peer);
 				break;
 			}
 		}
@@ -104,7 +104,7 @@ void O_SV_Loop (void)
 	return;
 }
 
-int O_SV_FindEmptyClientNum(void)
+int SV_FindEmptyClientNum(void)
 {
 	int i;
 	for(i = 0; i < MAXPLAYERS; i++)
@@ -118,7 +118,7 @@ int O_SV_FindEmptyClientNum(void)
 	return -1;
 }
 
-void O_SV_ClientWelcome (client_t* cl)
+void SV_ClientWelcome (client_t* cl)
 {
 	playeringame[cl->id] = true; // + 1 since server is in game at this stage in dev
 	players[cl->id].playerstate = PST_REBORN;
@@ -140,9 +140,9 @@ void O_SV_ClientWelcome (client_t* cl)
 	return;
 }
 
-void O_SV_ParsePacket (ENetPacket pk, ENetPeer *p)
+void SV_ParsePacket (ENetPacket pk, ENetPeer *p)
 {
-	int from = O_SV_ClientNumForPeer(p);
+	int from = SV_ClientNumForPeer(p);
 	if(from < 0) return; // Not a client
 	uint8_t msg = ReadUInt8((uint8_t**)&pk.data);
 	switch(msg)
@@ -178,7 +178,7 @@ void O_SV_ParsePacket (ENetPacket pk, ENetPeer *p)
 	return;
 }
 
-int O_SV_ClientNumForPeer(ENetPeer *p)
+int SV_ClientNumForPeer(ENetPeer *p)
 {
 	if(!p) return -1;
 	int i;

@@ -442,9 +442,9 @@ void D_DoomLoop (void)
 
         // Server Loop stuff:
         if(server)
-            O_SV_Loop();
+            SV_Loop();
         else if (client) // Client loop stuff:
-            O_CL_Loop();
+            CL_Loop();
     }
 }
 
@@ -871,13 +871,13 @@ void D_DoomMain (void)
     //
 
     if (M_CheckParm("-server") > 0) // Obsidian Dedicated Server
-        O_SV_Main();
+        SV_Main();
 
     {
         int i = M_CheckParmWithArgs ("-connect", 1);
 
         if(i > 0 && !server)
-             O_CL_Connect(myargv[i+1]);
+             CL_Connect(myargv[i+1]);
     }
 
     //!

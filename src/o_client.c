@@ -32,7 +32,7 @@ boolean client;
 
 ENetPeer *srvpeer;
 
-void O_CL_Connect (char *srv_hn)
+void CL_Connect (char *srv_hn)
 {
         if (enet_initialize() != 0)
                 return 1; // Initialize enet, if it fails, return 1
@@ -71,7 +71,7 @@ void O_CL_Connect (char *srv_hn)
 	printf("Connection to %s failed!\n", srv_hn);
 }
 
-void O_CL_Loop(void)
+void CL_Loop(void)
 {
 	ENetEvent event;
 	while (enet_host_service(localclient, &event, 5) > 0)
@@ -82,7 +82,7 @@ void O_CL_Loop(void)
 	return;
 }
 
-void O_CL_SendPosUpdate(fixed_t x, fixed_t y, fixed_t z, fixed_t ang, fixed_t momx, fixed_t momy, fixed_t momz)
+void CL_SendPosUpdate(fixed_t x, fixed_t y, fixed_t z, fixed_t ang, fixed_t momx, fixed_t momy, fixed_t momz)
 {
 	ENetPacket *pk = enet_packet_create(NULL, 32, 0);
 	void *start = pk->data;
@@ -100,7 +100,7 @@ void O_CL_SendPosUpdate(fixed_t x, fixed_t y, fixed_t z, fixed_t ang, fixed_t mo
 	enet_host_flush(localclient);
 }
 
-void O_CL_SendUseCmd(void)
+void CL_SendUseCmd(void)
 {
 	ENetPacket *pk = enet_packet_create(NULL, 1, ENET_PACKET_FLAG_RELIABLE);
 	void *start = pk->data;
@@ -110,7 +110,7 @@ void O_CL_SendUseCmd(void)
 	enet_host_flush(localclient);
 }
 
-void O_CL_SendStateUpdate(uint16_t state)
+void CL_SendStateUpdate(uint16_t state)
 {
 	ENetPacket *pk = enet_packet_create(NULL, 3, 0);
 	void *start = pk->data;

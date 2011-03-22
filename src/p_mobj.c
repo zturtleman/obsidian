@@ -61,7 +61,7 @@ P_SetMobjState
     state_t*	st;
 
     if(client && mobj == players[consoleplayer].mo)
-        O_CL_SendStateUpdate((uint16_t)state);
+        CL_SendStateUpdate((uint16_t)state);
 
     do
     {

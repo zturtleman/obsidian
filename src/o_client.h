@@ -22,8 +22,8 @@
     o_common : Obsidian Client/Server common code
 */
 
-#ifndef O_CLIENT_H
-#define O_CLIENT_H
+#ifndef CLIENT_H
+#define CLIENT_H
 
 #include "enet/enet.h"
 
@@ -31,11 +31,11 @@ ENetHost *localclient;
 int localid;
 uint8_t inGameMask;
 
-void O_CL_Connect (char *srv_hn);
-void O_CL_Loop(void);
+void CL_Connect (char *srv_hn);
+void CL_Loop(void);
 
-void O_CL_SendPosUpdate(fixed_t x, fixed_t y, fixed_t z, fixed_t ang, fixed_t momx, fixed_t momy, fixed_t momz);
-void O_CL_SendUseCmd(void);
-void O_CL_SendStateUpdate(uint16_t state);
+void CL_SendPosUpdate(fixed_t x, fixed_t y, fixed_t z, fixed_t ang, fixed_t momx, fixed_t momy, fixed_t momz);
+void CL_SendUseCmd(void);
+void CL_SendStateUpdate(uint16_t state);
 
 #endif

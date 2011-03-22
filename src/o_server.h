@@ -30,12 +30,12 @@
 #include "d_player.h"
 
 // Functions
-int O_SV_Main(void);
-void O_SV_Loop(void);
-int O_SV_FindEmptyClientNum(void);
-player_t* O_SV_FindEmptyPlayer(void);
-void O_SV_ParsePacket (ENetPacket pk, ENetPeer *p);
-int O_SV_ClientNumForPeer(ENetPeer *p);
+int SV_Main(void);
+void SV_Loop(void);
+int SV_FindEmptyClientNum(void);
+player_t* SV_FindEmptyPlayer(void);
+void SV_ParsePacket (ENetPacket pk, ENetPeer *p);
+int SV_ClientNumForPeer(ENetPeer *p);
 
 // Variables
 
@@ -58,6 +58,6 @@ typedef struct
 } client_t;
 
 client_t clients[MAXPLAYERS];
-void O_SV_ClientWelcome (client_t *cl);
+void SV_ClientWelcome (client_t *cl);
 
 #endif

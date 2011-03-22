@@ -327,7 +327,7 @@ void P_PlayerThink (player_t* player)
 	{
 	    P_UseLines (player);
         if(client)
-            O_CL_SendUseCmd();
+            CL_SendUseCmd();
 	    player->usedown = true;
 	}
     }
