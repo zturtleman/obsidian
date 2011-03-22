@@ -67,7 +67,15 @@ $(STAGING_DIR): launcher $(TOPLEVEL_DOCS)
 	./cp-with-libs $(TOPLEVEL)/setup/chocolate-setup "$(APP_BIN_DIR)"
 	$(STRIP) "$(APP_BIN_DIR)/chocolate-setup"
 
+	$(TOPLEVEL)/man/simplecpp -DPRECOMPILED -D__MACOSX__  \
+	             < $(TOPLEVEL)/man/INSTALL.template       \
+	             > $(STAGING_DIR)/INSTALL
+
 	find $(STAGING_DIR) -name .svn -delete -exec rm -rf {} \; || true
+
+	mkdir -p "$(APP_BIN_DIR)/man/man5" "$(APP_BIN_DIR)/man/man6"
+	cp $(TOPLEVEL)/man/*.5 "$(APP_BIN_DIR)/man/man5"
+	cp $(TOPLEVEL)/man/*.6 "$(APP_BIN_DIR)/man/man6"
 
 clean : launcher_clean
 	rm -f $(DMG)
