@@ -131,7 +131,7 @@ void SV_ClientWelcome (client_t* cl)
 	uint8_t i;
 	for (i = 0; i < MAXPLAYERS; i++)
 		if(playeringame[i])
-			inGame += 1 << i;
+			inGame |= 1 << i;
 	printf("DBG: players in game bitmask: %i\n", inGame);
 	WriteUInt8((uint8_t**)&p, inGame);
 	enet_packet_resize(pk, p-start);

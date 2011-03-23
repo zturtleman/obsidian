@@ -43,6 +43,8 @@
 
 #include "p_pspr.h"
 
+#include "o_common.h"
+
 #define LOWERSPEED		FRACUNIT*6
 #define RAISESPEED		FRACUNIT*6
 
@@ -277,6 +279,9 @@ void P_DropWeapon (player_t* player)
 // Follows after getting weapon up,
 // or after previous attack/fire sequence.
 //
+
+boolean server;
+
 void
 A_WeaponReady
 ( player_t*	player,
@@ -286,8 +291,8 @@ A_WeaponReady
     int		angle;
     
     // get out of attack state
-    if (player->mo->state == &states[S_PLAY_ATK1]
-	|| player->mo->state == &states[S_PLAY_ATK2] )
+    if (!server && (player->mo->state == &states[S_PLAY_ATK1]
+	|| player->mo->state == &states[S_PLAY_ATK2]))
     {
 	P_SetMobjState (player->mo, S_PLAY);
     }
