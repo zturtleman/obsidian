@@ -56,17 +56,31 @@ int SV_Main (void)
 		autostart = 1;
 		server = 1;
 		client = 0;
+		// Not liking how this is, but since it seems I can't do anything about setting client's "type" in the header...
+		int i;
+		for(i = 0; i < MAXPLAYERS; i++)
+			clients[i].type = CT_EMPTY;
 		return 0;
 	}
 
-	// Not liking how this is, but since it seems I can't do anything about setting client's "type" in the header...
-	int i;
-	for(i = 0; i < MAXPLAYERS; i++)
-		clients[i].type = CT_EMPTY;
 }
 
+void SV_DropClient(int cn, const char *reason);
 void SV_Loop (void)
 {
+	if(!(gametic % 35) && clients[0].type) printf("%i\n", clients[0].peer->lastReceiveTime);
+
+	// Check for timed out clients, destroy them >:)
+	int i;
+	for (i = 0; i < MAXPLAYERS; i++)
+	{
+		if(!clients[i].type || !clients[i].peer) // If they aren't set as in game, or (unfortunately) don't have a peer, ignore them
+			continue;
+
+		if(clients[i].peer->lastReceiveTime == 0) // Oh shit, a timed out client!!!
+			SV_DropClient(i, "timed out");
+	}
+
 	ENetEvent event;
 	while (enet_host_service(srv, &event, 5) > 0)
 	{
@@ -90,7 +104,7 @@ void SV_Loop (void)
 					break;
 				}
 				char hn[512];
-				printf("connected: %s - %i\n", (enet_address_get_host(&clients[c].peer->address, hn, sizeof(hn))==0) ? hn : "localhost", event.peer->connectID);
+				printf("connecting: %s\n", (enet_address_get_host(&clients[c].peer->address, hn, sizeof(hn))==0) ? hn : "localhost");
 				SV_ClientWelcome(&clients[c]);
 				break;
 			}
@@ -120,8 +134,8 @@ int SV_FindEmptyClientNum(void)
 
 void SV_ClientWelcome (client_t* cl)
 {
-	playeringame[cl->id] = true; // + 1 since server is in game at this stage in dev
-	players[cl->id].playerstate = PST_REBORN;
+	playeringame[cl->id] = true;
+	cl->player->playerstate = PST_REBORN;
 	ENetPacket *pk = enet_packet_create(NULL, 32, ENET_PACKET_FLAG_RELIABLE);
 	void *start = pk->data;
 	void *p = start;
@@ -132,12 +146,27 @@ void SV_ClientWelcome (client_t* cl)
 	for (i = 0; i < MAXPLAYERS; i++)
 		if(playeringame[i])
 			inGame |= 1 << i;
-	printf("DBG: players in game bitmask: %i\n", inGame);
 	WriteUInt8((uint8_t**)&p, inGame);
 	enet_packet_resize(pk, p-start);
 	enet_peer_send(cl->peer, 0, pk);
 	cl->type = CT_ACTIVE;
 	return;
+}
+
+void SV_DropClient(int cn, const char *reason) // Reset one of the client_t inside clients[]
+{
+	if(!clients[cn].type) // Client is already empty
+		return;
+
+	playeringame[cn] = false;
+	clients[cn].type = CT_EMPTY;
+	clients[cn].player = NULL;
+	if(clients[cn].peer)
+	{
+		enet_peer_reset(clients[cn].peer);
+		clients[cn].peer = NULL; // Just in case?
+	}
+	printf("disconnected client %i (%s)\n", cn, reason);
 }
 
 void SV_ParsePacket (ENetPacket pk, ENetPeer *p)
@@ -162,7 +191,6 @@ void SV_ParsePacket (ENetPacket pk, ENetPeer *p)
 			clients[from].player->mo->floorz = clients[from].player->mo->subsector->sector->floorheight;
 			clients[from].player->mo->ceilingz = clients[from].player->mo->subsector->sector->ceilingheight;
 			P_SetThingPosition(clients[from].player->mo);
-//			P_CheckPosition(clients[from].player->mo, clients[from].player->mo->x, clients[from].player->mo->y);
 		}
 		break;
 
