@@ -162,15 +162,10 @@ void SV_DropClient(int cn, const char *reason) // Reset one of the client_t insi
 	playeringame[cn] = false;
 	clients[cn].type = CT_EMPTY;
 	mobj_t *mo = clients[cn].player->mo;
+	P_RemoveMobj(mo);
 	mo->player = NULL;
 	clients[cn].player->mo = NULL;
-	P_RemoveMobj(mo);
 	clients[cn].player = NULL;
-	if(clients[cn].peer)
-	{
-		enet_peer_reset(clients[cn].peer);
-		clients[cn].peer = NULL; // Just in case?
-	}
 	printf("disconnected client %i (%s)\n", cn, reason);
 }
 

@@ -747,6 +747,9 @@ void R_DrawPSprite (pspdef_t* psp)
 //
 void R_DrawPlayerSprites (void)
 {
+    if(!viewplayer->mo)
+        return;
+
     int		i;
     int		lightnum;
     pspdef_t*	psp;
