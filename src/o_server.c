@@ -30,6 +30,7 @@
 #include "d_net.h"
 #include "r_defs.h"
 #include "r_main.h"
+#include "p_local.h"
 
 #include "o_server.h"
 #include "o_common.h"
@@ -70,17 +71,6 @@ void SV_Loop (void)
 {
 	if(!(gametic % 35) && clients[0].type) printf("%i\n", clients[0].peer->lastReceiveTime);
 
-	// Check for timed out clients, destroy them >:)
-	int i;
-	for (i = 0; i < MAXPLAYERS; i++)
-	{
-		if(!clients[i].type || !clients[i].peer) // If they aren't set as in game, or (unfortunately) don't have a peer, ignore them
-			continue;
-
-		if(clients[i].peer->lastReceiveTime == 0) // Oh shit, a timed out client!!!
-			SV_DropClient(i, "timed out");
-	}
-
 	ENetEvent event;
 	while (enet_host_service(srv, &event, 5) > 0)
 	{
@@ -112,6 +102,17 @@ void SV_Loop (void)
 			{
 				SV_ParsePacket(*event.packet, event.peer);
 				break;
+			}
+			case ENET_EVENT_TYPE_DISCONNECT:
+			{
+				int from = SV_ClientNumForPeer(event.peer);
+				switch(event.data)
+				{
+					case 0:
+						SV_DropClient(from, "timed out");
+					case 1:
+						SV_DropClient(from, "client exited");
+				}
 			}
 		}
 	}
@@ -160,6 +161,10 @@ void SV_DropClient(int cn, const char *reason) // Reset one of the client_t insi
 
 	playeringame[cn] = false;
 	clients[cn].type = CT_EMPTY;
+	mobj_t *mo = clients[cn].player->mo;
+	mo->player = NULL;
+	clients[cn].player->mo = NULL;
+	P_RemoveMobj(mo);
 	clients[cn].player = NULL;
 	if(clients[cn].peer)
 	{
