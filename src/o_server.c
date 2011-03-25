@@ -209,14 +209,9 @@ void SV_ParsePacket (ENetPacket pk, ENetPeer *p)
 		{
 			weapontype_t toFire = (weapontype_t)ReadInt32((uint32_t**)&pk.data);
 			if(toFire != clients[from].player->readyweapon)
-				clients[from].player->readyweapon = toFire;
-			if(ReadUInt8((uint8_t**)&pk.data))
-			{
-				clients[from].player->attackdown = 1;
-				P_FireWeapon(clients[from].player);
-			}
-			else
-				clients[from].player->attackdown = 0;
+			clients[from].player->readyweapon = toFire;
+			clients[from].player->refire = (int)ReadInt32((uint32_t**)&pk.data);
+			P_FireWeapon(clients[from].player);
 		}
 		break;
 	}

@@ -252,7 +252,10 @@ void P_FireWeapon (player_t* player)
 	
     if (!P_CheckAmmo (player))
 	return;
-	
+
+	if(client)
+		CL_SendFireCmd(player->readyweapon, player->refire);
+
     P_SetMobjState (player->mo, S_PLAY_ATK1);
     newstate = weaponinfo[player->readyweapon].atkstate;
     P_SetPsprite (player, ps_weapon, newstate);
@@ -325,18 +328,12 @@ A_WeaponReady
 		 && player->readyweapon != wp_bfg) )
 	{
 	    player->attackdown = true;
-	    if(client)
-    	    CL_SendFireCmd(player->readyweapon, 1);
 	    P_FireWeapon (player);		
 	    return;
 	}
     }
     else
-	{
 	    player->attackdown = false;
-        if(client)
-            CL_SendFireCmd(player->readyweapon, 0);
-    }
     
     // bob the weapon based on movement speed
     angle = (128*leveltime)&FINEMASK;

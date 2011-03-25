@@ -121,14 +121,14 @@ void CL_SendStateUpdate(uint16_t state)
 	enet_host_flush(localclient);
 }
 
-void CL_SendFireCmd(weapontype_t w, uint8_t attack)
+void CL_SendFireCmd(weapontype_t w, int refire)
 {
-	ENetPacket *pk = enet_packet_create(NULL, 6, 0);
+	ENetPacket *pk = enet_packet_create(NULL, 9, 0);
 	void *start = pk->data;
 	void *p = start;
 	WriteUInt8((uint8_t**)&p, MSG_FIRE);
 	WriteInt32((int32_t**)&p, (int32_t) w);
-	WriteUInt8((uint8_t**)&p, attack);
+	WriteUInt8((int32_t**)&p, (int32_t)refire);
 	enet_host_broadcast(localclient, 0, pk);
 	enet_host_flush(localclient);
 }
