@@ -49,7 +49,9 @@ enum
 
 	MSG_USE,
 
-	MSG_STATE
+	MSG_STATE,
+
+	MSG_FIRE
 };
 
 #endif

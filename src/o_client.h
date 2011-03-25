@@ -37,5 +37,6 @@ void CL_Loop(void);
 void CL_SendPosUpdate(fixed_t x, fixed_t y, fixed_t z, fixed_t ang, fixed_t momx, fixed_t momy, fixed_t momz);
 void CL_SendUseCmd(void);
 void CL_SendStateUpdate(uint16_t state);
+void CL_SendFireCmd(weapontype_t w);
 
 #endif

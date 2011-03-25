@@ -198,9 +198,18 @@ void SV_ParsePacket (ENetPacket pk, ENetPeer *p)
 		if(clients[from].player)
 			P_UseLines(clients[from].player);
 		break;
+
 		case MSG_STATE:
 		if(clients[from].player->mo)
 			P_SetMobjState(clients[from].player->mo, (statenum_t)ReadUInt16((uint16_t**)&pk.data));
+		break;
+
+		case MSG_FIRE:
+		if(clients[from].player)
+		{
+			clients[from].player->readyweapon = (weapontype_t)ReadInt32((uint32_t**)&pk.data);
+			P_FireWeapon(clients[from].player);
+		}
 		break;
 	}
 	return;

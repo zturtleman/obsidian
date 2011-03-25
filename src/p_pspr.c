@@ -44,6 +44,7 @@
 #include "p_pspr.h"
 
 #include "o_common.h"
+#include "o_client.h"
 
 #define LOWERSPEED		FRACUNIT*6
 #define RAISESPEED		FRACUNIT*6
@@ -51,7 +52,8 @@
 #define WEAPONBOTTOM	128*FRACUNIT
 #define WEAPONTOP		32*FRACUNIT
 
-
+boolean client;
+boolean server;
 
 //
 // P_SetPsprite
@@ -251,6 +253,9 @@ void P_FireWeapon (player_t* player)
     if (!P_CheckAmmo (player))
 	return;
 	
+    if(client) // Send the server the message
+        CL_SendFireCmd(player->readyweapon);
+
     P_SetMobjState (player->mo, S_PLAY_ATK1);
     newstate = weaponinfo[player->readyweapon].atkstate;
     P_SetPsprite (player, ps_weapon, newstate);
