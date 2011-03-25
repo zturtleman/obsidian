@@ -28,9 +28,11 @@
 #include "doomdef.h"
 #include "doomstat.h"
 #include "d_net.h"
+#include "d_event.h"
 #include "r_defs.h"
 #include "r_main.h"
 #include "p_local.h"
+#include "p_pspr.h"
 
 #include "o_server.h"
 #include "o_common.h"
@@ -69,8 +71,6 @@ int SV_Main (void)
 void SV_DropClient(int cn, const char *reason);
 void SV_Loop (void)
 {
-	if(!(gametic % 35) && clients[0].type) printf("%i\n", clients[0].peer->lastReceiveTime);
-
 	ENetEvent event;
 	while (enet_host_service(srv, &event, 5) > 0)
 	{
@@ -207,8 +207,16 @@ void SV_ParsePacket (ENetPacket pk, ENetPeer *p)
 		case MSG_FIRE:
 		if(clients[from].player)
 		{
-			clients[from].player->readyweapon = (weapontype_t)ReadInt32((uint32_t**)&pk.data);
-			P_FireWeapon(clients[from].player);
+			weapontype_t toFire = (weapontype_t)ReadInt32((uint32_t**)&pk.data);
+			if(toFire != clients[from].player->readyweapon)
+				clients[from].player->readyweapon = toFire;
+			if(ReadUInt8((uint8_t**)&pk.data))
+			{
+				clients[from].player->attackdown = 1;
+				P_FireWeapon(clients[from].player);
+			}
+			else
+				clients[from].player->attackdown = 0;
 		}
 		break;
 	}
