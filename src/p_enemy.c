@@ -923,7 +923,7 @@ void A_TroopAttack (mobj_t* actor)
     {
 	S_StartSound (actor, sfx_claw);
 	damage = (P_Random()%8+1)*3;
-	P_DamageMobj (actor->target, actor, actor, damage);
+	P_DamageMobj (actor->target, actor, actor, damage, false);
 	return;
     }
 
@@ -944,7 +944,7 @@ void A_SargAttack (mobj_t* actor)
     if (P_CheckMeleeRange (actor))
     {
 	damage = ((P_Random()%10)+1)*4;
-	P_DamageMobj (actor->target, actor, actor, damage);
+	P_DamageMobj (actor->target, actor, actor, damage, false);
     }
 }
 
@@ -959,7 +959,7 @@ void A_HeadAttack (mobj_t* actor)
     if (P_CheckMeleeRange (actor))
     {
 	damage = (P_Random()%6+1)*10;
-	P_DamageMobj (actor->target, actor, actor, damage);
+	P_DamageMobj (actor->target, actor, actor, damage, false);
 	return;
     }
     
@@ -988,7 +988,7 @@ void A_BruisAttack (mobj_t* actor)
     {
 	S_StartSound (actor, sfx_claw);
 	damage = (P_Random()%8+1)*10;
-	P_DamageMobj (actor->target, actor, actor, damage);
+	P_DamageMobj (actor->target, actor, actor, damage, false);
 	return;
     }
     
@@ -1112,7 +1112,7 @@ void A_SkelFist (mobj_t*	actor)
     {
 	damage = ((P_Random()%10)+1)*6;
 	S_StartSound (actor, sfx_skepch);
-	P_DamageMobj (actor->target, actor, actor, damage);
+	P_DamageMobj (actor->target, actor, actor, damage, false);
     }
 }
 
@@ -1325,7 +1325,7 @@ void A_VileAttack (mobj_t* actor)
 	return;
 
     S_StartSound (actor, sfx_barexp);
-    P_DamageMobj (actor->target, actor, actor, 20);
+    P_DamageMobj (actor->target, actor, actor, 20, false);
     actor->target->momz = 1000*FRACUNIT/actor->target->info->mass;
 	
     an = actor->angle >> ANGLETOFINESHIFT;
@@ -1508,7 +1508,7 @@ A_PainShootSkull
     if (!P_TryMove (newmobj, newmobj->x, newmobj->y))
     {
 	// kill it immediately
-	P_DamageMobj (newmobj,actor,actor,10000);	
+	P_DamageMobj (newmobj,actor,actor,10000, false);	
 	return;
     }
 		

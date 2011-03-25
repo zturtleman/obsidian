@@ -47,10 +47,7 @@
 
 #include "p_inter.h"
 
-
 #define BONUSADD	6
-
-
 
 
 // a weapon is found with two clip loads,
@@ -782,13 +779,20 @@ P_KillMobj
 // Source can be NULL for slime, barrel explosions
 // and other environmental stuff.
 //
+
+boolean client;
+
 void
 P_DamageMobj
 ( mobj_t*	target,
   mobj_t*	inflictor,
   mobj_t*	source,
-  int 		damage )
+  int 		damage,
+  boolean fromserver )
 {
+    if(client && !fromserver)
+        return;
+
     unsigned	ang;
     int		saved;
     player_t*	player;
