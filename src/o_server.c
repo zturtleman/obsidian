@@ -207,7 +207,7 @@ void SV_ParsePacket (ENetPacket pk, ENetPeer *p)
 		case MSG_FIRE:
 		if(clients[from].player)
 		{
-			weapontype_t toFire = (weapontype_t)ReadInt32((uint32_t**)&pk.data);
+			weapontype_t toFire = (weapontype_t)ReadInt8((uint8_t**)&pk.data);
 			if(toFire != clients[from].player->readyweapon)
 			clients[from].player->readyweapon = toFire;
 			clients[from].player->refire = (int)ReadInt32((uint32_t**)&pk.data);

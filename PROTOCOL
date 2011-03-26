@@ -3,8 +3,8 @@
 ==============================
 
 Message: MSG_NULL
-Server Use: Ping
-Client Use: Ping
+Server Use: None
+Client Use: None
 Data: None
 
 Message: MSG_WELCOME (reliable)
@@ -15,7 +15,7 @@ Data: 1 Unsigned 8-bit integer containing the server's protocol, 1 Unsigned 8-bi
 Message: MSG_POS
 Server Use: Update a particular client on the positions of the other clients.
 Client Use: Update the server with our current position.
-Data: 4 signed 32-bit integers, containing x, y, z, and angle. If the server is sending this, there will be an additional unsigned 8-bit integer containing which player this affects.
+Data: 7 signed 32-bit integers, containing x, y, z, angle, momx, momy, and momz. If the server is sending this, there will be an additional unsigned 8-bit integer containing which player this affects.
 
 Message: MSG_JOIN (reliable)
 Server Use: Inform a client of a new client's connection.
@@ -26,3 +26,13 @@ Message: MSG_USE (reliable)
 Server Use: Inform a client that another client used something (lifts, doors, etc).
 Client Use: Inform the server that we just used something.
 Data: None from the client, but the server will send an unsigned 8-bit integer to use as the player number.
+
+Message: MSG_STATE
+Server Use: Inform clients of a sprite state change from another client.
+Client Use: Inform the server of a sprite state change we just did.
+Data: statenum_t casted to a 16-bit unsigned integer.
+
+Message: MSG_FIRE
+Server Use: Inform clients that another client fired a weapon.
+Client Use: Inform server that we fired a weapon.
+Data: weapontype_t casted to an 8-bit integer, 32-bit integer containing the player's "refire" variable.

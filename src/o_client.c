@@ -37,7 +37,7 @@ void CL_Connect (char *srv_hn)
         if (enet_initialize() != 0)
                 return 1; // Initialize enet, if it fails, return 1
 
-	ENetAddress addr = { ENET_HOST_ANY, 11666 };
+	ENetAddress addr = { ENET_HOST_ANY, 11667 };
 	ENetEvent event;
 
 	if (enet_address_set_host (&addr, srv_hn) < 0)
@@ -127,7 +127,7 @@ void CL_SendFireCmd(weapontype_t w, int refire)
 	void *start = pk->data;
 	void *p = start;
 	WriteUInt8((uint8_t**)&p, MSG_FIRE);
-	WriteInt32((int32_t**)&p, (int32_t) w);
+	WriteInt8((int32_t**)&p, (int8_t) w);
 	WriteUInt8((int32_t**)&p, (int32_t)refire);
 	enet_host_broadcast(localclient, 0, pk);
 	enet_host_flush(localclient);

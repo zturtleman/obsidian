@@ -39,19 +39,11 @@ extern boolean client;
 
 enum
 {
-	MSG_NULL,
+	MSG_NULL, MSG_WELCOME, MSG_POS, 
 
-	MSG_WELCOME,
+	MSG_JOIN, MSG_USE, MSG_STATE, 
 
-	MSG_POS,
-
-	MSG_JOIN,
-
-	MSG_USE,
-
-	MSG_STATE,
-
-	MSG_FIRE
+	MSG_FIRE, MSG_DAMAGE
 };
 
 #endif
