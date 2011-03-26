@@ -220,7 +220,8 @@ void SV_ParsePacket (ENetPacket *pk, ENetPeer *p)
 		}
 		break;
 	}
-	enet_packet_destroy(pk);
+	if(pk->referenceCount == 0)
+		enet_packet_destroy(pk);
 	return;
 }
 
@@ -237,7 +238,6 @@ void SV_BroadcastPacket(ENetPacket *pk, int from, uint8_t msg)
 	WriteUInt8((uint8_t**)&pkp, (uint8_t)from);
 	for(i = 0; i < MAXPLAYERS; i++)
 	{
-		printf("%i\n", i);
 		if(i != from && clients[i].type > 1)
 			enet_peer_send(clients[i].peer, 1, pk);
 	}
