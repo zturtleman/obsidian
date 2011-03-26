@@ -100,7 +100,7 @@ void SV_Loop (void)
 			}
 			case ENET_EVENT_TYPE_RECEIVE:
 			{
-				SV_ParsePacket(*event.packet, event.peer);
+				SV_ParsePacket(event.packet, event.peer);
 				break;
 			}
 			case ENET_EVENT_TYPE_DISCONNECT:
@@ -169,11 +169,11 @@ void SV_DropClient(int cn, const char *reason) // Reset one of the client_t insi
 	printf("disconnected client %i (%s)\n", cn, reason);
 }
 
-void SV_ParsePacket (ENetPacket pk, ENetPeer *p)
+void SV_ParsePacket (ENetPacket *pk, ENetPeer *p)
 {
 	int from = SV_ClientNumForPeer(p);
 	if(from < 0) return; // Not a client
-	void *pkp = pk.data;
+	void *pkp = pk->data;
 	uint8_t msg = ReadUInt8((uint8_t**)&pkp);
 	switch(msg)
 	{
@@ -220,25 +220,31 @@ void SV_ParsePacket (ENetPacket pk, ENetPeer *p)
 		}
 		break;
 	}
+	enet_packet_destroy(pk);
 	return;
 }
 
-void SV_BroadcastPacket(ENetPacket pk, int from, uint8_t msg)
+void SV_BroadcastPacket(ENetPacket *pk, int from, uint8_t msg)
 {
-	if(enet_packet_resize(&pk, pk.dataLength + 1) < 0) // Failure! :O
+	int len = pk->dataLength;
+	if(enet_packet_resize(pk, pk->dataLength + 1) < 0) // Failure! :O
 		return;
 
 	int i;
-	void *pkp = pk.data;
-	pkp += pk.dataLength;
+	void *pkp = pk->data;
+	pkp = ((uint8_t*)pkp) + len;
 
 	WriteUInt8((uint8_t**)&pkp, (uint8_t)from);
 	for(i = 0; i < MAXPLAYERS; i++)
-		if(i != from && clients[i].type)
-			enet_peer_send(clients[i].peer, i, &pk);
+	{
+		printf("%i\n", i);
+		if(i != from && clients[i].type > 1)
+			enet_peer_send(clients[i].peer, 1, pk);
+	}
 
 	return;
 }
+
 int SV_ClientNumForPeer(ENetPeer *p)
 {
 	if(!p) return -1;

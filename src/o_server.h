@@ -34,8 +34,8 @@ int SV_Main(void);
 void SV_Loop(void);
 int SV_FindEmptyClientNum(void);
 player_t* SV_FindEmptyPlayer(void);
-void SV_ParsePacket (ENetPacket pk, ENetPeer *p);
-void SV_BroadcastPacket(ENetPacket pk, int from, uint8_t msg);
+void SV_ParsePacket (ENetPacket *pk, ENetPeer *p);
+void SV_BroadcastPacket(ENetPacket *pk, int from, uint8_t msg);
 int SV_ClientNumForPeer(ENetPeer *p);
 
 // Variables
