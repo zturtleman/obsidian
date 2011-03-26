@@ -35,7 +35,7 @@ ENetPeer *srvpeer;
 void CL_Connect (char *srv_hn)
 {
         if (enet_initialize() != 0)
-                return 1; // Initialize enet, if it fails, return 1
+                return; // Initialize enet, if it fails, return 1
 
 	ENetAddress addr = { ENET_HOST_ANY, 11666 };
 	ENetEvent event;
@@ -58,6 +58,11 @@ void CL_Connect (char *srv_hn)
 		client = 1;
 		server = 0;
 	}
+	else
+	{
+		printf("Connection to %s failed!\n", srv_hn);
+		return;
+	}
 
 	if(enet_host_service (localclient, &event, 5000) > 0 && event.type == ENET_EVENT_TYPE_RECEIVE
 	   && ReadUInt8((uint8_t**)&event.packet->data) == MSG_WELCOME) // Wait for server's greeting, set localid to the second marker we get.
@@ -65,10 +70,12 @@ void CL_Connect (char *srv_hn)
 		localid = ReadUInt8((uint8_t**)&event.packet->data);
 		inGameMask = ReadUInt8((uint8_t**)&event.packet->data);
 		printf("DBG: Setting client's id to: %i\n", localid);
-		return;
 	}
-
-	printf("Connection to %s failed!\n", srv_hn);
+	else
+	{
+		printf("Failed to recieve greeting message. Connection failed!\n");
+	}
+	return;
 }
 
 void CL_Loop(void)
@@ -77,9 +84,24 @@ void CL_Loop(void)
 	while (enet_host_service(localclient, &event, 5) > 0)
 	{
 		switch(event.type)
-		{}
+		{
+			case ENET_EVENT_TYPE_RECEIVE:
+				CL_ParsePacket(*event.packet);
+				break;
+			case ENET_EVENT_TYPE_DISCONNECT:
+				DEH_printf("Connection to remote host was lost\n");
+				players[consoleplayer].message = "Connection to remote host was lost";
+				break;
+		}
 	}
 	return;
+}
+
+void CL_ParsePacket(ENetPacket pk)
+{
+	void *p = pk.data;
+	int from = p + (pk.dataLength - 1);
+	printf("%i\n", from);
 }
 
 void CL_SendPosUpdate(fixed_t x, fixed_t y, fixed_t z, fixed_t ang, fixed_t momx, fixed_t momy, fixed_t momz)
