@@ -125,6 +125,6 @@ void CL_SendFireCmd(weapontype_t w, int refire)
 	void *p = start;
 	WriteUInt8((uint8_t**)&p, MSG_FIRE);
 	WriteInt8((int32_t**)&p, (int8_t) w);
-	WriteUInt8((int32_t**)&p, (int32_t)refire);
+	WriteInt32((int32_t**)&p, refire);
 	enet_peer_send(srvpeer, 0, pk);
 }

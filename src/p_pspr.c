@@ -357,7 +357,6 @@ void A_ReFire
     // check for fire
     //  (if a weaponchange is pending, let it go through instead)
     if ( (player->cmd.buttons & BT_ATTACK) 
-     || (server && player->attackdown)
 	 && player->pendingweapon == wp_nochange
 	 && player->health)
     {
