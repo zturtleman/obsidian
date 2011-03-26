@@ -192,12 +192,16 @@ void SV_ParsePacket (ENetPacket pk, ENetPeer *p)
 			clients[from].player->mo->floorz = clients[from].player->mo->subsector->sector->floorheight;
 			clients[from].player->mo->ceilingz = clients[from].player->mo->subsector->sector->ceilingheight;
 			P_SetThingPosition(clients[from].player->mo);
+			SV_BroadcastPacket(pk, from, msg);
 		}
 		break;
 
 		case MSG_USE:
 		if(clients[from].player)
+		{
 			P_UseLines(clients[from].player);
+			SV_BroadcastPacket(pk, from, msg);
+		}
 		break;
 
 		case MSG_STATE:
@@ -219,6 +223,22 @@ void SV_ParsePacket (ENetPacket pk, ENetPeer *p)
 	return;
 }
 
+void SV_BroadcastPacket(ENetPacket pk, int from, uint8_t msg)
+{
+	if(enet_packet_resize(&pk, pk.dataLength + 1) < 0) // Failure! :O
+		return;
+
+	int i;
+	void *pkp = pk.data;
+	pkp += pk.dataLength;
+
+	WriteUInt8((uint8_t**)&pkp, (uint8_t)from);
+	for(i = 0; i < MAXPLAYERS; i++)
+		if(i != from && clients[i].type)
+			enet_peer_send(clients[i].peer, i, &pk);
+
+	return;
+}
 int SV_ClientNumForPeer(ENetPeer *p)
 {
 	if(!p) return -1;

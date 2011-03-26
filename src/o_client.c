@@ -116,10 +116,10 @@ void CL_SendStateUpdate(uint16_t state)
 
 void CL_SendFireCmd(weapontype_t w, int refire)
 {
-	ENetPacket *pk = enet_packet_create(NULL, 9, ENET_PACKET_FLAG_RELIABLE);
+	ENetPacket *pk = enet_packet_create(NULL, 6, ENET_PACKET_FLAG_RELIABLE);
 	void *p = pk->data;
 	WriteUInt8((uint8_t**)&p, MSG_FIRE);
-	WriteInt8((int32_t**)&p, (int8_t) w);
+	WriteInt8((int8_t**)&p, (int8_t) w);
 	WriteInt32((int32_t**)&p, refire);
 	enet_peer_send(srvpeer, 0, pk);
 }
