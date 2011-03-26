@@ -173,20 +173,21 @@ void SV_ParsePacket (ENetPacket pk, ENetPeer *p)
 {
 	int from = SV_ClientNumForPeer(p);
 	if(from < 0) return; // Not a client
-	uint8_t msg = ReadUInt8((uint8_t**)&pk.data);
+	void *pkp = pk.data;
+	uint8_t msg = ReadUInt8((uint8_t**)&pkp);
 	switch(msg)
 	{
 		case MSG_POS:
 		if(clients[from].player && clients[from].player->mo)
 		{
 			P_UnsetThingPosition(clients[from].player->mo);
-			clients[from].player->mo->x = ReadInt32((int32_t**)&pk.data);
-			clients[from].player->mo->y = ReadInt32((int32_t**)&pk.data);
-			clients[from].player->mo->z = ReadInt32((int32_t**)&pk.data);
-			clients[from].player->mo->angle = ReadInt32((int32_t**)&pk.data);
-			clients[from].player->mo->momx = ReadInt32((int32_t**)&pk.data);
-			clients[from].player->mo->momy = ReadInt32((int32_t**)&pk.data);
-			clients[from].player->mo->momz = ReadInt32((int32_t**)&pk.data);
+			clients[from].player->mo->x = ReadInt32((int32_t**)&pkp);
+			clients[from].player->mo->y = ReadInt32((int32_t**)&pkp);
+			clients[from].player->mo->z = ReadInt32((int32_t**)&pkp);
+			clients[from].player->mo->angle = ReadInt32((int32_t**)&pkp);
+			clients[from].player->mo->momx = ReadInt32((int32_t**)&pkp);
+			clients[from].player->mo->momy = ReadInt32((int32_t**)&pkp);
+			clients[from].player->mo->momz = ReadInt32((int32_t**)&pkp);
 			clients[from].player->mo->subsector = R_PointInSubsector(clients[from].player->mo->x, clients[from].player->mo->y);
 			clients[from].player->mo->floorz = clients[from].player->mo->subsector->sector->floorheight;
 			clients[from].player->mo->ceilingz = clients[from].player->mo->subsector->sector->ceilingheight;
@@ -201,17 +202,16 @@ void SV_ParsePacket (ENetPacket pk, ENetPeer *p)
 
 		case MSG_STATE:
 		if(clients[from].player->mo)
-			P_SetMobjState(clients[from].player->mo, (statenum_t)ReadUInt16((uint16_t**)&pk.data));
+			P_SetMobjState(clients[from].player->mo, (statenum_t)ReadUInt16((uint16_t**)&pkp));
 		break;
 
 		case MSG_FIRE:
 		if(clients[from].player)
 		{
-			weapontype_t toFire = (weapontype_t)ReadInt8((uint8_t**)&pk.data);
+			weapontype_t toFire = (weapontype_t)ReadInt8((uint8_t**)&pkp);
 			if(toFire != clients[from].player->readyweapon)
 				clients[from].player->readyweapon = toFire;
-			clients[from].player->refire = ReadInt32((int32_t**)&pk.data);
-			printf("%i\n", clients[from].player->refire);
+			clients[from].player->refire = ReadInt32((int32_t**)&pkp);
 			P_FireWeapon(clients[from].player);
 		}
 		break;

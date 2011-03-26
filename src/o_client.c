@@ -84,9 +84,8 @@ void CL_Loop(void)
 
 void CL_SendPosUpdate(fixed_t x, fixed_t y, fixed_t z, fixed_t ang, fixed_t momx, fixed_t momy, fixed_t momz)
 {
-	ENetPacket *pk = enet_packet_create(NULL, 32, 0);
-	void *start = pk->data;
-	void *p = start;
+	ENetPacket *pk = enet_packet_create(NULL, 29, 0);
+	void *p = pk->data;
 	WriteUInt8((uint8_t**)&p, MSG_POS);
 	WriteInt32((int32_t**)&p, x);
 	WriteInt32((int32_t**)&p, y);
@@ -95,15 +94,13 @@ void CL_SendPosUpdate(fixed_t x, fixed_t y, fixed_t z, fixed_t ang, fixed_t momx
 	WriteInt32((int32_t**)&p, momx);
 	WriteInt32((int32_t**)&p, momy);
 	WriteInt32((int32_t**)&p, momz);
-	enet_packet_resize(pk, p-start);
 	enet_peer_send(srvpeer, 0, pk);
 }
 
 void CL_SendUseCmd(void)
 {
 	ENetPacket *pk = enet_packet_create(NULL, 1, ENET_PACKET_FLAG_RELIABLE);
-	void *start = pk->data;
-	void *p = start;
+	void *p = pk->data;
 	WriteUInt8((uint8_t**)&p, MSG_USE);
 	enet_peer_send(srvpeer, 1, pk);
 }
@@ -111,8 +108,7 @@ void CL_SendUseCmd(void)
 void CL_SendStateUpdate(uint16_t state)
 {
 	ENetPacket *pk = enet_packet_create(NULL, 3, 0);
-	void *start = pk->data;
-	void *p = start;
+	void *p = pk->data;
 	WriteUInt8((uint8_t**)&p, MSG_STATE);
 	WriteUInt16((uint16_t**)&p, state);
 	enet_peer_send(srvpeer, 0, pk);
@@ -121,8 +117,7 @@ void CL_SendStateUpdate(uint16_t state)
 void CL_SendFireCmd(weapontype_t w, int refire)
 {
 	ENetPacket *pk = enet_packet_create(NULL, 9, ENET_PACKET_FLAG_RELIABLE);
-	void *start = pk->data;
-	void *p = start;
+	void *p = pk->data;
 	WriteUInt8((uint8_t**)&p, MSG_FIRE);
 	WriteInt8((int32_t**)&p, (int8_t) w);
 	WriteInt32((int32_t**)&p, refire);
