@@ -27,6 +27,9 @@
 #include "doomstat.h"
 #include "p_mobj.h"
 #include "r_data.h"
+#include "r_defs.h"
+#include "r_main.h"
+#include "p_local.h"
 
 #include "o_client.h"
 #include "o_common.h"
