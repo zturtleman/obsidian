@@ -73,7 +73,7 @@
 #include "r_data.h"
 #include "r_sky.h"
 
-
+#include "o_common.h"
 
 #include "g_game.h"
 
@@ -157,7 +157,8 @@ boolean         testcontrols = false;    // Invoked by setup to test controls
 wbstartstruct_t wminfo;               	// parms for world map / intermission 
  
 byte		consistancy[MAXPLAYERS][BACKUPTICS]; 
- 
+
+boolean server; 
  
 // 
 // Controls 
@@ -885,7 +886,7 @@ boolean G_Responder (event_t* ev)
 	
     // allow spy mode changes even during the demo
     if (gamestate == GS_LEVEL && ev->type == ev_keydown 
-     && ev->data1 == key_spy && (singledemo || !deathmatch) )
+     && ev->data1 == key_spy && (server || singledemo || !deathmatch) )
     {
 	// spy mode 
 	do 
