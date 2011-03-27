@@ -86,7 +86,7 @@ void CL_Loop(void)
 		switch(event.type)
 		{
 			case ENET_EVENT_TYPE_RECEIVE:
-				CL_ParsePacket(*event.packet);
+				CL_ParsePacket(event.packet);
 				break;
 			case ENET_EVENT_TYPE_DISCONNECT:
 				DEH_printf("Connection to remote host was lost\n");
@@ -97,11 +97,10 @@ void CL_Loop(void)
 	return;
 }
 
-void CL_ParsePacket(ENetPacket pk)
+void CL_ParsePacket(ENetPacket *pk)
 {
-	void *p = pk.data;
-	int from = p + (pk.dataLength - 1);
-	printf("%i\n", from);
+	void *p = pk->data;
+	uint8_t from = ((uint8_t *)(pk->data))[pk->dataLength - 1];
 }
 
 void CL_SendPosUpdate(fixed_t x, fixed_t y, fixed_t z, fixed_t ang, fixed_t momx, fixed_t momy, fixed_t momz)
