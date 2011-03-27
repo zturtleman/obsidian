@@ -603,6 +603,8 @@ void S_StartSound(void *origin_p, int sfx_id)
         priority = NORM_PRIORITY;
     }
 
+    if(!players[consoleplayer].mo)
+        return;
 
     // Check to see if it is audible,
     //  and if not, modify the params
