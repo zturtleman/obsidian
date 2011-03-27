@@ -22,6 +22,9 @@
     o_server : Obsidian Server
 */
 
+// GhostlyDeath <March 27, 2011> -- Lean and mean for Windows (since ENet does not use it)
+#define WIN32_LEAN_AND_MEAN
+
 #include <stdio.h>
 #include "enet/enet.h"
 
@@ -42,6 +45,8 @@ boolean client;
 
 int SV_Main (void) 
 {
+	int i;
+
 	if (enet_initialize() != 0) 
 		return 1; // Initialize enet, if it fails, return 1
 
@@ -60,7 +65,7 @@ int SV_Main (void)
 		server = 1;
 		client = 0;
 		// Not liking how this is, but since it seems I can't do anything about setting client's "type" in the header...
-		int i;
+		
 		for(i = 0; i < MAXPLAYERS; i++)
 			clients[i].type = CT_EMPTY;
 		return 0;
@@ -72,13 +77,16 @@ void SV_DropClient(int cn, const char *reason);
 void SV_Loop (void)
 {
 	ENetEvent event;
+	int from, x, c;
+	char hn[512];
+
 	while (enet_host_service(srv, &event, 5) > 0)
 	{
 		switch(event.type)
 		{
 			case ENET_EVENT_TYPE_CONNECT:
 			{
-				int c = SV_FindEmptyClientNum(); // Find an empty client for this guy, or kick him out
+				c = SV_FindEmptyClientNum(); // Find an empty client for this guy, or kick him out
 				if (c < 0) 
 				{ 
 					enet_peer_reset(event.peer); 
@@ -93,7 +101,7 @@ void SV_Loop (void)
 					enet_peer_reset(clients[c].peer);
 					break;
 				}
-				char hn[512];
+				
 				printf("connecting: %s\n", (enet_address_get_host(&clients[c].peer->address, hn, sizeof(hn))==0) ? hn : "localhost");
 				SV_ClientWelcome(&clients[c]);
 				break;
@@ -105,7 +113,7 @@ void SV_Loop (void)
 			}
 			case ENET_EVENT_TYPE_DISCONNECT:
 			{
-				int from = SV_ClientNumForPeer(event.peer);
+				from = SV_ClientNumForPeer(event.peer);
 				switch(event.data)
 				{
 					case 0:
@@ -135,20 +143,21 @@ int SV_FindEmptyClientNum(void)
 
 void SV_ClientWelcome (client_t* cl)
 {
-	playeringame[cl->id] = true;
-	cl->player->playerstate = PST_REBORN;
 	ENetPacket *pk = enet_packet_create(NULL, 32, ENET_PACKET_FLAG_RELIABLE);
 	void *start = pk->data;
 	void *p = start;
-	WriteUInt8((uint8_t**)&p, MSG_WELCOME); // put a greeting marker on it
-	WriteUInt8((uint8_t**)&p, cl->id); // client will set this to consoleplayer
 	uint8_t inGame = 0;
 	uint8_t i;
+
+	playeringame[cl->id] = true;
+	cl->player->playerstate = PST_REBORN;
+	WriteUInt8((uint8_t**)&p, MSG_WELCOME); // put a greeting marker on it
+	WriteUInt8((uint8_t**)&p, cl->id); // client will set this to consoleplayer
 	for (i = 0; i < MAXPLAYERS; i++)
 		if(playeringame[i])
 			inGame |= 1 << i;
 	WriteUInt8((uint8_t**)&p, inGame);
-	enet_packet_resize(pk, p-start);
+	enet_packet_resize(pk, (uint8_t*)p - (uint8_t*)start);
 	enet_peer_send(cl->peer, 0, pk);
 	cl->type = CT_ACTIVE;
 	return;
@@ -156,12 +165,14 @@ void SV_ClientWelcome (client_t* cl)
 
 void SV_DropClient(int cn, const char *reason) // Reset one of the client_t inside clients[]
 {
+	mobj_t *mo;
+
 	if(!clients[cn].type) // Client is already empty
 		return;
 
 	playeringame[cn] = false;
 	clients[cn].type = CT_EMPTY;
-	mobj_t *mo = clients[cn].player->mo;
+	mo = clients[cn].player->mo;
 	P_RemoveMobj(mo);
 	mo->player = NULL;
 	clients[cn].player->mo = NULL;
@@ -172,9 +183,11 @@ void SV_DropClient(int cn, const char *reason) // Reset one of the client_t insi
 void SV_ParsePacket (ENetPacket *pk, ENetPeer *p)
 {
 	int from = SV_ClientNumForPeer(p);
-	if(from < 0) return; // Not a client
 	void *pkp = pk->data;
-	uint8_t msg = ReadUInt8((uint8_t**)&pkp);
+	uint8_t msg;
+
+	if(from < 0) return; // Not a client
+	msg = ReadUInt8((uint8_t**)&pkp);
 	switch(msg)
 	{
 		case MSG_POS:
@@ -227,11 +240,13 @@ void SV_ParsePacket (ENetPacket *pk, ENetPeer *p)
 void SV_BroadcastPacket(ENetPacket *pk, int from, uint8_t msg)
 {
 	int len = pk->dataLength;
+	int i;
+	void *pkp;
+
 	if(enet_packet_resize(pk, pk->dataLength + 1) < 0) // Failure! :O
 		return;
 
-	int i;
-	void *pkp = pk->data;
+	pkp = pk->data;
 	pkp = ((uint8_t*)pkp) + len;
 
 	WriteUInt8((uint8_t**)&pkp, (uint8_t)from);
@@ -246,8 +261,8 @@ void SV_BroadcastPacket(ENetPacket *pk, int from, uint8_t msg)
 
 int SV_ClientNumForPeer(ENetPeer *p)
 {
-	if(!p) return -1;
 	int i;
+	if(!p) return -1;
 	for (i = 0; i < MAXPLAYERS; i++)
 	{
 		if(clients[i].peer == p)

@@ -25,6 +25,9 @@
 #ifndef O_COMMON_H
 #define O_COMMON_H
 
+// GhostlyDeath <March 27, 2011> -- Lean and mean for Windows (since ENet does not use it)
+#define WIN32_LEAN_AND_MEAN
+
 #include "enet/enet.h"
 
 #define MAXPLAYERNAME 10

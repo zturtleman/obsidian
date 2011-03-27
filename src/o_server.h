@@ -25,6 +25,9 @@
 #ifndef O_SERVER_H
 #define O_SERVER_H
 
+// GhostlyDeath <March 27, 2011> -- Lean and mean for Windows (since ENet does not use it)
+#define WIN32_LEAN_AND_MEAN
+
 #include "enet/enet.h"
 #include "o_common.h"
 #include "d_player.h"

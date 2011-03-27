@@ -790,14 +790,15 @@ P_DamageMobj
   int 		damage,
   boolean fromserver )
 {
-    if(client && !fromserver)
-        return;
-
     unsigned	ang;
     int		saved;
     player_t*	player;
     fixed_t	thrust;
     int		temp;
+
+    if(client && !fromserver)
+        return;
+
 	
     if ( !(target->flags & MF_SHOOTABLE) )
 	return;	// shouldn't happen...

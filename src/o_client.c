@@ -22,6 +22,9 @@
     o_client : Obsidian Client
 */
 
+// GhostlyDeath <March 27, 2011> -- Lean and mean for Windows (since ENet does not use it)
+#define WIN32_LEAN_AND_MEAN
+
 #include "enet/enet.h"
 
 #include "doomstat.h"
@@ -30,6 +33,7 @@
 #include "r_defs.h"
 #include "r_main.h"
 #include "p_local.h"
+#include "deh_main.h"
 
 #include "o_client.h"
 #include "o_common.h"
@@ -41,11 +45,12 @@ ENetPeer *srvpeer;
 
 void CL_Connect (char *srv_hn)
 {
-        if (enet_initialize() != 0)
-                return; // Initialize enet, if it fails, return 1
-
 	ENetAddress addr = { ENET_HOST_ANY, 11666 };
 	ENetEvent event;
+	uint8_t* pkd, msgid;
+
+        if (enet_initialize() != 0)
+                return; // Initialize enet, if it fails, return 1
 
 	if (enet_address_set_host (&addr, srv_hn) < 0)
 	{
@@ -70,24 +75,35 @@ void CL_Connect (char *srv_hn)
 		printf("Connection to %s failed!\n", srv_hn);
 		return;
 	}
+	
+	if (enet_host_service(localclient, &event, 5000) > 0)
+		// Make sure we are recieving a packet
+		if (event.type == ENET_EVENT_TYPE_RECEIVE)
+		{
+			pkd = event.packet->data;
 
-	if(enet_host_service (localclient, &event, 5000) > 0 && event.type == ENET_EVENT_TYPE_RECEIVE
-	   && ReadUInt8((uint8_t**)&event.packet->data) == MSG_WELCOME) // Wait for server's greeting, set localid to the second marker we get.
-	{
-		localid = ReadUInt8((uint8_t**)&event.packet->data);
-		inGameMask = ReadUInt8((uint8_t**)&event.packet->data);
-		printf("DBG: Setting client's id to: %i\n", localid);
-	}
-	else
-	{
-		printf("Failed to recieve greeting message. Connection failed!\n");
-	}
+			// Read message type
+			msgid = ReadUInt8((uint8_t**)&pkd);
+
+			// Make sure it's a welcome message
+			if (msgid == MSG_WELCOME)
+			{
+				localid = ReadUInt8((uint8_t**)&pkd);
+				inGameMask = ReadUInt8((uint8_t**)&pkd);
+				printf("DBG: Setting client's id to: %i\n", localid);
+				return;
+			}
+		}
+	
+	// Oops
+	printf("Failed to recieve greeting message. Connection failed!\n");
 	return;
 }
 
 void CL_Loop(void)
 {
 	ENetEvent event;
+
 	while (enet_host_service(localclient, &event, 5) > 0)
 	{
 		switch(event.type)
@@ -110,6 +126,7 @@ void CL_ParsePacket(ENetPacket *pk)
 	void *p = pk->data;
 	uint8_t from = ((uint8_t *)(pk->data))[pk->dataLength - 1];
 	uint8_t msg = ReadUInt8((uint8_t**)&p);
+
 	switch(msg)
 	{
 		case MSG_POS:
@@ -146,6 +163,7 @@ void CL_SendPosUpdate(fixed_t x, fixed_t y, fixed_t z, fixed_t ang, fixed_t momx
 {
 	ENetPacket *pk = enet_packet_create(NULL, 29, 0);
 	void *p = pk->data;
+
 	WriteUInt8((uint8_t**)&p, MSG_POS);
 	WriteInt32((int32_t**)&p, x);
 	WriteInt32((int32_t**)&p, y);
@@ -161,6 +179,7 @@ void CL_SendUseCmd(void)
 {
 	ENetPacket *pk = enet_packet_create(NULL, 1, ENET_PACKET_FLAG_RELIABLE);
 	void *p = pk->data;
+
 	WriteUInt8((uint8_t**)&p, MSG_USE);
 	enet_peer_send(srvpeer, 1, pk);
 }
@@ -169,6 +188,7 @@ void CL_SendStateUpdate(uint16_t state)
 {
 	ENetPacket *pk = enet_packet_create(NULL, 3, 0);
 	void *p = pk->data;
+
 	WriteUInt8((uint8_t**)&p, MSG_STATE);
 	WriteUInt16((uint16_t**)&p, state);
 	enet_peer_send(srvpeer, 0, pk);
@@ -178,6 +198,7 @@ void CL_SendFireCmd(weapontype_t w, int refire)
 {
 	ENetPacket *pk = enet_packet_create(NULL, 6, ENET_PACKET_FLAG_RELIABLE);
 	void *p = pk->data;
+
 	WriteUInt8((uint8_t**)&p, MSG_FIRE);
 	WriteInt8((int8_t**)&p, (int8_t) w);
 	WriteInt32((int32_t**)&p, refire);
