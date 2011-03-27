@@ -23,7 +23,11 @@
 */
 
 #include "enet/enet.h"
+
 #include "doomstat.h"
+#include "p_mobj.h"
+#include "r_data.h"
+
 #include "o_client.h"
 #include "o_common.h"
 
@@ -97,10 +101,32 @@ void CL_Loop(void)
 	return;
 }
 
+// Pretty much the same here as serverside, except we're using different variables and reading some extra data
 void CL_ParsePacket(ENetPacket *pk)
 {
 	void *p = pk->data;
 	uint8_t from = ((uint8_t *)(pk->data))[pk->dataLength - 1];
+	uint8_t msg = ReadUInt8((uint8_t**)&p);
+	switch(msg)
+	{
+		case MSG_POS:
+		if(playeringame[from] && players[from].mo)
+		{
+			P_UnsetThingPosition(players[from].mo);
+			players[from].mo->x = ReadInt32((int32_t**)&p);
+			players[from].mo->y = ReadInt32((int32_t**)&p);
+			players[from].mo->z = ReadInt32((int32_t**)&p);
+			players[from].mo->angle = ReadInt32((int32_t**)&p);
+			players[from].mo->momx = ReadInt32((int32_t**)&p);
+			players[from].mo->momy = ReadInt32((int32_t**)&p);
+			players[from].mo->momz = ReadInt32((int32_t**)&p);
+			players[from].mo->subsector = R_PointInSubsector(players[from].mo->x, players[from].mo->y);
+			players[from].mo->floorz = players[from].mo->subsector->sector->floorheight;
+			players[from].mo->ceilingz = players[from].mo->subsector->sector->ceilingheight;
+			P_SetThingPosition(players[from].mo);
+		}
+		break;
+	}
 }
 
 void CL_SendPosUpdate(fixed_t x, fixed_t y, fixed_t z, fixed_t ang, fixed_t momx, fixed_t momy, fixed_t momz)
