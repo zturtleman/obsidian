@@ -129,6 +129,16 @@ void CL_ParsePacket(ENetPacket *pk)
 			P_SetThingPosition(players[from].mo);
 		}
 		break;
+
+		case MSG_USE:
+		if(players[from].mo)
+			P_UseLines(&players[from]);
+		break;
+
+		case MSG_STATE:
+		if(players[from].mo)
+			P_SetMobjState(players[from].mo, (statenum_t)ReadUInt16((uint16_t**)&p));
+		break;
 	}
 }
 

@@ -192,16 +192,12 @@ void SV_ParsePacket (ENetPacket *pk, ENetPeer *p)
 			clients[from].player->mo->floorz = clients[from].player->mo->subsector->sector->floorheight;
 			clients[from].player->mo->ceilingz = clients[from].player->mo->subsector->sector->ceilingheight;
 			P_SetThingPosition(clients[from].player->mo);
-			SV_BroadcastPacket(pk, from, msg);
 		}
 		break;
 
 		case MSG_USE:
 		if(clients[from].player)
-		{
 			P_UseLines(clients[from].player);
-			SV_BroadcastPacket(pk, from, msg);
-		}
 		break;
 
 		case MSG_STATE:
@@ -219,7 +215,10 @@ void SV_ParsePacket (ENetPacket *pk, ENetPeer *p)
 			P_FireWeapon(clients[from].player);
 		}
 		break;
+		default:
+			return;
 	}
+	SV_BroadcastPacket(pk, from, msg);
 	if(pk->referenceCount == 0)
 		enet_packet_destroy(pk);
 	return;
