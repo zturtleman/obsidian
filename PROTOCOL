@@ -3,14 +3,14 @@
 ==============================
 
 Message: MSG_NULL
-Server Use: None
-Client Use: None
+Server Use: None (Maybe used as a delimiter for packet data later on)
+Client Use: None (Maybe used as a delimiter for packet data later on)
 Data: None
 
 Message: MSG_WELCOME (reliable)
 Server Use: Sent to client upon connection, client should be able to gain an idea of what the game is like from this info.
 Client Use: Client will never send this message.
-Data: 1 Unsigned 8-bit integer containing the server's protocol, 1 Unsigned 8-bit integer containing the players id (for consoleplayer), 1 unsigned 8-bit integer containing info about which players are in game (bitmask: player 0 = 1, player 2 = 2, player 3 = 4, etc.)
+Data: 1 Unsigned 8-bit integer containing the server's protocol version, 1 Unsigned 8-bit integer containing the players id (for consoleplayer), 1 unsigned 8-bit integer containing info about which players are in game (bitmask: player 1 = 1, player 2 = 2, player 3 = 4, etc.)
 
 Message: MSG_POS
 Server Use: Update a particular client on the positions of the other clients.
@@ -32,7 +32,13 @@ Server Use: Inform clients of a sprite state change from another client.
 Client Use: Inform the server of a sprite state change we just did.
 Data: statenum_t casted to a 16-bit unsigned integer.
 
-Message: MSG_FIRE
+Message: MSG_FIRE (reliable)
 Server Use: Inform clients that another client fired a weapon.
 Client Use: Inform server that we fired a weapon.
 Data: weapontype_t casted to an 8-bit integer, 32-bit integer containing the player's "refire" variable.
+
+Message: MSG_DAMAGE (reliable)
+Server Use: Inform a client of a player getting damaged.
+Client Use: The client will never send this message to the server.
+Data: Unsigned 8-bit integer with the player's number to harm, Unsigned 8-bit integer describing the player that did the damage, and a 32-bit integer saying how much to damage the player.
+
