@@ -14,7 +14,7 @@ AC_PROG_CC
 AC_PROG_RANLIB
 AC_CHECK_PROG(HAVE_PYTHON, python, true, false)
 
-OPT_LEVEL=0
+OPT_LEVEL=2
 
 # Engine room, we need more speed!
 
