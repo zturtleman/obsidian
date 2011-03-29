@@ -296,7 +296,8 @@ A_WeaponReady
     int		angle;
     
     // get out of attack state
-    if (!server && (player->mo->state == &states[S_PLAY_ATK1]
+    // [tm512] But if we're in client or server mode, dont change the attack state.
+    if (!server && !client && (player->mo->state == &states[S_PLAY_ATK1]
 	|| player->mo->state == &states[S_PLAY_ATK2]))
     {
 	P_SetMobjState (player->mo, S_PLAY);

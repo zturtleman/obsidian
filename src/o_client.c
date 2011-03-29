@@ -120,7 +120,10 @@ void CL_Loop(void)
 	return;
 }
 
-// Pretty much the same here as serverside, except we're using different variables and reading some extra data
+// Pretty much the same here as serverside, except we're using different variables and reading some extra data,
+// we could be super concise and move this into an o_common.c, but that can wait for later maybe.
+void P_FireWeapon (player_t* player);
+
 void CL_ParsePacket(ENetPacket *pk)
 {
 	void *p = pk->data;
@@ -156,7 +159,23 @@ void CL_ParsePacket(ENetPacket *pk)
 		if(players[from].mo)
 			P_SetMobjState(players[from].mo, (statenum_t)ReadUInt16((uint16_t**)&p));
 		break;
+
+		case MSG_FIRE:
+		if(playeringame[from])
+		{
+			weapontype_t toFire = (weapontype_t)ReadInt8((uint8_t**)&p);
+			if(toFire != players[from].readyweapon)
+				players[from].readyweapon = toFire;
+			players[from].refire = ReadInt32((int32_t**)&p);
+			P_FireWeapon(&players[from]);
+		}
+		break;
+
+		default:
+			break;		
 	}
+	if(pk->referenceCount == 0)
+		enet_packet_destroy(pk);
 }
 
 void CL_SendPosUpdate(fixed_t x, fixed_t y, fixed_t z, fixed_t ang, fixed_t momx, fixed_t momy, fixed_t momz)

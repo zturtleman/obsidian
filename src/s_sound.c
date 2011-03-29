@@ -498,7 +498,7 @@ static int S_AdjustSoundParams(mobj_t *listener, mobj_t *source,
     fixed_t        ady;
     angle_t        angle;
 
-    if(!listener || !source) // Protect against those damned null pointers
+    if(server && (!listener || !source)) // Protect against those damned null pointers
 		return 0;
 
     // calculate the distance to sound origin
@@ -603,7 +603,7 @@ void S_StartSound(void *origin_p, int sfx_id)
         priority = NORM_PRIORITY;
     }
 
-    if(!players[consoleplayer].mo)
+    if(server && !players[consoleplayer].mo)
         return;
 
     // Check to see if it is audible,

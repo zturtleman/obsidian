@@ -130,14 +130,11 @@ void SV_Loop (void)
 int SV_FindEmptyClientNum(void)
 {
 	int i;
+
 	for(i = 0; i < MAXPLAYERS; i++)
-	{
 		if(clients[i].type == CT_EMPTY)
-		{
-			printf("DBG: client_t for new player found! Assigning #%i\n", i);
 			return i;
-		}
-	}
+
 	return -1;
 }
 
@@ -180,14 +177,19 @@ void SV_DropClient(int cn, const char *reason) // Reset one of the client_t insi
 	printf("disconnected client %i (%s)\n", cn, reason);
 }
 
+void P_FireWeapon (player_t* player);
+
 void SV_ParsePacket (ENetPacket *pk, ENetPeer *p)
 {
 	int from = SV_ClientNumForPeer(p);
 	void *pkp = pk->data;
 	uint8_t msg;
+	boolean valid;
 
 	if(from < 0) return; // Not a client
 	msg = ReadUInt8((uint8_t**)&pkp);
+	valid = 1;
+
 	switch(msg)
 	{
 		case MSG_POS:
@@ -229,11 +231,16 @@ void SV_ParsePacket (ENetPacket *pk, ENetPeer *p)
 		}
 		break;
 		default:
-			return;
+			valid = 0;
+			break;
 	}
-	SV_BroadcastPacket(pk, from, msg);
+	
+	if(valid)
+		SV_BroadcastPacket(pk, from, msg);
+
 	if(pk->referenceCount == 0)
 		enet_packet_destroy(pk);
+
 	return;
 }
 
