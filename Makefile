@@ -73,7 +73,7 @@ $(OBJ_D)/%.o: src/%.c
 	$(CC) $(INCLUDES) -c $< -o $@
 
 obsidian: $(OBS_OBJS)
-	$(CC) $(INCLUDES) $(LIBS) -lSDL_mixer -lm -lsamplerate -o obsidian $(OBS_OBJS) enet/.libs/libenet.a textscreen/libtextscreen.a opl/libopl.a pcsound/libpcsound.a
+	$(CC) $(INCLUDES) $(LIBS) -lSDL_mixer -lm -lsamplerate -o src/obsidian $(OBS_OBJS) enet/.libs/libenet.a textscreen/libtextscreen.a opl/libopl.a pcsound/libpcsound.a
 
 clean:
 	rm -rf obj/
