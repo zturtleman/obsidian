@@ -253,7 +253,7 @@ void P_FireWeapon (player_t* player)
     if (!P_CheckAmmo (player))
 	return;
 
-	if(client)
+	if(client && player == &players[consoleplayer])
 		CL_SendFireCmd(player->readyweapon, player->refire);
 
     P_SetMobjState (player->mo, S_PLAY_ATK1);
