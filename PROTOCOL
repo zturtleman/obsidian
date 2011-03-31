@@ -42,3 +42,7 @@ Server Use: Inform a client of a player getting damaged.
 Client Use: The client will never send this message to the server.
 Data: Unsigned 8-bit integer with the player's number to harm, Unsigned 8-bit integer describing the player that did the damage, and a 32-bit integer saying how much to damage the player.
 
+Message: MSG_RESPAWN
+Server Use: Inform other clients that a client respawned.
+Client Use: Inform the server that we respawned.
+Data: Unsigned 8-bit integer with the client's id (server only, client will send no extra data).

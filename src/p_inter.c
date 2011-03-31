@@ -47,6 +47,8 @@
 
 #include "p_inter.h"
 
+#include "o_server.h"
+
 #define BONUSADD	6
 
 
@@ -781,6 +783,7 @@ P_KillMobj
 //
 
 boolean client;
+boolean server;
 
 void
 P_DamageMobj
@@ -799,6 +802,8 @@ P_DamageMobj
     if(client && !fromserver)
         return;
 
+	if(server)
+		SV_DamageMobj(target, source, damage);
 	
     if ( !(target->flags & MF_SHOOTABLE) )
 	return;	// shouldn't happen...

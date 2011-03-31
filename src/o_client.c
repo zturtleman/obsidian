@@ -126,9 +126,11 @@ void P_FireWeapon (player_t* player);
 
 void CL_ParsePacket(ENetPacket *pk)
 {
+	uint8_t from, msg;
 	void *p = pk->data;
-	uint8_t from = ((uint8_t *)(pk->data))[pk->dataLength - 1];
-	uint8_t msg = ReadUInt8((uint8_t**)&p);
+	
+	from = ((uint8_t *)(pk->data))[pk->dataLength - 1];
+	msg = ReadUInt8((uint8_t**)&p);
 
 	switch(msg)
 	{
@@ -172,6 +174,7 @@ void CL_ParsePacket(ENetPacket *pk)
 		case MSG_FIRE:
 		if(playeringame[from])
 		{
+			printf("Me: %i From: %i Msg: %i\n", consoleplayer, from, msg);
 			weapontype_t toFire = (weapontype_t)ReadInt8((uint8_t**)&p);
 			if(toFire != players[from].readyweapon)
 				players[from].readyweapon = toFire;

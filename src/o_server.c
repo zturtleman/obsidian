@@ -55,7 +55,7 @@ int SV_Main (void)
 	addr.host = ENET_HOST_ANY;
 	addr.port = 11666;
 
-	srv = enet_host_create(&addr, MAXPLAYERS, 4, 0, 0);
+	srv = enet_host_create(&addr, MAXPLAYERS * 2, 4, 0, 0);
 	if(srv == NULL)
 		return 1;
 	else
@@ -140,6 +140,7 @@ int SV_FindEmptyClientNum(void)
 void SV_ClientWelcome (client_t* cl)
 {
 	ENetPacket *pk = enet_packet_create(NULL, 32, ENET_PACKET_FLAG_RELIABLE);
+	ENetPacket *newplayer = enet_packet_create(NULL, 2, ENET_PACKET_FLAG_RELIABLE);
 	void *p = pk->data;
 	uint8_t inGame = 0;
 	uint8_t i;
@@ -157,7 +158,6 @@ void SV_ClientWelcome (client_t* cl)
 	cl->type = CT_ACTIVE;
 
 	// Now, we inform everyone else about the new player. 
-	ENetPacket *newplayer = enet_packet_create(NULL, 2, ENET_PACKET_FLAG_RELIABLE);
 	p = newplayer->data;
 	WriteUInt8((uint8_t**)&p, MSG_JOIN);
 	WriteUInt8((uint8_t**)&p, cl->id);
@@ -267,15 +267,38 @@ void SV_ResizeBroadcastPacket(ENetPacket *pk, int from, uint8_t msg)
 
 void SV_BroadcastPacket(ENetPacket *pk, int exclude)
 {
+	// Use channels 0 - 3 for unreliable, 4 - 7 for reliable. Each client gets two dedicated channels
 	int i;
 	for(i = 0; i < MAXPLAYERS; i++)
 		if(i != exclude && clients[i].type > 1)
 			enet_peer_send(clients[i].peer, i, pk);
+			//enet_peer_send(clients[i].peer, i + (((pk->flags & ENET_PACKET_FLAG_RELIABLE) > 0) * MAXPLAYERS), pk); 
 
 	if(pk->referenceCount == 0)
 		enet_packet_destroy(pk);
 
 	return;
+}
+
+void SV_DamageMobj(mobj_t *target, mobj_t *source, int damage)
+{
+	// Loop through all players and see if our target and source have players.
+	ENetPacket *pk = enet_packet_create(NULL, 32, ENET_PACKET_FLAG_RELIABLE);
+	int t, s, i;
+	t = s = -1;
+
+	for(i = 0; i < MAXPLAYERS; i++)
+	{
+		if(!clients[i].player || !clients[i].player->mo)
+			continue;
+
+		if(clients[i].player->mo == target)
+			t = i;
+
+		if(clients[i].player->mo == source)
+			s = i;
+	}
+	printf("target = %i\nsource = %i\n", t, s);
 }
 
 
