@@ -73,7 +73,6 @@ int SV_Main (void)
 
 }
 
-void SV_DropClient(int cn, const char *reason);
 void SV_Loop (void)
 {
 	ENetEvent event;
@@ -141,8 +140,7 @@ int SV_FindEmptyClientNum(void)
 void SV_ClientWelcome (client_t* cl)
 {
 	ENetPacket *pk = enet_packet_create(NULL, 32, ENET_PACKET_FLAG_RELIABLE);
-	void *start = pk->data;
-	void *p = start;
+	void *p = pk->data;
 	uint8_t inGame = 0;
 	uint8_t i;
 
@@ -154,9 +152,17 @@ void SV_ClientWelcome (client_t* cl)
 		if(playeringame[i])
 			inGame |= 1 << i;
 	WriteUInt8((uint8_t**)&p, inGame);
-	enet_packet_resize(pk, (uint8_t*)p - (uint8_t*)start);
+	enet_packet_resize(pk, (uint8_t*)p - (uint8_t*)pk->data);
 	enet_peer_send(cl->peer, 0, pk);
 	cl->type = CT_ACTIVE;
+
+	// Now, we inform everyone else about the new player. 
+	ENetPacket *newplayer = enet_packet_create(NULL, 2, ENET_PACKET_FLAG_RELIABLE);
+	p = newplayer->data;
+	WriteUInt8((uint8_t**)&p, MSG_JOIN);
+	WriteUInt8((uint8_t**)&p, cl->id);
+	SV_BroadcastPacket(newplayer, cl->id);
+	
 	return;
 }
 
@@ -236,18 +242,14 @@ void SV_ParsePacket (ENetPacket *pk, ENetPeer *p)
 	}
 	
 	if(valid)
-		SV_BroadcastPacket(pk, from, msg);
-
-	if(pk->referenceCount == 0)
-		enet_packet_destroy(pk);
+		SV_ResizeBroadcastPacket(pk, from, msg);
 
 	return;
 }
 
-void SV_BroadcastPacket(ENetPacket *pk, int from, uint8_t msg)
+void SV_ResizeBroadcastPacket(ENetPacket *pk, int from, uint8_t msg)
 {
 	int len = pk->dataLength;
-	int i;
 	void *pkp;
 
 	if(enet_packet_resize(pk, pk->dataLength + 1) < 0) // Failure! :O
@@ -257,14 +259,25 @@ void SV_BroadcastPacket(ENetPacket *pk, int from, uint8_t msg)
 	pkp = ((uint8_t*)pkp) + len;
 
 	WriteUInt8((uint8_t**)&pkp, (uint8_t)from);
-	for(i = 0; i < MAXPLAYERS; i++)
-	{
-		if(i != from && clients[i].type > 1)
-			enet_peer_send(clients[i].peer, 1, pk);
-	}
+
+	SV_BroadcastPacket(pk, from);
 
 	return;
 }
+
+void SV_BroadcastPacket(ENetPacket *pk, int exclude)
+{
+	int i;
+	for(i = 0; i < MAXPLAYERS; i++)
+		if(i != exclude && clients[i].type > 1)
+			enet_peer_send(clients[i].peer, i, pk);
+
+	if(pk->referenceCount == 0)
+		enet_packet_destroy(pk);
+
+	return;
+}
+
 
 int SV_ClientNumForPeer(ENetPeer *p)
 {

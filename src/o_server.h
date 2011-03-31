@@ -35,10 +35,12 @@
 // Functions
 int SV_Main(void);
 void SV_Loop(void);
+void SV_DropClient(int cn, const char *reason);
 int SV_FindEmptyClientNum(void);
 player_t* SV_FindEmptyPlayer(void);
 void SV_ParsePacket (ENetPacket *pk, ENetPeer *p);
-void SV_BroadcastPacket(ENetPacket *pk, int from, uint8_t msg);
+void SV_ResizeBroadcastPacket(ENetPacket *pk, int from, uint8_t msg);
+void SV_BroadcastPacket(ENetPacket *pk, int exclude);
 int SV_ClientNumForPeer(ENetPeer *p);
 
 // Variables
