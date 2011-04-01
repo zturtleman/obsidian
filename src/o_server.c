@@ -306,10 +306,9 @@ void SV_BroadcastPacket(ENetPacket *pk, int exclude)
 
 void SV_DamageMobj(mobj_t *target, int damage)
 {
-	// Loop through all players and see if our target and source have players.
-//	ENetPacket *pk = enet_packet_create(NULL, 32, ENET_PACKET_FLAG_RELIABLE);
 	int i;
 
+	// Loop through all players and see if our target and source have players.
 	for(i = 0; i < MAXPLAYERS; i++)
 	{
 		if(!clients[i].player || !clients[i].player->mo)
@@ -318,7 +317,6 @@ void SV_DamageMobj(mobj_t *target, int damage)
 		if(clients[i].player->mo == target)
 			damages[i] += damage;
 	}
-	printf("damage = %i\n", damages[i]);
 }
 
 

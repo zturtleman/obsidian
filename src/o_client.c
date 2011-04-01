@@ -174,7 +174,6 @@ void CL_ParsePacket(ENetPacket *pk)
 		case MSG_FIRE:
 		if(playeringame[from])
 		{
-			printf("Me: %i From: %i Msg: %i\n", consoleplayer, from, msg);
 			weapontype_t toFire = (weapontype_t)ReadInt8((uint8_t**)&p);
 			if(toFire != players[from].readyweapon)
 				players[from].readyweapon = toFire;
