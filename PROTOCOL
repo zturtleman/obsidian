@@ -40,7 +40,12 @@ Data: weapontype_t casted to an 8-bit integer, 32-bit integer containing the pla
 Message: MSG_DAMAGE (reliable)
 Server Use: Inform a client of a player getting damaged.
 Client Use: The client will never send this message to the server.
-Data: Unsigned 8-bit integer with the player's number to harm, Unsigned 8-bit integer describing the player that did the damage, and a 32-bit integer saying how much to damage the player.
+Data: Unsigned 8-bit integer specifying which player to hurt, and a 32-bit integer saying how much to damage the player.
+
+Message: MSG_KILL (reliable)
+Server Use: Tell the client that he died.
+Client Use: The client will never send this message to the server.
+Data: Unsigned 8-bit integer specifying which player died, unsigned 8-bit integer specifying which player killed the client (will be MAXPLAYERS + 1 if they died by environment, etc.)
 
 Message: MSG_RESPAWN
 Server Use: Inform other clients that a client respawned.

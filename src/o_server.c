@@ -138,11 +138,9 @@ void SV_Loop (void)
 			void *p = dmg->data;
 
 			WriteUInt8((uint8_t**)&p, MSG_DAMAGE);
+			WriteUInt8((uint8_t**)&p, i);
 			WriteInt32((int32_t**)&p, damages[i]);
-
-			enet_peer_send(clients[i].peer, 4 + i, dmg);
-			if(dmg->referenceCount == 0)
-				enet_packet_destroy(dmg);
+			SV_BroadcastPacket(dmg, -1);
 
 			damages[i] = 0;
 		}
@@ -319,6 +317,34 @@ void SV_DamageMobj(mobj_t *target, int damage)
 	}
 }
 
+void SV_KillMobj(mobj_t *source, mobj_t *target)
+{
+	uint8_t i, s, t;
+	ENetPacket *pk = enet_packet_create(NULL, 3, ENET_PACKET_FLAG_RELIABLE);
+	void *p = pk->data;
+
+	s = t = MAXPLAYERS + 1;
+
+	for(i = 0; i < MAXPLAYERS; i++)
+	{
+		if(!clients[i].player || !clients[i].player->mo)
+			continue;
+
+		if(clients[i].player->mo == target)
+			t = i;
+
+		if(clients[i].player->mo == source)
+			s = i;
+	}
+
+	if(t <= MAXPLAYERS)
+	{
+		WriteUInt8((uint8_t**)&p, MSG_KILL);
+		WriteUInt8((uint8_t**)&p, t);
+		WriteUInt8((uint8_t**)&p, s);
+		SV_BroadcastPacket(pk, -1);
+	}
+}
 
 int SV_ClientNumForPeer(ENetPeer *p)
 {

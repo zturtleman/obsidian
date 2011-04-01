@@ -182,6 +182,14 @@ void CL_ParsePacket(ENetPacket *pk)
 		}
 		break;
 
+		case MSG_DAMAGE:
+		{
+			int damaged;
+			damaged = ReadUInt8((uint8_t**)&p);
+			if(players[damaged].mo)
+				P_DamageMobj(players[damaged].mo, NULL, NULL, ReadInt32((int32_t**)&p), true);
+		}
+
 		default:
 			break;		
 	}

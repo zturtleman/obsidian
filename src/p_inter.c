@@ -668,6 +668,10 @@ P_TouchSpecialThing
 //
 // KillMobj
 //
+
+boolean client;
+boolean server;
+
 void
 P_KillMobj
 ( mobj_t*	source,
@@ -675,7 +679,10 @@ P_KillMobj
 {
     mobjtype_t	item;
     mobj_t*	mo;
-	
+
+    if(server)	
+        SV_KillMobj(source, target);
+
     target->flags &= ~(MF_SHOOTABLE|MF_FLOAT|MF_SKULLFLY);
 
     if (target->type != MT_SKULL)
@@ -782,9 +789,6 @@ P_KillMobj
 // and other environmental stuff.
 //
 
-boolean client;
-boolean server;
-
 void
 P_DamageMobj
 ( mobj_t*	target,
@@ -801,9 +805,6 @@ P_DamageMobj
 
     if(client && !fromserver)
         return;
-
-	if(server)
-		SV_DamageMobj(target, damage);
 	
     if ( !(target->flags & MF_SHOOTABLE) )
 	return;	// shouldn't happen...
@@ -906,7 +907,11 @@ P_DamageMobj
     
     // do the damage	
     target->health -= damage;	
-    if (target->health <= 0)
+
+	if(server)
+		SV_DamageMobj(target, damage);
+
+    if (target->health <= 0 && !client)
     {
 	P_KillMobj (source, target);
 	return;
