@@ -41,7 +41,7 @@ player_t* SV_FindEmptyPlayer(void);
 void SV_ParsePacket (ENetPacket *pk, ENetPeer *p);
 void SV_ResizeBroadcastPacket(ENetPacket *pk, int from, uint8_t msg);
 void SV_BroadcastPacket(ENetPacket *pk, int exclude);
-void SV_DamageMobj(mobj_t *target, mobj_t *source, int damage);
+void SV_DamageMobj(mobj_t *target, int damage);
 int SV_ClientNumForPeer(ENetPeer *p);
 
 // Variables

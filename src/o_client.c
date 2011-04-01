@@ -60,8 +60,8 @@ void CL_Connect (char *srv_hn)
 
 	printf("Attempting to connect to %s:%i\n", srv_hn, addr.port);
 
-	localclient = enet_host_create (NULL, 1, 2, 0, 0);
-	srvpeer = enet_host_connect (localclient, &addr, 2, 0);
+	localclient = enet_host_create (NULL, 1, MAXPLAYERS * 2, 0, 0);
+	srvpeer = enet_host_connect (localclient, &addr, MAXPLAYERS * 2, 0);
 
 	if(enet_host_service (localclient, &event, 5000) > 0 && event.type == ENET_EVENT_TYPE_CONNECT)
 	{

@@ -803,7 +803,7 @@ P_DamageMobj
         return;
 
 	if(server)
-		SV_DamageMobj(target, source, damage);
+		SV_DamageMobj(target, damage);
 	
     if ( !(target->flags & MF_SHOOTABLE) )
 	return;	// shouldn't happen...

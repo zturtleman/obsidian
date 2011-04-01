@@ -43,6 +43,9 @@
 boolean server;
 boolean client;
 
+// Have a damages integer for each client. Every tic, this will be sent out to the client and reset if they were hurt that tic. 
+int damages[MAXPLAYERS];
+
 int SV_Main (void) 
 {
 	int i;
@@ -55,7 +58,7 @@ int SV_Main (void)
 	addr.host = ENET_HOST_ANY;
 	addr.port = 11666;
 
-	srv = enet_host_create(&addr, MAXPLAYERS * 2, 4, 0, 0);
+	srv = enet_host_create(&addr, MAXPLAYERS, MAXPLAYERS * 2, 0, 0);
 	if(srv == NULL)
 		return 1;
 	else
@@ -64,10 +67,12 @@ int SV_Main (void)
 		autostart = 1;
 		server = 1;
 		client = 0;
-		// Not liking how this is, but since it seems I can't do anything about setting client's "type" in the header...
-		
+
 		for(i = 0; i < MAXPLAYERS; i++)
+		{
 			clients[i].type = CT_EMPTY;
+			damages[i] = 0;
+		}
 		return 0;
 	}
 
@@ -76,7 +81,7 @@ int SV_Main (void)
 void SV_Loop (void)
 {
 	ENetEvent event;
-	int from, x, c;
+	int from, i, c;
 	char hn[512];
 
 	while (enet_host_service(srv, &event, 5) > 0)
@@ -121,6 +126,25 @@ void SV_Loop (void)
 						SV_DropClient(from, "client exited");
 				}
 			}
+		}
+	}
+
+	// Send damage if needed.
+	for(i = 0; i < MAXPLAYERS; i++)
+	{
+		if(damages[i] && clients[i].player)
+		{
+			ENetPacket *dmg = enet_packet_create(NULL, 5, ENET_PACKET_FLAG_RELIABLE);
+			void *p = dmg->data;
+
+			WriteUInt8((uint8_t**)&p, MSG_DAMAGE);
+			WriteInt32((int32_t**)&p, damages[i]);
+
+			enet_peer_send(clients[i].peer, 4 + i, dmg);
+			if(dmg->referenceCount == 0)
+				enet_packet_destroy(dmg);
+
+			damages[i] = 0;
 		}
 	}
 	return;
@@ -269,10 +293,10 @@ void SV_BroadcastPacket(ENetPacket *pk, int exclude)
 {
 	// Use channels 0 - 3 for unreliable, 4 - 7 for reliable. Each client gets two dedicated channels
 	int i;
+
 	for(i = 0; i < MAXPLAYERS; i++)
 		if(i != exclude && clients[i].type > 1)
-			enet_peer_send(clients[i].peer, i, pk);
-			//enet_peer_send(clients[i].peer, i + (((pk->flags & ENET_PACKET_FLAG_RELIABLE) > 0) * MAXPLAYERS), pk); 
+			enet_peer_send(clients[i].peer, i + (((pk->flags & ENET_PACKET_FLAG_RELIABLE) > 0) * MAXPLAYERS), pk); 
 
 	if(pk->referenceCount == 0)
 		enet_packet_destroy(pk);
@@ -280,12 +304,11 @@ void SV_BroadcastPacket(ENetPacket *pk, int exclude)
 	return;
 }
 
-void SV_DamageMobj(mobj_t *target, mobj_t *source, int damage)
+void SV_DamageMobj(mobj_t *target, int damage)
 {
 	// Loop through all players and see if our target and source have players.
-	ENetPacket *pk = enet_packet_create(NULL, 32, ENET_PACKET_FLAG_RELIABLE);
-	int t, s, i;
-	t = s = -1;
+//	ENetPacket *pk = enet_packet_create(NULL, 32, ENET_PACKET_FLAG_RELIABLE);
+	int i;
 
 	for(i = 0; i < MAXPLAYERS; i++)
 	{
@@ -293,12 +316,9 @@ void SV_DamageMobj(mobj_t *target, mobj_t *source, int damage)
 			continue;
 
 		if(clients[i].player->mo == target)
-			t = i;
-
-		if(clients[i].player->mo == source)
-			s = i;
+			damages[i] += damage;
 	}
-	printf("target = %i\nsource = %i\n", t, s);
+	printf("damage = %i\n", damages[i]);
 }
 
 
