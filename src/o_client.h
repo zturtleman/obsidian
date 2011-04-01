@@ -42,5 +42,6 @@ void CL_SendPosUpdate(fixed_t x, fixed_t y, fixed_t z, fixed_t ang, fixed_t momx
 void CL_SendUseCmd(void);
 void CL_SendStateUpdate(uint16_t state);
 void CL_SendFireCmd(weapontype_t w, int refire);
+void CL_SendRespawn(void);
 
 #endif

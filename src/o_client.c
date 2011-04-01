@@ -189,12 +189,34 @@ void CL_ParsePacket(ENetPacket *pk)
 			if(players[damaged].mo)
 				P_DamageMobj(players[damaged].mo, NULL, NULL, ReadInt32((int32_t**)&p), true);
 		}
+		break;
+
+		case MSG_KILL:
+		{
+			int killed, killer;
+			mobj_t *killedmo, *killermo;
+			killed = ReadUInt8((uint8_t**)&p);
+			killer = ReadUInt8((uint8_t**)&p);
+
+			if(players[killed].mo && killer > MAXPLAYERS)
+				P_KillMobj(NULL, players[killed].mo);
+			else if(players[killed].mo && players[killer].mo)
+				P_KillMobj(players[killer].mo, players[killed].mo);
+		}
+		break;
+
+		case MSG_RESPAWN:
+		if(playeringame[from])
+			players[from].playerstate = PST_REBORN;
+		break;
 
 		default:
 			break;		
 	}
 	if(pk->referenceCount == 0)
 		enet_packet_destroy(pk);
+
+	return;
 }
 
 void CL_SendPosUpdate(fixed_t x, fixed_t y, fixed_t z, fixed_t ang, fixed_t momx, fixed_t momy, fixed_t momz)
@@ -211,15 +233,17 @@ void CL_SendPosUpdate(fixed_t x, fixed_t y, fixed_t z, fixed_t ang, fixed_t momx
 	WriteInt32((int32_t**)&p, momy);
 	WriteInt32((int32_t**)&p, momz);
 	enet_peer_send(srvpeer, 0, pk);
+	return;
 }
 
 void CL_SendUseCmd(void)
 {
-	ENetPacket *pk = enet_packet_create(NULL, 1, ENET_PACKET_FLAG_RELIABLE);
+	ENetPacket *pk = enet_packet_create(NULL, 1, 0);
 	void *p = pk->data;
 
 	WriteUInt8((uint8_t**)&p, MSG_USE);
-	enet_peer_send(srvpeer, 1, pk);
+	enet_peer_send(srvpeer, 0, pk);
+	return;
 }
 
 void CL_SendStateUpdate(uint16_t state)
@@ -230,6 +254,7 @@ void CL_SendStateUpdate(uint16_t state)
 	WriteUInt8((uint8_t**)&p, MSG_STATE);
 	WriteUInt16((uint16_t**)&p, state);
 	enet_peer_send(srvpeer, 0, pk);
+	return;
 }
 
 void CL_SendFireCmd(weapontype_t w, int refire)
@@ -240,5 +265,16 @@ void CL_SendFireCmd(weapontype_t w, int refire)
 	WriteUInt8((uint8_t**)&p, MSG_FIRE);
 	WriteInt8((int8_t**)&p, (int8_t) w);
 	WriteInt32((int32_t**)&p, refire);
-	enet_peer_send(srvpeer, 0, pk);
+	enet_peer_send(srvpeer, 1, pk);
+	return;
+}
+
+void CL_SendReborn(void)
+{
+	ENetPacket *pk = enet_packet_create(NULL, 1, ENET_PACKET_FLAG_RELIABLE);
+	void *p = pk->data;
+
+	WriteUInt8((uint8_t**)&p, MSG_RESPAWN);
+	enet_peer_send(srvpeer, 1, pk);
+	return;
 }

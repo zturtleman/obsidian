@@ -81,7 +81,7 @@ int SV_Main (void)
 void SV_Loop (void)
 {
 	ENetEvent event;
-	int from, i, c;
+	int from, c;
 	char hn[512];
 
 	while (enet_host_service(srv, &event, 5) > 0)
@@ -129,22 +129,8 @@ void SV_Loop (void)
 		}
 	}
 
-	// Send damage if needed.
-	for(i = 0; i < MAXPLAYERS; i++)
-	{
-		if(damages[i] && clients[i].player)
-		{
-			ENetPacket *dmg = enet_packet_create(NULL, 5, ENET_PACKET_FLAG_RELIABLE);
-			void *p = dmg->data;
+	SV_SendDamage();
 
-			WriteUInt8((uint8_t**)&p, MSG_DAMAGE);
-			WriteUInt8((uint8_t**)&p, i);
-			WriteInt32((int32_t**)&p, damages[i]);
-			SV_BroadcastPacket(dmg, -1);
-
-			damages[i] = 0;
-		}
-	}
 	return;
 }
 
@@ -258,6 +244,12 @@ void SV_ParsePacket (ENetPacket *pk, ENetPeer *p)
 			P_FireWeapon(clients[from].player);
 		}
 		break;
+
+		case MSG_RESPAWN:
+		if(clients[from].player)
+			clients[from].player->playerstate = PST_REBORN;
+		break;
+
 		default:
 			valid = 0;
 			break;
@@ -302,6 +294,28 @@ void SV_BroadcastPacket(ENetPacket *pk, int exclude)
 	return;
 }
 
+void SV_SendDamage(void)
+{
+	int i;
+
+	// Send damage if needed.
+	for(i = 0; i < MAXPLAYERS; i++)
+	{
+		if(damages[i] && clients[i].player)
+		{
+			ENetPacket *dmg = enet_packet_create(NULL, 5, ENET_PACKET_FLAG_RELIABLE);
+			void *p = dmg->data;
+
+			WriteUInt8((uint8_t**)&p, MSG_DAMAGE);
+			WriteUInt8((uint8_t**)&p, i);
+			WriteInt32((int32_t**)&p, damages[i]);
+			SV_BroadcastPacket(dmg, -1);
+
+			damages[i] = 0;
+		}
+	}
+}
+
 void SV_DamageMobj(mobj_t *target, int damage)
 {
 	int i;
@@ -315,6 +329,8 @@ void SV_DamageMobj(mobj_t *target, int damage)
 		if(clients[i].player->mo == target)
 			damages[i] += damage;
 	}
+
+	
 }
 
 void SV_KillMobj(mobj_t *source, mobj_t *target)
@@ -339,6 +355,9 @@ void SV_KillMobj(mobj_t *source, mobj_t *target)
 
 	if(t <= MAXPLAYERS)
 	{
+		if(damages[t]) // Send unsent damage
+			SV_SendDamage();
+
 		WriteUInt8((uint8_t**)&p, MSG_KILL);
 		WriteUInt8((uint8_t**)&p, t);
 		WriteUInt8((uint8_t**)&p, s);
