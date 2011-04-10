@@ -225,7 +225,7 @@ void SV_ParsePacket (ENetPacket *pk, ENetPeer *p)
 		break;
 
 		case MSG_USE:
-		if(clients[from].player)
+		if(clients[from].player && clients[from].player->mo && clients[from].player->mo->health > 0)
 			P_UseLines(clients[from].player);
 		break;
 
@@ -235,7 +235,7 @@ void SV_ParsePacket (ENetPacket *pk, ENetPeer *p)
 		break;
 
 		case MSG_FIRE:
-		if(clients[from].player)
+		if(clients[from].player && clients[from].player->mo && clients[from].player->mo->health > 0)
 		{
 			weapontype_t toFire = (weapontype_t)ReadInt8((uint8_t**)&pkp);
 			if(toFire != clients[from].player->readyweapon)
