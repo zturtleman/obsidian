@@ -303,7 +303,7 @@ void SV_SendDamage(void)
 	{
 		if(damages[i] && clients[i].player)
 		{
-			ENetPacket *dmg = enet_packet_create(NULL, 5, ENET_PACKET_FLAG_RELIABLE);
+			ENetPacket *dmg = enet_packet_create(NULL, 6, ENET_PACKET_FLAG_RELIABLE);
 			void *p = dmg->data;
 
 			WriteUInt8((uint8_t**)&p, MSG_DAMAGE);
@@ -311,6 +311,7 @@ void SV_SendDamage(void)
 			WriteInt32((int32_t**)&p, damages[i]);
 			SV_BroadcastPacket(dmg, -1);
 
+			printf("%i - %i\n", i, damages[i]);
 			damages[i] = 0;
 		}
 	}
