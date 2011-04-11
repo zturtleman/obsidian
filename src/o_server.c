@@ -230,7 +230,7 @@ void SV_ParsePacket (ENetPacket *pk, ENetPeer *p)
 		break;
 
 		case MSG_STATE:
-		if(clients[from].player->mo)
+		if(clients[from].player->mo && clients[from].player->mo && clients[from].player->mo->health > 0)
 			P_SetMobjState(clients[from].player->mo, (statenum_t)ReadUInt16((uint16_t**)&pkp));
 		break;
 
