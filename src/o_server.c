@@ -43,9 +43,6 @@
 boolean server;
 boolean client;
 
-// Have a damages integer for each client. Every tic, this will be sent out to the client and reset if they were hurt that tic. 
-int damages[MAXPLAYERS];
-
 int SV_Main (void) 
 {
 	int i;
