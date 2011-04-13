@@ -7,5 +7,5 @@ cd enet
 ./configure && make -j${jobs} || exit 1
 cd ..
 
-# Configure and compile obsidian:
-./autogen.sh $@ && make -j${jobs} || exit 1
+# compile obsidian:
+make -j${jobs} || exit 1

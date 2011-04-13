@@ -75,5 +75,15 @@ $(OBJ_D)/%.o: src/%.c
 obsidian: $(OBS_OBJS)
 	$(CC) $(INCLUDES) $(LIBS) -lSDL_mixer -lm -lsamplerate -o src/obsidian $(OBS_OBJS) enet/.libs/libenet.a textscreen/libtextscreen.a opl/libopl.a pcsound/libpcsound.a
 
+SETUP_SOURCES = $(wildcard setup/*.c)
+SETUP_OBJS = $(patsubst setup/%.c,$(OBJ_D)/setup/%.o,$(SETUP_SOURCES))
+
+$(OBJ_D)/setup/%.o: setup/%.c
+	@$(MKDIR) $(dir $@)
+	$(CC) $(INCLUDES) -c $< -o $@
+
+setup: $(SETUP_OBJS)
+	$(CC) $(INCLUDES) $(LIBS) -lSDL_mixer -lm -lsamplerate -o setup/obsidian-setup $(SETUP_OBJS) textscreen/libtextscreen.a 
+
 clean:
 	rm -rf obj/
