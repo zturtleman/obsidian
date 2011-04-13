@@ -34,6 +34,7 @@
 #include "r_main.h"
 #include "p_local.h"
 #include "deh_main.h"
+#include "p_inter.h"
 
 #include "o_client.h"
 #include "o_common.h"
