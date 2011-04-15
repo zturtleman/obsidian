@@ -33,7 +33,7 @@
 #include "d_player.h"
 
 // Functions
-int SV_Main(void);
+void SV_Main(void);
 void SV_Loop(void);
 void SV_DropClient(int cn, const char *reason);
 int SV_FindEmptyClientNum(void);

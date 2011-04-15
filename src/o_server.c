@@ -32,6 +32,7 @@
 #include "doomstat.h"
 #include "d_net.h"
 #include "d_event.h"
+#include "i_system.h"
 #include "r_defs.h"
 #include "r_main.h"
 #include "p_local.h"
@@ -44,9 +45,9 @@
 boolean server;
 boolean client;
 
-int SV_Main (void) 
+void SV_Main (void) 
 {
-	int i, j;
+	int i, j, attempts;
 
 	if (enet_initialize() != 0) 
 		return 1; // Initialize enet, if it fails, return 1
@@ -61,9 +62,21 @@ int SV_Main (void)
 	else
 		addr.port = 11666;
 
+	// Attempt to bind the server to this address and port, if it fails, increment the port and try again.
 	srv = enet_host_create(&addr, MAXPLAYERS, MAXPLAYERS * 2, 0, 0);
+	attempts = 0;
+
+	while(srv == NULL && attempts < 100)
+	{
+		addr.port ++;
+		attempts ++;
+
+		srv = enet_host_create(&addr, MAXPLAYERS, MAXPLAYERS * 2, 0, 0);
+	}
+
+	// If it still isn't working, error out.
 	if(srv == NULL)
-		return 1;
+		I_Error("Failed to initialize server.\nIf for some reason there aren't any open ports in this range, use -port to try another.");
 	else
 	{
 		printf("Obsidian Dedicated Server started on%s port %i\n", addr.port == 11666 ? "" : " alternate", addr.port);
@@ -76,9 +89,8 @@ int SV_Main (void)
 			clients[i].type = CT_EMPTY;
 			damages[i] = 0;
 		}
-		return 0;
 	}
-
+	return;
 }
 
 void SV_Loop (void)
