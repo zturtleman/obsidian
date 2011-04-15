@@ -80,7 +80,7 @@ void CL_Connect (char *srv_hn)
 	}
 	else
 	{
-		printf("Connection to %s failed!\n", srv_hn);
+		printf("Connection to %s:%i failed!\n", host, addr.port);
 		return;
 	}
 	
@@ -98,7 +98,6 @@ void CL_Connect (char *srv_hn)
 			{
 				localid = ReadUInt8((uint8_t**)&pkd);
 				inGameMask = ReadUInt8((uint8_t**)&pkd);
-				printf("DBG: Setting client's id to: %i\n", localid);
 				return;
 			}
 		}
