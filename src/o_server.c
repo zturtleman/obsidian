@@ -186,6 +186,8 @@ void SV_DropClient(int cn, const char *reason) // Reset one of the client_t insi
 	clients[cn].player->mo = NULL;
 	clients[cn].player = NULL;
 	printf("disconnected client %i (%s)\n", cn, reason);
+
+	return;
 }
 
 void P_FireWeapon (player_t* player);
