@@ -34,7 +34,7 @@ $(OBJ_D)/textscreen/%.o: textscreen/%.c
 	$(CC) $(INCLUDES) -c $< -o $@
 
 textscreen: $(TXT_OBJS)
-	i686-w64-mingw32-ar cru textscreen/libtextscreen.a $(TXT_OBJS)
+	ar cru textscreen/libtextscreen.a $(TXT_OBJS)
 	i686-w64-mingw32-ranlib textscreen/libtextscreen.a
 
 # OPL stuffs
@@ -46,7 +46,7 @@ $(OBJ_D)/opl/%.o: opl/%.c
 	$(CC) $(INCLUDES) -c $< -o $@
 
 opl: $(OPL_OBJS)
-	i686-w64-mingw32-ar cru opl/libopl.a $(OPL_OBJS)
+	ar cru opl/libopl.a $(OPL_OBJS)
 	i686-w64-mingw32-ranlib opl/libopl.a
 
 # pcsound stuffs
@@ -58,7 +58,7 @@ $(OBJ_D)/pcsound/%.o: pcsound/%.c
 	$(CC) $(INCLUDES) -c $< -o $@
 
 pcsound: $(PCSOUND_OBJS)
-	i686-w64-mingw32-ar cru pcsound/libpcsound.a $(PCSOUND_OBJS)
+	ar cru pcsound/libpcsound.a $(PCSOUND_OBJS)
 	i686-w64-mingw32-ranlib pcsound/libpcsound.a
 
 # engine stuff
@@ -70,7 +70,7 @@ $(OBJ_D)/%.o: src/%.c
 	$(CC) $(INCLUDES) -c $< -o $@
 
 obsidian: $(OBS_OBJS)
-	$(CC) -o src/obsidian.exe $(OBS_OBJS) -Lenet/.libs -Ltextscreen -Lopl -Lpcsound $(LIBS) -lopl -ltextscreen -lpcsound -lSDL_mixer -lm -lenet
+	$(CC) -o src/obsidian.exe $(OBS_OBJS) textscreen/libtextscreen.a pcsound/libpcsound.a opl/libopl.a enet/.libs/libenet.a $(LIBS) -lSDL_mixer -lm
 
 SETUP_SOURCES = $(wildcard setup/*.c)
 SETUP_OBJS = $(patsubst setup/%.c,$(OBJ_D)/setup/%.o,$(SETUP_SOURCES))
@@ -80,7 +80,7 @@ $(OBJ_D)/setup/%.o: setup/%.c
 	$(CC) $(INCLUDES) -c $< -o $@
 
 setup: $(SETUP_OBJS)
-	$(CC) $(INCLUDES) $(LIBS) -lSDL_mixer -lm -lsamplerate -o setup/obsidian-setup.exe $(SETUP_OBJS) textscreen/libtextscreen.a 
+	$(CC) -o setup/obsidian-setup.exe $(SETUP_OBJS) textscreen/libtextscreen.a $(LIBS) -lSDL_mixer -lm 
 
 clean:
 	rm -rf obj/

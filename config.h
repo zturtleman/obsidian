@@ -1,5 +1,6 @@
 /* config.h.  Generated from config.hin by configure.  */
 /* config.hin.  Generated from configure.in by autoheader.  */
+// Windows build should be made with this
 
 /* Define to 1 if you have the <dev/isa/spkrio.h> header file. */
 /* #undef HAVE_DEV_ISA_SPKRIO_H */
@@ -11,7 +12,7 @@
 #define HAVE_INTTYPES_H 1
 
 /* Define to 1 if you have the `ioperm' function. */
-#define HAVE_IOPERM 1
+//#define HAVE_IOPERM 1
 
 /* Define to 1 if you have the `amd64' library (-lamd64). */
 /* #undef HAVE_LIBAMD64 */
@@ -23,16 +24,16 @@
 #define HAVE_LIBM 1
 
 /* Define to 1 if you have the `samplerate' library (-lsamplerate). */
-#define HAVE_LIBSAMPLERATE 1
+//#define HAVE_LIBSAMPLERATE 1
 
 /* Define to 1 if you have the <linux/kd.h> header file. */
-#define HAVE_LINUX_KD_H 1
+//#define HAVE_LINUX_KD_H 1
 
 /* Define to 1 if you have the <memory.h> header file. */
 #define HAVE_MEMORY_H 1
 
 /* Define to 1 if you have the `mmap' function. */
-#define HAVE_MMAP 1
+//#define HAVE_MMAP 1
 
 /* Define to 1 if you have the `sched_setaffinity' function. */
 #define HAVE_SCHED_SETAFFINITY 1
