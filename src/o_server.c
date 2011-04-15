@@ -36,6 +36,7 @@
 #include "r_main.h"
 #include "p_local.h"
 #include "p_pspr.h"
+#include "m_argv.h"
 
 #include "o_server.h"
 #include "o_common.h"
@@ -45,22 +46,27 @@ boolean client;
 
 int SV_Main (void) 
 {
-	int i;
+	int i, j;
 
 	if (enet_initialize() != 0) 
 		return 1; // Initialize enet, if it fails, return 1
 
 	atexit(enet_deinitialize);
 
+	j = M_CheckParmWithArgs("-port", 1);
+
 	addr.host = ENET_HOST_ANY;
-	addr.port = 11666;
+	if(j > 0)
+		addr.port = atoi(myargv[j+1]);
+	else
+		addr.port = 11666;
 
 	srv = enet_host_create(&addr, MAXPLAYERS, MAXPLAYERS * 2, 0, 0);
 	if(srv == NULL)
 		return 1;
 	else
 	{
-		printf("Obsidian Dedicated Server started on port %i\n", addr.port);
+		printf("Obsidian Dedicated Server started on%s port %i\n", addr.port == 11666 ? "" : " alternate", addr.port);
 		autostart = 1;
 		server = 1;
 		client = 0;
