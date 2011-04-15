@@ -20,11 +20,7 @@ ifeq ($(strip $(shell make -v |grep "GNU")),)
 endif
 
 INCLUDES = -I. -Itextscreen -Iopl -Isrc -Ipcsound -Ienet/include $(shell sdl-config --cflags)
-LIBS = $(shell sdl-config --libs)
-
-ifeq ($(strip $(win32)), true)
-LIBS += -mwindows -lws2_32 -lwinmm
-endif
+LIBS = -lws2_32 -lwinmm $(shell sdl-config --libs)
 
 default: all
 all: textscreen opl pcsound obsidian setup
@@ -74,7 +70,7 @@ $(OBJ_D)/%.o: src/%.c
 	$(CC) $(INCLUDES) -c $< -o $@
 
 obsidian: $(OBS_OBJS)
-	$(CC) $(INCLUDES) $(LIBS) -lSDL_mixer -lm -lsamplerate -o src/obsidian.exe $(OBS_OBJS) -Lenet/.libs -lenet textscreen/libtextscreen.a opl/libopl.a pcsound/libpcsound.a
+	$(CC) -o src/obsidian.exe $(OBS_OBJS) -Lenet/.libs -Ltextscreen -Lopl -Lpcsound $(LIBS) -lopl -ltextscreen -lpcsound -lSDL_mixer -lm -lenet
 
 SETUP_SOURCES = $(wildcard setup/*.c)
 SETUP_OBJS = $(patsubst setup/%.c,$(OBJ_D)/setup/%.o,$(SETUP_SOURCES))
