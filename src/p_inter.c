@@ -875,11 +875,21 @@ P_DamageMobj
 	
 	if (player->armortype)
 	{
-	    if (player->armortype == 1)
-		saved = damage/3;
+        if (!client)
+        {
+	        if (player->armortype == 1)
+		        saved = damage/3;
+	        else
+		        saved = damage/2;
+        }
 	    else
-		saved = damage/2;
-	    
+        {
+            if (player->armortype == 1)
+                saved = damage/2;
+            else
+                saved = damage;
+        }
+
 	    if (player->armorpoints <= saved)
 	    {
 		// armor is used up
@@ -887,7 +897,8 @@ P_DamageMobj
 		player->armortype = 0;
 	    }
 	    player->armorpoints -= saved;
-	    damage -= saved;
+        if (!client)
+	        damage -= saved;
 	}
 	player->health -= damage; 	// mirror mobj health here for Dave
 	if (player->health < 0)
