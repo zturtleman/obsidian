@@ -874,7 +874,8 @@ void D_DoomMain (void)
         SV_Main();
 
     {
-        int i = M_CheckParmWithArgs ("-connect", 1);
+        int i;
+        i = M_CheckParmWithArgs ("-connect", 1);
 
         if(i > 0 && !server)
              CL_Connect(myargv[i+1]);

@@ -34,6 +34,7 @@
 #include "r_main.h"
 #include "p_local.h"
 #include "deh_main.h"
+#include "p_inter.h"
 
 #include "o_client.h"
 #include "o_common.h"
@@ -48,17 +49,24 @@ void CL_Connect (char *srv_hn)
 	ENetAddress addr = { ENET_HOST_ANY, 11666 };
 	ENetEvent event;
 	uint8_t* pkd, msgid;
+	char *host, *port;
 
-        if (enet_initialize() != 0)
-                return; // Initialize enet, if it fails, return 1
+	if (enet_initialize() != 0)
+		return; // Initialize enet, if it fails, return
 
-	if (enet_address_set_host (&addr, srv_hn) < 0)
+	host = strtok(srv_hn, ":");
+	port = strtok(NULL, ":");
+
+	if (port)
+		addr.port = atoi(port);
+
+	if (enet_address_set_host (&addr, host) < 0)
 	{
 		printf("Could not resolve address!\n");
 		return;
 	}
 
-	printf("Attempting to connect to %s:%i\n", srv_hn, addr.port);
+	printf("Attempting to connect to %s:%i\n", host, addr.port);
 
 	localclient = enet_host_create (NULL, 1, MAXPLAYERS * 2, 0, 0);
 	srvpeer = enet_host_connect (localclient, &addr, MAXPLAYERS * 2, 0);
@@ -72,7 +80,7 @@ void CL_Connect (char *srv_hn)
 	}
 	else
 	{
-		printf("Connection to %s failed!\n", srv_hn);
+		printf("Connection to %s:%i failed!\n", host, addr.port);
 		return;
 	}
 	
@@ -90,7 +98,6 @@ void CL_Connect (char *srv_hn)
 			{
 				localid = ReadUInt8((uint8_t**)&pkd);
 				inGameMask = ReadUInt8((uint8_t**)&pkd);
-				printf("DBG: Setting client's id to: %i\n", localid);
 				return;
 			}
 		}

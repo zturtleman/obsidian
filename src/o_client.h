@@ -44,4 +44,6 @@ void CL_SendStateUpdate(uint16_t state);
 void CL_SendFireCmd(weapontype_t w, int refire);
 void CL_SendRespawn(void);
 
+void CL_SendReborn(void);
+
 #endif

@@ -19,7 +19,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
 // 02111-1307, USA.
 //
-// DESCRIPTION:
+// DESCRIPTION: Looks lonely
 //
 //
 //-----------------------------------------------------------------------------
@@ -28,11 +28,7 @@
 #ifndef __P_INTER__
 #define __P_INTER__
 
-
-
-
 boolean	P_GivePower(player_t*, int);
-
-
+void P_KillMobj(mobj_t* source, mobj_t* target);
 
 #endif
