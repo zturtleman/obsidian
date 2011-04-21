@@ -1,0 +1,22 @@
+1 ICON "../data/doom.ico"
+
+1 VERSIONINFO
+PRODUCTVERSION 0, 0, 0, 0
+FILEVERSION 0, 0, 0, 0
+FILETYPE 1
+{
+ BLOCK "StringFileInfo"
+ {
+  BLOCK "040904E4"
+  {
+   VALUE "FileVersion", ""
+   VALUE "FileDescription", "obsidian"
+   VALUE "InternalName", "obsidian"
+   VALUE "CompanyName", "tetrismaster512@hotmail.com"
+   VALUE "LegalCopyright", "Copyright (C) 1993-2011.  Licensed under GNU General Public License, version 2"
+   VALUE "ProductName", "obsidian"
+   VALUE "ProductVersion", ""
+  }
+ }
+}
+

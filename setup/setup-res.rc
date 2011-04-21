@@ -1,0 +1,24 @@
+1 ICON "../data/setup.ico"
+
+1 24 MOVEABLE PURE "setup-manifest.xml"
+
+1 VERSIONINFO
+PRODUCTVERSION 0, 0, 0, 0
+FILEVERSION 0, 0, 0, 0
+FILETYPE 1
+{
+ BLOCK "StringFileInfo"
+ {
+  BLOCK "040904E4"
+  {
+   VALUE "FileVersion", ""
+   VALUE "FileDescription", "obsidian setup"
+   VALUE "InternalName", "obsidian"
+   VALUE "CompanyName", "tetrismaster512@hotmail.com"
+   VALUE "LegalCopyright", "GNU General Public License"
+   VALUE "ProductName", "obsidian setup"
+   VALUE "ProductVersion", ""
+  }
+ }
+}
+
