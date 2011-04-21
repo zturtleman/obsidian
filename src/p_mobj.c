@@ -1061,3 +1061,30 @@ P_SpawnPlayerMissile
     P_CheckMissileSpawn (th);
 }
 
+// [tm512] P_NumberMobjs
+// Cycle through the thinker list, if a thinker is a mobj_t, set its netid
+// Probably shitty and hacky, but it should work!
+
+thinker_t	thinkercap;
+
+void P_NumberMobjs (void)
+{
+	int i;
+	thinker_t *current;
+
+	i = 1;
+	current = thinkercap.next;
+
+	while (current != &thinkercap)
+	{
+		if (current->function.acp1 == (actionf_p1)P_MobjThinker)
+		{
+			printf("%u as %i\n", current, i); //debug
+			((mobj_t*)current)->netid = i;
+			i ++;
+			current = current->next;
+		}
+	}
+
+	return;
+}
