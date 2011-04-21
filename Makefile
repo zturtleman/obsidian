@@ -6,7 +6,7 @@ MKDIR=mkdir -p
 
 OBJ_D=obj
 OPT_LEVEL=0
-DGB_LEVEL=3
+DBG_LEVEL=3
 
 # Windows build? (make sure to set CC to the mingw compiler)
 win32 := false
@@ -25,8 +25,17 @@ ifeq ($(strip $(win32)), true)
 LIBS += -mwindows -lws2_32 -lwinmm
 endif
 
-default: all
-all: textscreen opl pcsound obsidian setup
+default: noversion
+noversion: config textscreen opl pcsound obsidian setup
+version: clean configv textscreen opl pcsound obsidian setup
+
+# Configuration
+
+config:
+	./version.sh n
+
+configv:
+	./version.sh n v
 
 # Textscreen stuffs
 TXT_SOURCES = $(wildcard textscreen/*.c)
@@ -34,7 +43,7 @@ TXT_OBJS = $(patsubst textscreen/%.c,$(OBJ_D)/textscreen/%.o,$(TXT_SOURCES))
 
 $(OBJ_D)/textscreen/%.o: textscreen/%.c
 	@$(MKDIR) $(dir $@)
-	$(CC) $(INCLUDES) -c $< -o $@
+	$(CC) $(INCLUDES) -O$(OPT_LEVEL) -g$(DBG_LEVEL) -c $< -o $@
 
 textscreen: $(TXT_OBJS)
 	ar cru textscreen/libtextscreen.a $(TXT_OBJS)
@@ -46,7 +55,7 @@ OPL_OBJS = $(patsubst opl/%.c,$(OBJ_D)/opl/%.o,$(OPL_SOURCES))
 
 $(OBJ_D)/opl/%.o: opl/%.c
 	@$(MKDIR) $(dir $@)
-	$(CC) $(INCLUDES) -c $< -o $@
+	$(CC) $(INCLUDES) -O$(OPT_LEVEL) -g$(DBG_LEVEL) -c $< -o $@
 
 opl: $(OPL_OBJS)
 	ar cru opl/libopl.a $(OPL_OBJS)
@@ -58,7 +67,7 @@ PCSOUND_OBJS = $(patsubst pcsound/%.c,$(OBJ_D)/pcsound/%.o,$(PCSOUND_SOURCES))
 
 $(OBJ_D)/pcsound/%.o: pcsound/%.c
 	@$(MKDIR) $(dir $@)
-	$(CC) $(INCLUDES) -c $< -o $@
+	$(CC) $(INCLUDES) -O$(OPT_LEVEL) -g$(DBG_LEVEL) -c $< -o $@
 
 pcsound: $(PCSOUND_OBJS)
 	ar cru pcsound/libpcsound.a $(PCSOUND_OBJS)
@@ -70,7 +79,7 @@ OBS_SOURCES = $(wildcard src/*.c)
 OBS_OBJS = $(patsubst src/%.c,$(OBJ_D)/%.o,$(OBS_SOURCES))
 
 $(OBJ_D)/%.o: src/%.c
-	$(CC) $(INCLUDES) -c $< -o $@
+	$(CC) $(INCLUDES) -O$(OPT_LEVEL) -g$(DBG_LEVEL) -c $< -o $@
 
 obsidian: $(OBS_OBJS)
 	$(CC) $(INCLUDES) $(LIBS) -lSDL_mixer -lm -lsamplerate -o src/obsidian $(OBS_OBJS) enet/.libs/libenet.a textscreen/libtextscreen.a opl/libopl.a pcsound/libpcsound.a
@@ -80,10 +89,11 @@ SETUP_OBJS = $(patsubst setup/%.c,$(OBJ_D)/setup/%.o,$(SETUP_SOURCES))
 
 $(OBJ_D)/setup/%.o: setup/%.c
 	@$(MKDIR) $(dir $@)
-	$(CC) $(INCLUDES) -c $< -o $@
+	$(CC) $(INCLUDES) -O$(OPT_LEVEL) -g$(DBG_LEVEL) -c $< -o $@
 
 setup: $(SETUP_OBJS)
 	$(CC) $(INCLUDES) $(LIBS) -lSDL_mixer -lm -lsamplerate -o setup/obsidian-setup $(SETUP_OBJS) textscreen/libtextscreen.a 
 
 clean:
 	rm -rf obj/
+	rm config.h

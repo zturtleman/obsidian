@@ -68,7 +68,7 @@
 #define PACKAGE_NAME "obsidian"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "obsidian"
+#define PACKAGE_STRING "obsidian _VERSION_"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "obsidian"
@@ -77,10 +77,10 @@
 #define PACKAGE_URL ""
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION ""
+#define PACKAGE_VERSION "_VERSION_"
 
 /* Define to 1 if you have the ANSI C header files. */
 #define STDC_HEADERS 1
 
 /* Version number of package */
-#define VERSION ""
+#define VERSION "_VERSION_"
