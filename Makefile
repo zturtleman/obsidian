@@ -76,24 +76,26 @@ pcsound: $(PCSOUND_OBJS)
 # engine stuff
 
 OBS_SOURCES = $(wildcard src/*.c)
+OBS_HEADERS = $(wildcard src/*.h)
 OBS_OBJS = $(patsubst src/%.c,$(OBJ_D)/%.o,$(OBS_SOURCES))
 OBS_OUT = src/obsidian
 
 obsidian: $(OBS_OUT)
 
-$(OBJ_D)/%.o: src/%.c
+$(OBJ_D)/%.o: src/%.c $(OBS_HEADERS)
 	$(CC) $(INCLUDES) -O$(OPT_LEVEL) -g$(DBG_LEVEL) -c $< -o $@
 
 $(OBS_OUT): $(OBS_OBJS)
 	$(CC) $(INCLUDES) $(LIBS) -lSDL_mixer -lm -lsamplerate -o src/obsidian $(OBS_OBJS) enet/.libs/libenet.a textscreen/libtextscreen.a opl/libopl.a pcsound/libpcsound.a
 
 SETUP_SOURCES = $(wildcard setup/*.c)
+SETUP_HEADERS = $(wildcard setup/*.h)
 SETUP_OBJS = $(patsubst setup/%.c,$(OBJ_D)/setup/%.o,$(SETUP_SOURCES))
 SETUP_OUT = setup/obsidian-setup
 
 setup: $(SETUP_OUT)
 
-$(OBJ_D)/setup/%.o: setup/%.c
+$(OBJ_D)/setup/%.o: setup/%.c $(SETUP_HEADERS)
 	@$(MKDIR) $(dir $@)
 	$(CC) $(INCLUDES) -O$(OPT_LEVEL) -g$(DBG_LEVEL) -c $< -o $@
 
