@@ -211,9 +211,6 @@ typedef struct mobj_s
     // List: thinker links.
     thinker_t		thinker;
 
-    // Netgame ID
-    int 		netid;
-
     // Info for drawing: position.
     fixed_t		x;
     fixed_t		y;
@@ -286,7 +283,10 @@ typedef struct mobj_s
     mapthing_t		spawnpoint;	
 
     // Thing being chased/attacked for tracers.
-    struct mobj_s*	tracer;	
+    struct mobj_s*	tracer;
+
+    // Netgame ID
+    int 		netid;
     
 } mobj_t;
 
