@@ -103,4 +103,4 @@ $(SETUP_OUT): $(SETUP_OBJS)
 
 clean:
 	rm -rf obj/
-	rm config.h
+	rm -f config.h
