@@ -889,7 +889,7 @@ void D_DoomMain (void)
     // [tm512] I hate having to do this, but we'll worry about monster sync LATER in development. Besides, its easier to test stuff with an empty
     // level, not having to always do -nomonsters
 	
-    nomonsters = (M_CheckParm ("-nomonsters") || server || client);
+    nomonsters = (M_CheckParm ("-nomonsters") || (server || client && !M_CheckParm("-forcemonsters")));
 
     //!
     // @vanilla

@@ -748,6 +748,10 @@ static void P_LoadReject(int lumpnum)
 //
 // P_SetupLevel
 //
+
+void P_NumberMobjs (void);
+boolean client, server;
+
 void
 P_SetupLevel
 ( int		episode,
@@ -817,6 +821,8 @@ P_SetupLevel
     bodyqueslot = 0;
     deathmatch_p = deathmatchstarts;
     P_LoadThings (lumpnum+ML_THINGS);
+    if(client || server)
+        P_NumberMobjs();
     
     // if deathmatch, randomly spawn the active players
     if (deathmatch)

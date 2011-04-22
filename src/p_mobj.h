@@ -211,6 +211,9 @@ typedef struct mobj_s
     // List: thinker links.
     thinker_t		thinker;
 
+    // Netgame ID
+    int 		netid;
+
     // Info for drawing: position.
     fixed_t		x;
     fixed_t		y;
