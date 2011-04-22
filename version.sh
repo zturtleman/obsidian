@@ -9,7 +9,7 @@ if [[ $1 == "n" ]] ; then conf=config.h.nix ; else conf=config.h.win ; fi
 
 if [[ $2 == "v" ]] 
 then 
-	ver="r$(hg parents --template "{rev}") ($(date +"%b %d, %Y"))"
+	ver="r$(hg parents --template "{node|short}") ($(date +"%b %d, %Y"))"
 fi
 
 # Includes a gross hack to remove an extra space for the nonversioned build
