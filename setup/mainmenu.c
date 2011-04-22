@@ -269,7 +269,7 @@ static void InitTextscreen(void)
         exit(-1);
     }
 
-    TXT_SetDesktopTitle(PACKAGE_NAME " Setup ver " PACKAGE_VERSION);
+    TXT_SetDesktopTitle(PACKAGE_NAME " setup " PACKAGE_VERSION);
     SetIcon();
 }
 
