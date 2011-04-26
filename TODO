@@ -1,15 +1,23 @@
-obsidian Roadmap
+Obsidian Roadmap (in order?)
 
- ** 0.0a - Unreleased (will be private)
-  - Should set down the groundwork preparing the engine for a modern
-    online engine.
-  - Bug/Oddity Fixes, etc.
+Netcode:
 
- ** 0.0b - Unreleased (will be private)
-  - Start Netcode, should be somewhat functional by the end of this
-    phase.
-  - Work on a branch, continue working on stuff from 0.0a
+ -- Implement MSG_PICKUP in a sane fashion. [In-progress]
+ -- Work on making netcode play a little better, there are many problems with this currently (and not surprisingly).
+ -- Implement game snapshots upon connect, theoretically, these could also be sent to terribly desynced clients.
+ -- Add unlagged, this is a must-have for various reasons.
+ -- Netdemos on both client and server (simple write to buffer and read back).
+ -- Team Deathmatch and CTF.
 
- ** 0.0c - Unreleased
-  - Netcode should be somewhat playable at the end of this phase.
-  - Release alpha to the public?
+Engine:
+
+ -- Extend MAXPLAYERS limit, preferrably maintaining vanilla demo compatibility, Odamex does this so we can too.
+ -- Flat lists, so UDMX, UDM3, and several other maps do not crash the engine.
+ -- High-Res video modes.
+
+Fancy Stuff That May Never Happen:
+
+ -- Partial Boom support.
+ -- Medals and/or kill spree messages.
+ -- Console (using a Python interpreter).
+
