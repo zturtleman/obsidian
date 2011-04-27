@@ -328,7 +328,6 @@ void SV_SendDamage(void)
 			WriteInt32((int32_t**)&p, damages[i]);
 			SV_BroadcastPacket(dmg, -1);
 
-			printf("%i - %i\n", i, damages[i]);
 			damages[i] = 0;
 		}
 	}

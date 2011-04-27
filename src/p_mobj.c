@@ -1079,7 +1079,7 @@ void P_NumberMobjs (void)
 	{
 		if (current->function.acp1 == (actionf_p1)P_MobjThinker)
 		{
-			printf("%u as %i\n", current, i); //debug
+		//	printf("%u as %i\n", current, i); //debug
 			((mobj_t*)current)->netid = i;
 			i ++;
 			current = current->next;
