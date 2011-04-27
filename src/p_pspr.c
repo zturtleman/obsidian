@@ -250,7 +250,7 @@ void P_FireWeapon (player_t* player)
 {
     statenum_t	newstate;
 	
-    if (!P_CheckAmmo (player))
+    if (!P_CheckAmmo (player) && (!client || player == &players[consoleplayer]))
 	return;
 
 	if(client && player == &players[consoleplayer])
