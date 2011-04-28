@@ -279,7 +279,8 @@ static void DEH_ParseContext(deh_context_t *context)
 
     if (!CheckSignatures(context))
     {
-        DEH_Error(context, "This is not a valid dehacked patch file!");
+        printf("This is not a valid dehacked patch file!\n");
+		return;
     }
 
     // Read the file
