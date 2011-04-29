@@ -279,11 +279,14 @@ void I_Endoom(void)
 // I_Quit
 //
 
+void CL_Disconnect (void);
+
 void I_Quit (void)
 {
     D_QuitNetGame ();
     G_CheckDemoStatus();
     S_Shutdown();
+    CL_Disconnect();
 
     if (!screensaver_mode)
     {

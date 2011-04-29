@@ -107,6 +107,29 @@ void CL_Connect (char *srv_hn)
 	return;
 }
 
+void CL_Disconnect (void)
+{
+	// Called when quitting the game.
+	ENetEvent event;
+
+	enet_peer_disconnect(srvpeer, 1);
+
+	while(enet_host_service(localclient, &event, 1000) > 0) // Wait up to a second for a reply from the server...
+	{
+		switch(event.type)
+		{
+			case ENET_EVENT_TYPE_DISCONNECT:
+				return; // Until the the server sends us back acknowledgement.
+			default:
+				enet_packet_destroy(event.packet);
+		}
+	}
+
+	// Kill the connection at this point.
+	enet_peer_reset(srvpeer);
+	return;
+}
+
 void CL_Loop(void)
 {
 	ENetEvent event;
