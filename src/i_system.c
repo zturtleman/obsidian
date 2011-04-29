@@ -64,6 +64,7 @@
 
 int show_endoom = 1;
 
+boolean client, server;
 // Tactile feedback function, probably used for the Logitech Cyberman
 
 void I_Tactile(int on, int off, int total)
@@ -286,7 +287,8 @@ void I_Quit (void)
     D_QuitNetGame ();
     G_CheckDemoStatus();
     S_Shutdown();
-    CL_Disconnect();
+	if (client)
+    	CL_Disconnect();
 
     if (!screensaver_mode)
     {
