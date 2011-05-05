@@ -1088,3 +1088,27 @@ void P_NumberMobjs (void)
 
 	return;
 }
+
+// [tm512] P_FindMobjById
+// Cycle the thinker list until we find the mobj we want.
+// Might be slow, no way to know until it's tested
+
+mobj_t *P_FindMobjById (int id)
+{
+	int i;
+	thinker_t *current;
+
+	i = 1;
+	current = thinkercap.next;
+
+	while (current != &thinkercap)
+	{
+		if (current->function.acp1 == (actionf_p1)P_MobjThinker)
+		{
+			if(((mobj_t*)current)->netid == id)
+				return (mobj_t*)current;
+		}
+	}
+
+	return NULL; // Nothing found with this id, oh well.
+}
