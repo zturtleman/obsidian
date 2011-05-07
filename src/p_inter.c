@@ -339,6 +339,7 @@ P_TouchSpecialThing
 ( mobj_t*	special,
   mobj_t*	toucher )
 {
+    printf ("Touched: %i\n", special->netid);
     player_t*	player;
     int		i;
     fixed_t	delta;
