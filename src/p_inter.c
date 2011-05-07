@@ -674,7 +674,7 @@ P_TouchSpecialThing
 	S_StartSound (NULL, sound);
 
     // [tm512] Serverside message sending, if we get here, we need to tell the client what they picked up.
-    printf ("Touched: %i\n", special->netid);
+    //printf ("Touched: %i\n", special->netid);
     if (server)
         SV_SendPickup(player, special->netid);
 }
