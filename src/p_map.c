@@ -1024,7 +1024,8 @@ boolean PTR_ShootTraverse (intercept_t* in)
 		return false;
 	    
 	    // it's a sky hack wall
-	    if	(li->backsector && li->backsector->ceilingpic == skyflatnum)
+        // [tm512] Apply a fix to the "Sky Hack Wall". - 5/7/11
+	    if	(li->backsector && li->backsector->ceilingpic == skyflatnum && li->backsector->ceilingheight < z)
 		return false;		
 	}
 
