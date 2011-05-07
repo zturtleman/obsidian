@@ -153,6 +153,7 @@ void CL_Loop(void)
 // Pretty much the same here as serverside, except we're using different variables and reading some extra data,
 // we could be super concise and move this into an o_common.c, but that can wait for later maybe.
 void P_FireWeapon (player_t* player);
+mobj_t *P_FindMobjById (int id);
 
 void CL_ParsePacket(ENetPacket *pk)
 {

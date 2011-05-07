@@ -1108,6 +1108,7 @@ mobj_t *P_FindMobjById (int id)
 			if(((mobj_t*)current)->netid == id)
 				return (mobj_t*)current;
 		}
+		current = current->next;
 	}
 
 	return NULL; // Nothing found with this id, oh well.
