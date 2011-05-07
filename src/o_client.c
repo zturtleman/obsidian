@@ -224,7 +224,6 @@ void CL_ParsePacket(ENetPacket *pk)
 		case MSG_KILL:
 		{
 			int killed, killer;
-			mobj_t *killedmo, *killermo;
 			killed = ReadUInt8((uint8_t**)&p);
 			killer = ReadUInt8((uint8_t**)&p);
 
@@ -239,6 +238,18 @@ void CL_ParsePacket(ENetPacket *pk)
 		if(playeringame[from])
 			players[from].playerstate = PST_REBORN;
 		break;
+
+		case MSG_PICKUP:
+		{
+			int picked;
+
+			picked = ReadUInt8((uint8_t**)&p);
+			printf("%i\n", picked);
+			if(playeringame[picked] && players[picked].mo)
+				P_TouchSpecialThing(P_FindMobjById(ReadInt32((int**)&p)), players[picked].mo, true);
+
+			break;
+		}
 
 		default:
 			break;		

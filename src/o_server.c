@@ -335,6 +335,25 @@ void SV_SendDamage(void)
 
 void SV_SendPickup (player_t *player, int netid)
 {
+	uint8_t i, t;
+	ENetPacket *pk = enet_packet_create(NULL, 6, ENET_PACKET_FLAG_RELIABLE);
+	void *p = pk->data;
+
+	t = MAXPLAYERS + 1;
+
+	for (i = 0; i < MAXPLAYERS; i++)
+		if (&players[i] == player) 
+			t = i;
+
+	if (t > MAXPLAYERS)
+		return;
+
+	WriteUInt8((uint8_t**)&p, MSG_PICKUP);
+	WriteUInt8((uint8_t**)&p, t);
+	WriteInt32((int**)&p, netid);
+
+	SV_BroadcastPacket(pk, -1);
+
 	return;
 }
 
