@@ -272,7 +272,8 @@ extern int		clipammo[NUMAMMO];
 void
 P_TouchSpecialThing
 ( mobj_t*	special,
-  mobj_t*	toucher );
+  mobj_t*	toucher,
+  boolean fromserver );
 
 void
 P_DamageMobj

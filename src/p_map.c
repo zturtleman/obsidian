@@ -380,7 +380,7 @@ boolean PIT_CheckThing (mobj_t* thing)
 	if (tmflags&MF_PICKUP)
 	{
 	    // can remove thing
-	    P_TouchSpecialThing (thing, tmthing);
+	    P_TouchSpecialThing (thing, tmthing, false);
 	}
 	return !solid;
     }

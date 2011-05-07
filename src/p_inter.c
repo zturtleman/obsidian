@@ -334,18 +334,27 @@ P_GivePower
 //
 // P_TouchSpecialThing
 //
+
+boolean client, server;
+
 void
 P_TouchSpecialThing
 ( mobj_t*	special,
-  mobj_t*	toucher )
-{
-    printf ("Touched: %i\n", special->netid);
+  mobj_t*	toucher,
+  boolean fromserver )
+{ 
     player_t*	player;
     int		i;
     fixed_t	delta;
     int		sound;
-		
-    delta = special->z - toucher->z;
+	
+    if (client && !fromserver) // Clients don't get any say here
+        return;
+
+    if (!special) // Sometimes the server will send us a reference to an object that doesn't exist.
+        return;
+
+	delta = special->z - toucher->z;
 
     if (delta > toucher->height
 	|| delta < -8*FRACUNIT)
@@ -663,15 +672,17 @@ P_TouchSpecialThing
     player->bonuscount += BONUSADD;
     if (player == &players[consoleplayer])
 	S_StartSound (NULL, sound);
+
+    // [tm512] Serverside message sending, if we get here, we need to tell the client what they picked up.
+    printf ("Touched: %i\n", special->netid);
+    if (server)
+        SV_SendPickup(player, special->netid);
 }
 
 
 //
 // KillMobj
 //
-
-boolean client;
-boolean server;
 
 void
 P_KillMobj

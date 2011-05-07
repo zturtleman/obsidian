@@ -333,6 +333,11 @@ void SV_SendDamage(void)
 	}
 }
 
+void SV_SendPickup (player_t *player, int netid)
+{
+	return;
+}
+
 void SV_DamageMobj(mobj_t *target, int damage)
 {
 	int i;
