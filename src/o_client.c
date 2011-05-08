@@ -166,7 +166,7 @@ void CL_ParsePacket(ENetPacket *pk)
 	switch(msg)
 	{
 		case MSG_POS:
-		if(playeringame[from] && players[from].mo)
+		if(playeringame[from] && players[from].mo && players[from].mo->health)
 		{
 			P_UnsetThingPosition(players[from].mo);
 			players[from].mo->x = ReadInt32((int32_t**)&p);
@@ -184,7 +184,7 @@ void CL_ParsePacket(ENetPacket *pk)
 		break;
 
 		case MSG_USE:
-		if(players[from].mo)
+		if(players[from].mo && players[from].mo->health)
 			P_UseLines(&players[from]);
 		break;
 
@@ -198,12 +198,12 @@ void CL_ParsePacket(ENetPacket *pk)
 		break;
 
 		case MSG_STATE:
-		if(players[from].mo)
+		if(players[from].mo && players[from].mo->health)
 			P_SetMobjState(players[from].mo, (statenum_t)ReadUInt16((uint16_t**)&p));
 		break;
 
 		case MSG_FIRE:
-		if(playeringame[from])
+		if(playeringame[from] && players[from].mo->health)
 		{
 			weapontype_t toFire = (weapontype_t)ReadInt8((uint8_t**)&p);
 			if(toFire != players[from].readyweapon)

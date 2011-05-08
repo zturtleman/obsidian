@@ -224,7 +224,7 @@ void SV_ParsePacket (ENetPacket *pk, ENetPeer *p)
 	switch(msg)
 	{
 		case MSG_POS:
-		if(clients[from].player && clients[from].player->mo)
+		if(clients[from].player && clients[from].player->mo && clients[from].player->mo->health > 0)
 		{
 			P_UnsetThingPosition(clients[from].player->mo);
 			clients[from].player->mo->x = ReadInt32((int32_t**)&pkp);
