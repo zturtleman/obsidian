@@ -47,7 +47,17 @@ Server Use: Tell the client that he died.
 Client Use: The client will never send this message to the server.
 Data: Unsigned 8-bit integer specifying which player died, unsigned 8-bit integer specifying which player killed the client (will be MAXPLAYERS + 1 if they died by environment, etc.)
 
-Message: MSG_RESPAWN
+Message: MSG_RESPAWN (reliable)
 Server Use: Inform other clients that a client respawned.
 Client Use: Inform the server that we respawned.
 Data: Unsigned 8-bit integer with the client's id (server only, client will send no extra data).
+
+Message: MSG_PICKUP (reliable)
+Server Use: Inform a client that a client picked up an item.
+Client Use: The client will not send this to the server.
+Data: Unsigned 8-bit integer with client id, 32-bit integer containing the item's netid.
+
+Message: MSG_WPICKUP (reliable)
+Server Use: Inform a client that they picked up a weapon ("staying" weapons only)
+Client Use: The client will not send this to the server.
+Data: Unsigned 8-bit integer with the weapon's type.
