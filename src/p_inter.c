@@ -163,6 +163,9 @@ P_GiveAmmo
 // P_GiveWeapon
 // The weapon name may have a MF_DROPPED flag ored in.
 //
+
+boolean client, server;
+
 boolean
 P_GiveWeapon
 ( player_t*	player,
@@ -191,6 +194,10 @@ P_GiveWeapon
 
 	if (player == &players[consoleplayer])
 	    S_StartSound (NULL, sfx_wpnup);
+
+    if (server)
+        SV_SendWeapon (player, weapon);
+
 	return false;
     }
 	
@@ -334,8 +341,6 @@ P_GivePower
 //
 // P_TouchSpecialThing
 //
-
-boolean client, server;
 
 void
 P_TouchSpecialThing

@@ -357,6 +357,29 @@ void SV_SendPickup (player_t *player, int netid)
 	return;
 }
 
+void SV_SendWeapon (player_t *player, weapontype_t weapon)
+{
+	uint8_t i, t;
+	ENetPacket *pk = enet_packet_create(NULL, 2, ENET_PACKET_FLAG_RELIABLE);
+	void *p = pk->data;
+
+	t = MAXPLAYERS + 1;
+
+	for (i = 0; i < MAXPLAYERS; i++)
+		if (&players[i] == player)
+			t = i;
+
+	if (t > MAXPLAYERS)
+		return;
+
+	WriteUInt8((uint8_t**)&p, MSG_WPICKUP);
+	WriteUInt8((uint8_t**)&p, (uint8_t)weapon);
+
+	enet_peer_send(clients[t].peer, t + MAXPLAYERS, pk);
+
+	return;
+}
+
 void SV_DamageMobj(mobj_t *target, int damage)
 {
 	int i;

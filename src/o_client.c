@@ -251,6 +251,12 @@ void CL_ParsePacket(ENetPacket *pk)
 			break;
 		}
 
+		case MSG_WPICKUP:
+		{
+			P_GiveWeapon(&players[consoleplayer], (weapontype_t)ReadUInt8((uint8_t**)&p), false);
+			break;
+		}
+
 		default:
 			break;		
 	}
