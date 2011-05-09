@@ -133,7 +133,10 @@ typedef	struct
 
     int			linecount;
     struct line_s**	lines;	// [linecount] size
-    
+
+    fixed_t ul_floorheight[UL_MAXTICS];
+    fixed_t ul_ceilingheight[UL_MAXTICS];
+
 } sector_t;
 
 

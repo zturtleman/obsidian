@@ -41,9 +41,9 @@
 
 #include "o_server.h"
 #include "o_common.h"
+#include "o_unlag.h"
 
-boolean server;
-boolean client;
+boolean server, client, unlag;
 
 void SV_Main (void) 
 {
@@ -53,6 +53,9 @@ void SV_Main (void)
 		return 1; // Initialize enet, if it fails, return 1
 
 	atexit(enet_deinitialize);
+
+	// Temporary useful switch for unlagged:
+	unlag = M_CheckParm("-unlag");
 
 	j = M_CheckParmWithArgs("-port", 1);
 
@@ -145,6 +148,7 @@ void SV_Loop (void)
 	}
 
 	SV_SendDamage();
+	SV_ULRecordPos(); // Unlagged - Record player positions
 
 	return;
 }
