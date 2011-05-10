@@ -2,7 +2,7 @@
 <CodeBlocks_project_file>
 	<FileVersion major="1" minor="6" />
 	<Project>
-		<Option title="chocolate-doom" />
+		<Option title="obsidian" />
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
 		<Build>
@@ -19,7 +19,7 @@
 					<Add option="-gdwarf-2" />
 				</Compiler>
 				<Linker>
-					<Add option="-lpcsound-dbg -ltextscreen-dbg" />
+					<Add option="-lpcsound-dbg -ltextscreen-dbg -lenet -lws2_32 -lWinmm" />
 				</Linker>
 			</Target>
 			<Target title="Release">
@@ -34,7 +34,7 @@
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
-					<Add option="-lpcsound -ltextscreen" />
+					<Add option="-lpcsound -ltextscreen -lenet -lws2_32 -lWinmm" />
 				</Linker>
 			</Target>
 		</Build>
@@ -46,6 +46,8 @@
 			<Add directory="..\src" />
 			<Add directory="..\textscreen" />
 			<Add directory="..\pcsound" />
+			<Add directory="..\enet\" />
+			<Add directory="..\enet\include" />
 			<Add directory="..\opl" />
 		</Compiler>
 		<Linker>
@@ -280,51 +282,19 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="..\src\mus2mid.h" />
-		<Unit filename="..\src\net_client.c">
+		<Unit filename="..\src\o_client.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="..\src\net_client.h" />
-		<Unit filename="..\src\net_common.c">
+		<Unit filename="..\src\o_client.h" />
+		<Unit filename="..\src\o_common.h" />
+		<Unit filename="..\src\o_server.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="..\src\net_common.h" />
-		<Unit filename="..\src\net_dedicated.c">
+		<Unit filename="..\src\o_server.h" />
+		<Unit filename="..\src\o_unlag.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="..\src\net_dedicated.h" />
-		<Unit filename="..\src\net_defs.h" />
-		<Unit filename="..\src\net_gui.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="..\src\net_gui.h" />
-		<Unit filename="..\src\net_io.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="..\src\net_io.h" />
-		<Unit filename="..\src\net_loop.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="..\src\net_loop.h" />
-		<Unit filename="..\src\net_packet.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="..\src\net_packet.h" />
-		<Unit filename="..\src\net_query.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="..\src\net_query.h" />
-		<Unit filename="..\src\net_sdl.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="..\src\net_sdl.h" />
-		<Unit filename="..\src\net_server.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="..\src\net_server.h" />
-		<Unit filename="..\src\net_structrw.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="..\src\net_structrw.h" />
+		<Unit filename="..\src\o_unlag.h" />
 		<Unit filename="..\src\p_ceilng.c">
 			<Option compilerVar="CC" />
 		</Unit>
