@@ -22,8 +22,8 @@
     o_unlag : Backwards Reconciliation
 */
 
-#ifndef O_SERVER_H
-#define O_SERVER_H
+#ifndef O_UNLAG_H
+#define O_UNLAG_H
 
 #define UL_MAXTICS 35 // 35 tics maximum reconciliation
 
@@ -34,7 +34,7 @@ typedef struct
 	fixed_t z;
 } position_t;
 
-position_t ul_playerpos[MAXPLAYERS][UL_MAXTICS]; // Store the positions of all players for up to one gametic.
+position_t ul_playerpos[MAXPLAYERS][UL_MAXTICS]; // Store the positions of all players for up to one second.
 
 void SV_ULRecordPos (void);
 

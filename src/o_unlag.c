@@ -22,12 +22,29 @@
     o_unlag : Backwards Reconciliation
 */
 
+#include "doomdef.h"
+#include "doomstat.h"
+
 #include "o_common.h"
-#include "o_server.h"
+#include "o_unlag.h"
+
+int numsectors;
 
 void SV_ULRecordPos (void)
 {
 	int i;
+	player_t *pl;
 
 	for (i = 0; i < MAXPLAYERS; i++)
+	{
+		if (playeringame[i] && players[i].mo)
+		{
+			pl = &players[i];
+			ul_playerpos[i][gametic % UL_MAXTICS].x = pl->mo->x;
+			ul_playerpos[i][gametic % UL_MAXTICS].y = pl->mo->y;
+			ul_playerpos[i][gametic % UL_MAXTICS].z = pl->mo->z;
+		}
+	}
 
+	return;
+}

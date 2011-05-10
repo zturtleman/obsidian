@@ -43,7 +43,9 @@
 #include "o_common.h"
 #include "o_unlag.h"
 
-boolean server, client, unlag;
+boolean server;
+boolean client;
+boolean unlag;
 
 void SV_Main (void) 
 {
@@ -56,6 +58,7 @@ void SV_Main (void)
 
 	// Temporary useful switch for unlagged:
 	unlag = M_CheckParm("-unlag");
+	if (unlag) printf ("Experimental Unlagging Enabled (good luck).\n");
 
 	j = M_CheckParmWithArgs("-port", 1);
 
@@ -148,7 +151,8 @@ void SV_Loop (void)
 	}
 
 	SV_SendDamage();
-	SV_ULRecordPos(); // Unlagged - Record player positions
+	if(unlag)
+		SV_ULRecordPos(); // Unlagged - Record player positions
 
 	return;
 }
