@@ -1025,8 +1025,9 @@ boolean PTR_ShootTraverse (intercept_t* in)
 	    
 	    // it's a sky hack wall
         // [tm512] Apply a fix to the "Sky Hack Wall". - 5/7/11
-	    if	(li->backsector && li->backsector->ceilingpic == skyflatnum && li->backsector->ceilingheight < z)
-		return false;		
+	    if	(li->backsector && li->backsector->ceilingpic == skyflatnum && 
+	        ((demorecording || demoplayback) || li->backsector->ceilingheight < z))
+		return false;
 	}
 
 	// Spawn bullet puffs.
