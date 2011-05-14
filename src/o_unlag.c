@@ -24,17 +24,20 @@
 
 #include "doomdef.h"
 #include "doomstat.h"
+#include "r_defs.h"
 
 #include "o_common.h"
 #include "o_unlag.h"
 
 int numsectors;
+sector_t *sectors;
 
 void SV_ULRecordPos (void)
 {
 	int i;
 	player_t *pl;
 
+	// Record player positions.
 	for (i = 0; i < MAXPLAYERS; i++)
 	{
 		if (playeringame[i] && players[i].mo)
@@ -44,6 +47,12 @@ void SV_ULRecordPos (void)
 			ul_playerpos[i][gametic % UL_MAXTICS].y = pl->mo->y;
 			ul_playerpos[i][gametic % UL_MAXTICS].z = pl->mo->z;
 		}
+	}
+
+	for (i = 0; i < numsectors; i++)
+	{
+		sectors[i].ul_floorheight[gametic % UL_MAXTICS] = sectors[i].floorheight;
+		sectors[i].ul_ceilingheight[gametic % UL_MAXTICS] = sectors[i].ceilingheight;
 	}
 
 	return;
