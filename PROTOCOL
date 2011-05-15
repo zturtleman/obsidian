@@ -35,7 +35,7 @@ Data: statenum_t casted to a 16-bit unsigned integer.
 Message: MSG_FIRE (reliable)
 Server Use: Inform clients that another client fired a weapon.
 Client Use: Inform server that we fired a weapon.
-Data: weapontype_t casted to an 8-bit integer, 32-bit integer containing the player's "refire" variable.
+Data: weapontype_t casted to an 8-bit integer, 16-bit integer containing the player's "refire" variable.
 
 Message: MSG_DAMAGE (reliable)
 Server Use: Inform a client of a player getting damaged.

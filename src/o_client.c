@@ -208,7 +208,7 @@ void CL_ParsePacket(ENetPacket *pk)
 			weapontype_t toFire = (weapontype_t)ReadInt8((uint8_t**)&p);
 			if(toFire != players[from].readyweapon)
 				players[from].readyweapon = toFire;
-			players[from].refire = ReadInt32((int32_t**)&p);
+			players[from].refire = ReadInt16((int16_t**)&p);
 			P_FireWeapon(&players[from]);
 		}
 		break;
@@ -306,12 +306,12 @@ void CL_SendStateUpdate(uint16_t state)
 
 void CL_SendFireCmd(weapontype_t w, int refire)
 {
-	ENetPacket *pk = enet_packet_create(NULL, 6, ENET_PACKET_FLAG_RELIABLE);
+	ENetPacket *pk = enet_packet_create(NULL, 4, ENET_PACKET_FLAG_RELIABLE);
 	void *p = pk->data;
 
 	WriteUInt8((uint8_t**)&p, MSG_FIRE);
 	WriteInt8((int8_t**)&p, (int8_t) w);
-	WriteInt32((int32_t**)&p, refire);
+	WriteInt16((int16_t**)&p, refire);
 	enet_peer_send(srvpeer, 1, pk);
 	return;
 }
