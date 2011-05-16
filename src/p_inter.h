@@ -28,6 +28,7 @@
 #ifndef __P_INTER__
 #define __P_INTER__
 
+boolean P_GiveWeapon( player_t*	player, weapontype_t	weapon, boolean	dropped);
 boolean	P_GivePower(player_t*, int);
 void P_KillMobj(mobj_t* source, mobj_t* target);
 

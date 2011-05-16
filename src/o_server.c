@@ -45,7 +45,7 @@
 boolean server;
 boolean client;
 
-void SV_Main (void) 
+int SV_Main (void) 
 {
 	int i, j, attempts;
 
@@ -90,7 +90,8 @@ void SV_Main (void)
 			damages[i] = 0;
 		}
 	}
-	return;
+
+	return 0;
 }
 
 void SV_Loop (void)
