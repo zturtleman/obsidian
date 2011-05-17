@@ -40,9 +40,9 @@ void SV_ULRecordPos (void)
 	// Record player positions.
 	for (i = 0; i < MAXPLAYERS; i++)
 	{
-		if (playeringame[i] && players[i].mo)
+		pl = &players[i];
+		if (playeringame[i] && pl->mo)
 		{
-			pl = &players[i];
 			ul_playerpos[i][gametic % UL_MAXTICS].x = pl->mo->x;
 			ul_playerpos[i][gametic % UL_MAXTICS].y = pl->mo->y;
 			ul_playerpos[i][gametic % UL_MAXTICS].z = pl->mo->z;
@@ -57,3 +57,32 @@ void SV_ULRecordPos (void)
 
 	return;
 }
+
+// Reconciles everything back to a specified gametic, as long as that gametic is within UL_MAXTICS of the current one
+void SV_ULReconcile (int tic, player_t *exclude)
+{
+	int i;
+	player_t *pl;
+
+	if (tic < gametic - UL_MAXTICS) // Out of range
+		return;
+
+	for (i = 0; i < MAXPLAYERS; i++)
+	{
+		pl = &players[i];
+		if (playeringame[i] && pl->mo && pl != exclude)
+		{
+			pl->mo->x = ul_playerpos[i][tic % UL_MAXTICS].x;
+			pl->mo->y = ul_playerpos[i][tic % UL_MAXTICS].y;
+			pl->mo->z = ul_playerpos[i][tic % UL_MAXTICS].z;
+		}
+	}
+
+	for (i = 0; i < numsectors; i++)
+	{
+		sectors[i].floorheight = sectors[i].ul_floorheight[tic % UL_MAXTICS];
+		sectors[i].ceilingheight = sectors[i].ul_ceilingheight[tic % UL_MAXTICS];
+	}
+
+	return;
+}	

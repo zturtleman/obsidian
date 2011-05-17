@@ -273,9 +273,17 @@ void SV_ParsePacket (ENetPacket *pk, ENetPeer *p)
 				clients[from].player->readyweapon = toFire;
 			clients[from].player->refire = ReadInt16((int16_t**)&pkp);
 			senttic = ReadInt32((int32_t**)&pkp);
-			printf("unlag debug: gametic - %05d | senttic - %05d | latency - %02d (%s)\n", gametic, senttic, gametic - senttic,
-			       (gametic - senttic < 0 || !senttic) ? "discarded" : "");
+			if (unlag)
+			{
+				printf("unlag debug: gametic - %05d | senttic - %05d | latency - %02d (%s)\n", gametic, senttic, gametic - senttic,
+				       (gametic - senttic < 1 || !senttic) ? "discarded" : "");
+				// Reconcile player positions...
+				if (gametic - senttic > 1 && senttic)
+					SV_ULReconcile(senttic, clients[from].player);
+			}
 			P_FireWeapon(clients[from].player);
+			if (unlag && gametic - senttic > 1 && senttic) // ...And restore them after firing.
+				SV_ULReconcile(gametic, clients[from].player);
 		}
 		break;
 
