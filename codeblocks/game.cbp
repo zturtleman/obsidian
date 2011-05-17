@@ -291,6 +291,10 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="..\src\o_server.h" />
+		<Unit filename="..\src\o_unlag.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\src\o_unlag.h" />
 		<Unit filename="..\src\p_ceilng.c">
 			<Option compilerVar="CC" />
 		</Unit>

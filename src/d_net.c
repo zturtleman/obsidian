@@ -474,6 +474,8 @@ void TryRunTics (void)
 		D_DoAdvanceDemo ();
 
 	    G_Ticker ();
+        if (!gametic && client)
+            CL_SendTic ();
 	    gametic++;
 	    
 	    // modify command for duplicated tics

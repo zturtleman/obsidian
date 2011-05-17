@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <CodeBlocks_workspace_file>
 	<Workspace title="obsidian">
-		<Project filename="game.cbp">
+		<Project filename="game.cbp" active="1">
 			<Depends filename="textscreen.cbp" />
 			<Depends filename="libpcsound.cbp" />
 		</Project>
@@ -10,6 +10,6 @@
 		</Project>
 		<Project filename="textscreen.cbp" />
 		<Project filename="libpcsound.cbp" />
-		<Project filename="..\enet\enet_dll.cbp" active="1" />
+		<Project filename="..\enet\enet_dll.cbp" />
 	</Workspace>
 </CodeBlocks_workspace_file>

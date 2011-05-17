@@ -41,9 +41,11 @@
 
 #include "o_server.h"
 #include "o_common.h"
+#include "o_unlag.h"
 
 boolean server;
 boolean client;
+boolean unlag;
 
 int SV_Main (void) 
 {
@@ -53,6 +55,10 @@ int SV_Main (void)
 		return 1; // Initialize enet, if it fails, return 1
 
 	atexit(enet_deinitialize);
+
+	// Temporary useful switch for unlagged:
+	unlag = M_CheckParm("-unlag");
+	if (unlag) printf ("Experimental Unlagging Enabled (good luck).\n");
 
 	j = M_CheckParmWithArgs("-port", 1);
 
@@ -146,6 +152,8 @@ void SV_Loop (void)
 	}
 
 	SV_SendDamage();
+	if(unlag)
+		SV_ULRecordPos(); // Unlagged - Record player positions
 
 	return;
 }
@@ -224,6 +232,21 @@ void SV_ParsePacket (ENetPacket *pk, ENetPeer *p)
 
 	switch(msg)
 	{
+		case MSG_TIC:
+		{
+			int rcvtic;
+			rcvtic = ReadInt32((int32_t**)&pkp);
+
+			if (!rcvtic) // First tic of the client, send it back!
+				enet_peer_send(clients[from].peer, from + MAXPLAYERS, pk);
+			else // This is the round trip time for this player, will be used to calculate relative ping later on.
+			{
+				printf("%i init rtt = %i\n", from, rcvtic);
+				clients[from].initRTT = rcvtic;
+			}
+		}
+		break;
+
 		case MSG_POS:
 		if(clients[from].player && clients[from].player->mo && clients[from].player->mo->health > 0)
 		{

@@ -42,7 +42,8 @@
 // SECTORS do store MObjs anyway.
 #include "p_mobj.h"
 
-
+// Unlagged:
+#include "o_unlag.h"
 
 
 
@@ -133,7 +134,10 @@ typedef	struct
 
     int			linecount;
     struct line_s**	lines;	// [linecount] size
-    
+
+    fixed_t ul_floorheight[UL_MAXTICS];
+    fixed_t ul_ceilingheight[UL_MAXTICS];
+
 } sector_t;
 
 
