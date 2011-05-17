@@ -152,8 +152,12 @@ void SV_Loop (void)
 	}
 
 	SV_SendDamage();
+
 	if(unlag)
 		SV_ULRecordPos(); // Unlagged - Record player positions
+
+	if (!(gametic % 70)) // Send a tic update every two seconds to keep clients synced
+		SV_SendTic ();
 
 	return;
 }
@@ -232,21 +236,6 @@ void SV_ParsePacket (ENetPacket *pk, ENetPeer *p)
 
 	switch(msg)
 	{
-		case MSG_TIC:
-		{
-			int rcvtic;
-			rcvtic = ReadInt32((int32_t**)&pkp);
-
-			if (!rcvtic) // First tic of the client, send it back!
-				enet_peer_send(clients[from].peer, from + MAXPLAYERS, pk);
-			else // This is the round trip time for this player, will be used to calculate relative ping later on.
-			{
-				printf("%i init rtt = %i\n", from, rcvtic);
-				clients[from].initRTT = rcvtic;
-			}
-		}
-		break;
-
 		case MSG_POS:
 		if(clients[from].player && clients[from].player->mo && clients[from].player->mo->health > 0)
 		{
@@ -278,10 +267,14 @@ void SV_ParsePacket (ENetPacket *pk, ENetPeer *p)
 		case MSG_FIRE:
 		if(clients[from].player && clients[from].player->mo && clients[from].player->mo->health > 0)
 		{
+			int senttic;
 			weapontype_t toFire = (weapontype_t)ReadInt8((uint8_t**)&pkp);
 			if(toFire != clients[from].player->readyweapon)
 				clients[from].player->readyweapon = toFire;
 			clients[from].player->refire = ReadInt16((int16_t**)&pkp);
+			senttic = ReadInt32((int32_t**)&pkp);
+			printf("unlag debug: gametic - %05d | senttic - %05d | latency - %02d (%s)\n", gametic, senttic, gametic - senttic,
+			       (gametic - senttic < 0 || !senttic) ? "discarded" : "");
 			P_FireWeapon(clients[from].player);
 		}
 		break;
@@ -463,4 +456,20 @@ int SV_ClientNumForPeer(ENetPeer *p)
 			return i;
 	}
 	return -1;
+}
+
+void SV_SendTic (void)
+{
+	// Updates the clients on our current gametic, make sure they stay in sync
+	// Unreliable, it's okay if the packet is missed sometimes.
+
+	ENetPacket *pk = enet_packet_create (NULL, 5, 0);
+	void *p = pk->data;
+
+	WriteUInt8((uint8_t**)&p, MSG_TIC);
+	WriteInt32((int32_t**)&p, gametic);
+
+	SV_BroadcastPacket (pk, -1);
+
+	return;
 }

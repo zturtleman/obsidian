@@ -165,8 +165,8 @@ void CL_ParsePacket(ENetPacket *pk)
 
 	switch(msg)
 	{
-		case MSG_TIC: // Send current gametic to the server, the actual data of the packet is irrelavent..
-		CL_SendTic();
+		case MSG_TIC: 
+		sv_gametic = ReadInt32((int32_t**)&p);
 		break;
 
 		case MSG_POS:
@@ -310,24 +310,13 @@ void CL_SendStateUpdate(uint16_t state)
 
 void CL_SendFireCmd(weapontype_t w, int refire)
 {
-	ENetPacket *pk = enet_packet_create(NULL, 4, ENET_PACKET_FLAG_RELIABLE);
+	ENetPacket *pk = enet_packet_create(NULL, 8, ENET_PACKET_FLAG_RELIABLE);
 	void *p = pk->data;
 
 	WriteUInt8((uint8_t**)&p, MSG_FIRE);
 	WriteInt8((int8_t**)&p, (int8_t) w);
 	WriteInt16((int16_t**)&p, refire);
-	enet_peer_send(srvpeer, 1, pk);
-	return;
-}
-
-void CL_SendTic (void)
-{
-	ENetPacket *pk = enet_packet_create(NULL, 5, ENET_PACKET_FLAG_RELIABLE);
-	void *p = pk->data;
-
-	WriteUInt8((uint8_t**)&p, MSG_TIC);
-	printf("sending tic %i\n", gametic);
-	WriteInt32((int32_t**)&p, gametic);
+	WriteInt32((int32_t**)&p, sv_gametic);
 	enet_peer_send(srvpeer, 1, pk);
 	return;
 }

@@ -47,6 +47,7 @@ void SV_SendWeapon(player_t *player, weapontype_t weapon);
 void SV_DamageMobj(mobj_t *target, int damage);
 void SV_KillMobj(mobj_t *source, mobj_t *target);
 int SV_ClientNumForPeer(ENetPeer *p);
+void SV_SendTic (void);
 
 // Variables
 
@@ -66,7 +67,6 @@ typedef struct
 {
 	int type;
 	int id;
-	int initRTT; // Initial round trip time
 	ENetPeer *peer;
 	player_t *player;
 	char name[MAXPLAYERNAME + 1];

@@ -33,6 +33,7 @@
 ENetHost *localclient;
 int localid;
 uint8_t inGameMask;
+extern int sv_gametic;
 
 void CL_Connect (char *srv_hn);
 void CL_Loop(void);
@@ -43,7 +44,6 @@ void CL_SendUseCmd(void);
 void CL_SendStateUpdate(uint16_t state);
 void CL_SendFireCmd(weapontype_t w, int refire);
 void CL_SendRespawn(void);
-void CL_SendTic(void);
 void CL_SendReborn(void);
 
 #endif
