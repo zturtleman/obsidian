@@ -231,6 +231,21 @@ void SV_ParsePacket (ENetPacket *pk, ENetPeer *p)
 
 	switch(msg)
 	{
+		case MSG_TIC:
+		{
+			int rcvtic;
+			rcvtic = ReadInt32((int32_t**)&pkp);
+
+			if (!rcvtic) // First tic of the client, send it back!
+				enet_peer_send(clients[from].peer, from + MAXPLAYERS, pk);
+			else // This is the round trip time for this player, will be used to calculate relative ping later on.
+			{
+				printf("%i init rtt = %i\n", from, rcvtic);
+				clients[from].initRTT = rcvtic;
+			}
+		}
+		break;
+
 		case MSG_POS:
 		if(clients[from].player && clients[from].player->mo && clients[from].player->mo->health > 0)
 		{

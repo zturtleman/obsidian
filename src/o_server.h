@@ -66,6 +66,7 @@ typedef struct
 {
 	int type;
 	int id;
+	int initRTT; // Initial round trip time
 	ENetPeer *peer;
 	player_t *player;
 	char name[MAXPLAYERNAME + 1];

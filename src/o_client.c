@@ -165,6 +165,10 @@ void CL_ParsePacket(ENetPacket *pk)
 
 	switch(msg)
 	{
+		case MSG_TIC: // Send current gametic to the server, the actual data of the packet is irrelavent..
+		CL_SendTic();
+		break;
+
 		case MSG_POS:
 		if(playeringame[from] && players[from].mo && players[from].mo->health)
 		{
@@ -312,6 +316,18 @@ void CL_SendFireCmd(weapontype_t w, int refire)
 	WriteUInt8((uint8_t**)&p, MSG_FIRE);
 	WriteInt8((int8_t**)&p, (int8_t) w);
 	WriteInt32((int32_t**)&p, refire);
+	enet_peer_send(srvpeer, 1, pk);
+	return;
+}
+
+void CL_SendTic (void)
+{
+	ENetPacket *pk = enet_packet_create(NULL, 5, ENET_PACKET_FLAG_RELIABLE);
+	void *p = pk->data;
+
+	WriteUInt8((uint8_t**)&p, MSG_TIC);
+	printf("sending tic %i\n", gametic);
+	WriteInt32((int32_t**)&p, gametic);
 	enet_peer_send(srvpeer, 1, pk);
 	return;
 }
