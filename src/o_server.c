@@ -275,8 +275,8 @@ void SV_ParsePacket (ENetPacket *pk, ENetPeer *p)
 			senttic = ReadInt32((int32_t**)&pkp);
 			if (unlag)
 			{
-				printf("unlag debug: gametic - %05d | senttic - %05d | latency - %02d (%s)\n", gametic, senttic, gametic - senttic,
-				       (gametic - senttic < 1 || !senttic) ? "discarded" : "");
+			//	printf("unlag debug: gametic - %05d | senttic - %05d | latency - %02d (%s)\n", gametic, senttic, gametic - senttic,
+			//	       (gametic - senttic < 2 || !senttic) ? "discarded" : "");
 				// Reconcile player positions...
 				if (gametic - senttic > 1 && senttic)
 					SV_ULReconcile(senttic, clients[from].player);
