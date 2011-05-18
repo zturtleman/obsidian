@@ -35,8 +35,7 @@
 
 extern boolean server;
 extern boolean client;
-
-// void WriteInt32(int32_t** const Dest, int32_t Value);
+extern int dmStart;
 
 // Protocol
 

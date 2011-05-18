@@ -1336,6 +1336,9 @@ G_CheckSpot
 // Spawns a player at one of the random death match spots 
 // called at level load and each death 
 //
+
+int dmStart;
+
 void G_DeathMatchSpawnPlayer (int playernum) 
 { 
     int             i,j; 
@@ -1346,12 +1349,17 @@ void G_DeathMatchSpawnPlayer (int playernum)
 	I_Error ("Only %i deathmatch spots, 4 required", selections); 
  
     for (j=0 ; j<20 ; j++) 
-    { 
-	i = P_Random() % selections; 
+    {
+    if (client)
+	    i = dmStart;
+	else
+	    i = P_Random() % selections; 
 	if (G_CheckSpot (playernum, &deathmatchstarts[i]) ) 
 	{ 
 	    deathmatchstarts[i].type = playernum+1; 
 	    P_SpawnPlayer (&deathmatchstarts[i]); 
+        if (server)
+            dmStart = i;
 	    return; 
 	} 
     } 
