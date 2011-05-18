@@ -25,6 +25,8 @@
 #include "doomdef.h"
 #include "doomstat.h"
 #include "r_defs.h"
+#include "r_main.h"
+#include "p_local.h"
 
 #include "o_common.h"
 #include "o_unlag.h"
@@ -63,25 +65,32 @@ void SV_ULReconcile (int tic, player_t *exclude)
 {
 	int i;
 	player_t *pl;
+	subsector_t *dest;
 
 	if (tic < gametic - UL_MAXTICS) // Out of range
 		return;
+
+	for (i = 0; i < numsectors; i++)
+	{
+		sectors[i].floorheight = sectors[i].ul_floorheight[tic % UL_MAXTICS];
+		sectors[i].ceilingheight = sectors[i].ul_ceilingheight[tic % UL_MAXTICS];
+	}
 
 	for (i = 0; i < MAXPLAYERS; i++)
 	{
 		pl = &players[i];
 		if (playeringame[i] && pl->mo && pl != exclude)
 		{
+			P_UnsetThingPosition (pl->mo);
 			pl->mo->x = ul_playerpos[i][tic % UL_MAXTICS].x;
 			pl->mo->y = ul_playerpos[i][tic % UL_MAXTICS].y;
 			pl->mo->z = ul_playerpos[i][tic % UL_MAXTICS].z;
+			dest = R_PointInSubsector (pl->mo->x, pl->mo->y);
+			pl->mo->subsector = dest;
+			pl->mo->floorz = dest->sector->floorheight;
+			pl->mo->ceilingz = dest->sector->ceilingheight;
+			P_SetThingPosition (pl->mo);
 		}
-	}
-
-	for (i = 0; i < numsectors; i++)
-	{
-		sectors[i].floorheight = sectors[i].ul_floorheight[tic % UL_MAXTICS];
-		sectors[i].ceilingheight = sectors[i].ul_ceilingheight[tic % UL_MAXTICS];
 	}
 
 	return;
