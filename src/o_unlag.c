@@ -39,6 +39,7 @@ void SV_ULRecordPos (void)
 	int i;
 	player_t *pl;
 
+	printf ("SV_ULRecordPos %i\n", gametic);
 	// Record player positions.
 	for (i = 0; i < MAXPLAYERS; i++)
 	{
@@ -68,7 +69,15 @@ void SV_ULReconcile (int tic, player_t *exclude)
 	subsector_t *dest;
 
 	if (tic < gametic - UL_MAXTICS) // Out of range
+	{
+		printf ("SV_ULReconcile: %i is out of range!\n", tic);
 		return;
+	}
+
+	// Record positions for this tic, since it hasn't been done yet.
+	SV_ULRecordPos ();
+
+	//printf ("SV_ULReconcile: [%i] Reconciling to tic %i on tic %i.\n", exclude, tic, gametic);
 
 	for (i = 0; i < numsectors; i++)
 	{

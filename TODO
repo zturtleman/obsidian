@@ -5,7 +5,7 @@ Netcode:
  -- Implement MSG_PICKUP in a sane fashion. [Done unless something pops up]
  -- Work on making netcode play a little better, there are many problems with this currently (and not surprisingly). [In-progress]
  -- Implement game snapshots upon connect, theoretically, these could also be sent to terribly desynced clients.
- -- Add unlagged, this is a must-have for various reasons.
+ -- Add unlagged, this is a must-have for various reasons. [In-Progress]
  -- Netdemos on both client and server (simple write to buffer and read back).
  -- Team Deathmatch and CTF.
 

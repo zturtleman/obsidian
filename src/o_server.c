@@ -100,6 +100,8 @@ int SV_Main (void)
 	return 0;
 }
 
+int sv_lastruntic; // Egh, a hack
+
 void SV_Loop (void)
 {
 	ENetEvent event;
@@ -151,6 +153,10 @@ void SV_Loop (void)
 		}
 	}
 
+	// Don't do the following more than once per tic :S
+	if (sv_lastruntic == gametic)
+		return;
+
 	SV_SendDamage();
 
 	if(unlag)
@@ -158,6 +164,8 @@ void SV_Loop (void)
 
 	if (!(gametic % 70)) // Send a tic update every two seconds to keep clients synced
 		SV_SendTic ();
+
+	sv_lastruntic = gametic;
 
 	return;
 }
@@ -279,7 +287,7 @@ void SV_ParsePacket (ENetPacket *pk, ENetPeer *p)
 			//	       (gametic - senttic < 2 || !senttic) ? "discarded" : "");
 				// Reconcile player positions...
 				if (gametic - senttic > 1 && senttic)
-					SV_ULReconcile(senttic, clients[from].player);
+					SV_ULReconcile(gametic - ((gametic -senttic)/2), clients[from].player);
 			}
 			P_FireWeapon(clients[from].player);
 			if (unlag && gametic - senttic > 1 && senttic) // ...And restore them after firing.
