@@ -256,8 +256,8 @@ void SV_ParsePacket (ENetPacket *pk, ENetPeer *p)
 			clients[from].player->mo->momy = ReadInt32((int32_t**)&pkp);
 			clients[from].player->mo->momz = ReadInt32((int32_t**)&pkp);
 			clients[from].player->mo->subsector = R_PointInSubsector(clients[from].player->mo->x, clients[from].player->mo->y);
-			clients[from].player->mo->floorz = clients[from].player->mo->subsector->sector->floorheight;
-			clients[from].player->mo->ceilingz = clients[from].player->mo->subsector->sector->ceilingheight;
+			clients[from].player->mo->floorz = ReadInt32((const int32_t**)&pkp);
+			clients[from].player->mo->ceilingz = ReadInt32((const int32_t**)&pkp);
 			P_SetThingPosition(clients[from].player->mo);
 		}
 		break;

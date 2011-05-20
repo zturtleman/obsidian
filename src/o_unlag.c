@@ -48,6 +48,8 @@ void SV_ULRecordPos (void)
 			ul_playerpos[i][gametic % UL_MAXTICS].x = pl->mo->x;
 			ul_playerpos[i][gametic % UL_MAXTICS].y = pl->mo->y;
 			ul_playerpos[i][gametic % UL_MAXTICS].z = pl->mo->z;
+			ul_playerpos[i][gametic % UL_MAXTICS].floorz = pl->mo->floorz;
+			ul_playerpos[i][gametic % UL_MAXTICS].ceilingz = pl->mo->ceilingz;
 		}
 	}
 
@@ -88,10 +90,11 @@ void SV_ULReconcile (int tic, player_t *exclude)
 			pl->mo->x = ul_playerpos[i][tic % UL_MAXTICS].x;
 			pl->mo->y = ul_playerpos[i][tic % UL_MAXTICS].y;
 			pl->mo->z = ul_playerpos[i][tic % UL_MAXTICS].z;
+			
 			dest = R_PointInSubsector (pl->mo->x, pl->mo->y);
 			pl->mo->subsector = dest;
-			pl->mo->floorz = dest->sector->floorheight;
-			pl->mo->ceilingz = dest->sector->ceilingheight;
+			pl->mo->floorz = ul_playerpos[i][tic % UL_MAXTICS].floorz;
+			pl->mo->ceilingz = ul_playerpos[i][tic % UL_MAXTICS].ceilingz;
 			P_SetThingPosition (pl->mo);
 		}
 	}

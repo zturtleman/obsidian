@@ -181,8 +181,8 @@ void CL_ParsePacket(ENetPacket *pk)
 			players[from].mo->momy = ReadInt32((int32_t**)&p);
 			players[from].mo->momz = ReadInt32((int32_t**)&p);
 			players[from].mo->subsector = R_PointInSubsector(players[from].mo->x, players[from].mo->y);
-			players[from].mo->floorz = players[from].mo->subsector->sector->floorheight;
-			players[from].mo->ceilingz = players[from].mo->subsector->sector->ceilingheight;
+			players[from].mo->floorz = ReadInt32((const int32_t**)&p);
+			players[from].mo->ceilingz = ReadInt32((const int32_t**)&p);
 			P_SetThingPosition(players[from].mo);
 		}
 		break;
@@ -270,9 +270,9 @@ void CL_ParsePacket(ENetPacket *pk)
 	return;
 }
 
-void CL_SendPosUpdate(fixed_t x, fixed_t y, fixed_t z, fixed_t ang, fixed_t momx, fixed_t momy, fixed_t momz)
+void CL_SendPosUpdate(fixed_t x, fixed_t y, fixed_t z, fixed_t ang, fixed_t momx, fixed_t momy, fixed_t momz, fixed_t floorz, fixed_t ceilingz)
 {
-	ENetPacket *pk = enet_packet_create(NULL, 29, 0);
+	ENetPacket *pk = enet_packet_create(NULL, 37, 0);
 	void *p = pk->data;
 
 	WriteUInt8((uint8_t**)&p, MSG_POS);
@@ -283,6 +283,8 @@ void CL_SendPosUpdate(fixed_t x, fixed_t y, fixed_t z, fixed_t ang, fixed_t momx
 	WriteInt32((int32_t**)&p, momx);
 	WriteInt32((int32_t**)&p, momy);
 	WriteInt32((int32_t**)&p, momz);
+	WriteInt32((int32_t**)&p, floorz);
+	WriteInt32((int32_t**)&p, ceilingz);
 	enet_peer_send(srvpeer, 0, pk);
 	return;
 }
