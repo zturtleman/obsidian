@@ -32,6 +32,8 @@ typedef struct
 	fixed_t x;
 	fixed_t y;
 	fixed_t z;
+	fixed_t floorz;
+	fixed_t ceilingz;
 } position_t;
 
 position_t ul_playerpos[MAXPLAYERS][UL_MAXTICS]; // Store the positions of all players for up to one second.
