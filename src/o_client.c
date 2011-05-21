@@ -240,6 +240,7 @@ void CL_ParsePacket(ENetPacket *pk)
 		{
 			players[from].playerstate = PST_REBORN;
 			dmStart = ReadUInt8((uint8_t**)&p);
+			G_DoReborn (from);
 		}
 		break;
 
