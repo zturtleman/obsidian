@@ -1028,7 +1028,7 @@ void G_Ticker (void)
     
     // do player reborns if needed
     for (i=0 ; i<MAXPLAYERS ; i++) 
-	if (playeringame[i] && players[i].playerstate == PST_REBORN) 
+	if (playeringame[i] && players[i].playerstate == PST_REBORN && !client) 
 	    G_DoReborn (i);
     
     // do things to change the game state
