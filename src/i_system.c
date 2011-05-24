@@ -263,7 +263,7 @@ void I_Endoom(void)
     {
         TXT_UpdateScreen();
 
-        if (TXT_GetChar() >= 0)
+        if (TXT_GetChar() > 0)
         {
             break;
         }
