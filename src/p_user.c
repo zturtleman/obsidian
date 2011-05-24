@@ -228,8 +228,7 @@ void P_DeathThink (player_t* player)
 
     if (player->cmd.buttons & BT_USE)
 	{
-        if(!client)
-		    player->playerstate = PST_REBORN;
+		player->playerstate = PST_REBORN;
 		if(client)
 			CL_SendReborn();
 	}

@@ -210,7 +210,6 @@ void SV_DropClient(int cn, const char *reason) // Reset one of the client_t insi
 }
 
 void P_FireWeapon (player_t* player);
-void SV_SendReborn (int from);
 
 void SV_ParsePacket (ENetPacket *pk, ENetPeer *p)
 {
@@ -266,10 +265,7 @@ void SV_ParsePacket (ENetPacket *pk, ENetPeer *p)
 
 		case MSG_RESPAWN:
 		if(clients[from].player)
-		{
-			G_DoReborn(from);
-			SV_SendReborn(from);
-		}
+			clients[from].player->playerstate = PST_REBORN;
 		break;
 
 		default:
@@ -382,19 +378,6 @@ void SV_SendWeapon (player_t *player, weapontype_t weapon)
 
 	enet_peer_send(clients[t].peer, t + MAXPLAYERS, pk);
 
-	return;
-}
-
-void SV_SendReborn (int from)
-{
-	ENetPacket *pk = enet_packet_create(NULL, 3, ENET_PACKET_FLAG_RELIABLE);
-	void *p = pk->data;
-
-	WriteUInt8((uint8_t**)&p, MSG_RESPAWN);
-	WriteUInt8((uint8_t**)&p, (uint8_t)dmStart);
-	WriteUInt8((uint8_t**)&p, from);
-
-	SV_BroadcastPacket(pk, -1);
 	return;
 }
 

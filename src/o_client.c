@@ -237,10 +237,7 @@ void CL_ParsePacket(ENetPacket *pk)
 
 		case MSG_RESPAWN:
 		if(playeringame[from])
-		{
 			players[from].playerstate = PST_REBORN;
-			dmStart = ReadUInt8((uint8_t**)&p);
-		}
 		break;
 
 		case MSG_PICKUP:
