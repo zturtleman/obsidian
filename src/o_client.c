@@ -194,7 +194,6 @@ void CL_ParsePacket(ENetPacket *pk)
 			newpl = ReadUInt8((uint8_t**)&p);
 			playeringame[newpl] = true;
 			players[newpl].playerstate = PST_REBORN;
-			G_DoReborn (newpl);
 		}
 		break;
 
@@ -241,7 +240,6 @@ void CL_ParsePacket(ENetPacket *pk)
 		{
 			players[from].playerstate = PST_REBORN;
 			dmStart = ReadUInt8((uint8_t**)&p);
-			G_DoReborn (from);
 		}
 		break;
 

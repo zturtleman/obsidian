@@ -267,11 +267,9 @@ void SV_ParsePacket (ENetPacket *pk, ENetPeer *p)
 		case MSG_RESPAWN:
 		if(clients[from].player)
 		{
-			clients[from].player->playerstate = PST_REBORN;
 			G_DoReborn(from);
 			SV_SendReborn(from);
 		}
-		valid = 0; // Don't send twice ;)
 		break;
 
 		default:
