@@ -165,6 +165,10 @@ void CL_ParsePacket(ENetPacket *pk)
 
 	switch(msg)
 	{
+		case MSG_TIC: 
+		sv_gametic = ReadInt32((int32_t**)&p);
+		break;
+
 		case MSG_POS:
 		if(playeringame[from] && players[from].mo && players[from].mo->health)
 		{
@@ -177,8 +181,8 @@ void CL_ParsePacket(ENetPacket *pk)
 			players[from].mo->momy = ReadInt32((int32_t**)&p);
 			players[from].mo->momz = ReadInt32((int32_t**)&p);
 			players[from].mo->subsector = R_PointInSubsector(players[from].mo->x, players[from].mo->y);
-			players[from].mo->floorz = players[from].mo->subsector->sector->floorheight;
-			players[from].mo->ceilingz = players[from].mo->subsector->sector->ceilingheight;
+			players[from].mo->floorz = ReadInt32((const int32_t**)&p);
+			players[from].mo->ceilingz = ReadInt32((const int32_t**)&p);
 			P_SetThingPosition(players[from].mo);
 		}
 		break;
@@ -269,9 +273,9 @@ void CL_ParsePacket(ENetPacket *pk)
 	return;
 }
 
-void CL_SendPosUpdate(fixed_t x, fixed_t y, fixed_t z, fixed_t ang, fixed_t momx, fixed_t momy, fixed_t momz)
+void CL_SendPosUpdate(fixed_t x, fixed_t y, fixed_t z, fixed_t ang, fixed_t momx, fixed_t momy, fixed_t momz, fixed_t floorz, fixed_t ceilingz)
 {
-	ENetPacket *pk = enet_packet_create(NULL, 29, 0);
+	ENetPacket *pk = enet_packet_create(NULL, 37, 0);
 	void *p = pk->data;
 
 	WriteUInt8((uint8_t**)&p, MSG_POS);
@@ -282,6 +286,8 @@ void CL_SendPosUpdate(fixed_t x, fixed_t y, fixed_t z, fixed_t ang, fixed_t momx
 	WriteInt32((int32_t**)&p, momx);
 	WriteInt32((int32_t**)&p, momy);
 	WriteInt32((int32_t**)&p, momz);
+	WriteInt32((int32_t**)&p, floorz);
+	WriteInt32((int32_t**)&p, ceilingz);
 	enet_peer_send(srvpeer, 0, pk);
 	return;
 }
@@ -309,12 +315,13 @@ void CL_SendStateUpdate(uint16_t state)
 
 void CL_SendFireCmd(weapontype_t w, int refire)
 {
-	ENetPacket *pk = enet_packet_create(NULL, 4, ENET_PACKET_FLAG_RELIABLE);
+	ENetPacket *pk = enet_packet_create(NULL, 8, ENET_PACKET_FLAG_RELIABLE);
 	void *p = pk->data;
 
 	WriteUInt8((uint8_t**)&p, MSG_FIRE);
 	WriteInt8((int8_t**)&p, (int8_t) w);
 	WriteInt16((int16_t**)&p, refire);
+	WriteInt32((int32_t**)&p, sv_gametic);
 	enet_peer_send(srvpeer, 1, pk);
 	return;
 }

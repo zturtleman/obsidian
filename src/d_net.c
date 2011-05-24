@@ -340,6 +340,9 @@ int	oldnettics;
 
 extern	boolean	advancedemo;
 
+// Unlagged stuff (server gametic):
+int sv_gametic;
+
 void TryRunTics (void)
 {
     int	i;
@@ -476,6 +479,9 @@ void TryRunTics (void)
 	    G_Ticker ();
 	    gametic++;
 	    
+        if (client && sv_gametic)
+            sv_gametic++;
+ 
 	    // modify command for duplicated tics
 	    if (i != ticdup-1)
 	    {

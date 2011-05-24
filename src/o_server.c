@@ -41,9 +41,11 @@
 
 #include "o_server.h"
 #include "o_common.h"
+#include "o_unlag.h"
 
 boolean server;
 boolean client;
+boolean unlag;
 
 int SV_Main (void) 
 {
@@ -53,6 +55,10 @@ int SV_Main (void)
 		return 1; // Initialize enet, if it fails, return 1
 
 	atexit(enet_deinitialize);
+
+	// Temporary useful switch for unlagged:
+	unlag = M_CheckParm("-unlag");
+	if (unlag) printf ("Experimental Unlagging Enabled (good luck).\n");
 
 	j = M_CheckParmWithArgs("-port", 1);
 
@@ -93,6 +99,8 @@ int SV_Main (void)
 
 	return 0;
 }
+
+int sv_lastruntic; // Egh, a hack
 
 void SV_Loop (void)
 {
@@ -145,7 +153,19 @@ void SV_Loop (void)
 		}
 	}
 
+	// Don't do the following more than once per tic :S
+	if (sv_lastruntic == gametic)
+		return;
+
 	SV_SendDamage();
+
+	if(unlag)
+		SV_ULRecordPos(); // Unlagged - Record player positions
+
+	if (!(gametic % 70)) // Send a tic update every two seconds to keep clients synced
+		SV_SendTic ();
+
+	sv_lastruntic = gametic;
 
 	return;
 }
@@ -237,8 +257,8 @@ void SV_ParsePacket (ENetPacket *pk, ENetPeer *p)
 			clients[from].player->mo->momy = ReadInt32((int32_t**)&pkp);
 			clients[from].player->mo->momz = ReadInt32((int32_t**)&pkp);
 			clients[from].player->mo->subsector = R_PointInSubsector(clients[from].player->mo->x, clients[from].player->mo->y);
-			clients[from].player->mo->floorz = clients[from].player->mo->subsector->sector->floorheight;
-			clients[from].player->mo->ceilingz = clients[from].player->mo->subsector->sector->ceilingheight;
+			clients[from].player->mo->floorz = ReadInt32((const int32_t**)&pkp);
+			clients[from].player->mo->ceilingz = ReadInt32((const int32_t**)&pkp);
 			P_SetThingPosition(clients[from].player->mo);
 		}
 		break;
@@ -256,11 +276,23 @@ void SV_ParsePacket (ENetPacket *pk, ENetPeer *p)
 		case MSG_FIRE:
 		if(clients[from].player && clients[from].player->mo && clients[from].player->mo->health > 0)
 		{
+			int senttic;
 			weapontype_t toFire = (weapontype_t)ReadInt8((uint8_t**)&pkp);
 			if(toFire != clients[from].player->readyweapon)
 				clients[from].player->readyweapon = toFire;
 			clients[from].player->refire = ReadInt16((int16_t**)&pkp);
+			senttic = ReadInt32((int32_t**)&pkp);
+			if (unlag)
+			{
+			//	printf("unlag debug: gametic - %05d | senttic - %05d | latency - %02d (%s)\n", gametic, senttic, gametic - senttic,
+			//	       (gametic - senttic < 2 || !senttic) ? "discarded" : "");
+				// Reconcile player positions...
+				if (gametic - senttic > 1 && senttic)
+					SV_ULReconcile(gametic - ((gametic -senttic)/2), clients[from].player);
+			}
 			P_FireWeapon(clients[from].player);
+			if (unlag && gametic - senttic > 1 && senttic) // ...And restore them after firing.
+				SV_ULReconcile(gametic, clients[from].player);
 		}
 		break;
 
@@ -457,4 +489,20 @@ int SV_ClientNumForPeer(ENetPeer *p)
 			return i;
 	}
 	return -1;
+}
+
+void SV_SendTic (void)
+{
+	// Updates the clients on our current gametic, make sure they stay in sync
+	// Unreliable, it's okay if the packet is missed sometimes.
+
+	ENetPacket *pk = enet_packet_create (NULL, 5, 0);
+	void *p = pk->data;
+
+	WriteUInt8((uint8_t**)&p, MSG_TIC);
+	WriteInt32((int32_t**)&p, gametic);
+
+	SV_BroadcastPacket (pk, -1);
+
+	return;
 }

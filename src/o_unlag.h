@@ -1,16 +1,16 @@
 /*  Obsidian
     Copyright (C) 2011 by tm512
-
+    
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"), to deal
     in the Software without restriction, including without limitation the rights
     to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
     copies of the Software, and to permit persons to whom the Software is
     furnished to do so, subject to the following conditions:
-
+    
     The above copyright notice and this permission notice shall be included in
     all copies or substantial portions of the Software.
-
+    
     THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
     IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
     FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -19,37 +19,25 @@
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
     THE SOFTWARE.
     ---
-    o_common : Obsidian Client/Server common code
+    o_unlag : Backwards Reconciliation
 */
 
-#ifndef O_COMMON_H
-#define O_COMMON_H
+#ifndef O_UNLAG_H
+#define O_UNLAG_H
 
-// GhostlyDeath <March 27, 2011> -- Lean and mean for Windows (since ENet does not use it)
-#define WIN32_LEAN_AND_MEAN
+#define UL_MAXTICS 35 // 35 tics maximum reconciliation
 
-#include "enet/enet.h"
-
-#define MAXPLAYERNAME 10
-#define OBS_PROTO 1
-
-extern boolean server;
-extern boolean client;
-extern int dmStart;
-
-// Protocol
-
-enum
+typedef struct
 {
-	MSG_NULL, MSG_WELCOME, MSG_TIC,
+	fixed_t x;
+	fixed_t y;
+	fixed_t z;
+	fixed_t floorz;
+	fixed_t ceilingz;
+} position_t;
 
-	MSG_POS, MSG_JOIN, MSG_USE, 
+position_t ul_playerpos[MAXPLAYERS][UL_MAXTICS]; // Store the positions of all players for up to one second.
 
-	MSG_STATE, MSG_FIRE, MSG_DAMAGE, 
-
-	MSG_KILL, MSG_RESPAWN, MSG_PICKUP, 
-
-	MSG_WPICKUP
-};
+void SV_ULRecordPos (void);
 
 #endif
