@@ -127,6 +127,7 @@
 				RuntimeLibrary="2"
 				StructMemberAlignment="1"
 				EnableFunctionLevelLinking="true"
+				DisableLanguageExtensions="false"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				DebugInformationFormat="3"
@@ -143,7 +144,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="SDL.lib SDL_mixer.lib SDL_net.lib SDLmain.lib"
+				AdditionalDependencies="SDL.lib SDL_mixer.lib SDL_net.lib SDLmain.lib ws2_32.lib winmm.lib"
 				OutputFile="$(OutDir)\obsidian.exe"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
