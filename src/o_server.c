@@ -216,11 +216,11 @@ void SV_ParsePacket (ENetPacket *pk, ENetPeer *p)
 	int from = SV_ClientNumForPeer(p);
 	void *pkp = pk->data;
 	uint8_t msg;
-	boolean valid;
+	boolean resend;
 
 	if(from < 0) return; // Not a client
 	msg = ReadUInt8((uint8_t**)&pkp);
-	valid = 1;
+	resend = 0;
 
 	switch(msg)
 	{
@@ -239,17 +239,24 @@ void SV_ParsePacket (ENetPacket *pk, ENetPeer *p)
 			clients[from].player->mo->floorz = clients[from].player->mo->subsector->sector->floorheight;
 			clients[from].player->mo->ceilingz = clients[from].player->mo->subsector->sector->ceilingheight;
 			P_SetThingPosition(clients[from].player->mo);
+			resend = 1;
 		}
 		break;
 
 		case MSG_USE:
 		if(clients[from].player && clients[from].player->mo && clients[from].player->mo->health > 0)
+		{
 			P_UseLines(clients[from].player);
+			resend = 1;
+		}
 		break;
 
 		case MSG_STATE:
 		if(clients[from].player->mo && clients[from].player->mo && clients[from].player->mo->health > 0)
+		{
 			P_SetMobjState(clients[from].player->mo, (statenum_t)ReadUInt16((uint16_t**)&pkp));
+			resend = 1;
+		}
 		break;
 
 		case MSG_FIRE:
@@ -260,20 +267,24 @@ void SV_ParsePacket (ENetPacket *pk, ENetPeer *p)
 				clients[from].player->readyweapon = toFire;
 			clients[from].player->refire = ReadInt16((int16_t**)&pkp);
 			P_FireWeapon(clients[from].player);
+			resend = 1;
 		}
 		break;
 
 		case MSG_RESPAWN:
 		if(clients[from].player)
+		{
 			clients[from].player->playerstate = PST_REBORN;
+			resend = 1;
+		}
 		break;
 
 		default:
-			valid = 0;
+			resend = 0;
 			break;
 	}
 	
-	if(valid)
+	if(resend)
 		SV_ResizeBroadcastPacket(pk, from, msg);
 
 	return;
