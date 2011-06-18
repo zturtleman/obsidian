@@ -116,6 +116,7 @@ void SV_Loop (void)
 				clients[c].id = c;
 				clients[c].peer = event.peer;
 				clients[c].player = &players[c];
+				clients[c].firstspawn = 0;
 				if(!clients[c].player) 
 				{
 					enet_peer_reset(clients[c].peer);
@@ -272,17 +273,18 @@ void SV_ParsePacket (ENetPacket *pk, ENetPeer *p)
 		break;
 
 		case MSG_RESPAWN:
-		if(clients[from].player)
+		if(clients[from].player && clients[from].firstspawn)
 		{
 			int dmstart;
 
+			if(clients[from].player->playerstate != PST_REBORN)
+				clients[from].player->playerstate = PST_REBORN;
+
 			if(deathmatch)
 			{
-				if(clients[from].player->mo)
-					clients[from].player->mo->player = NULL;
+				clients[from].player->mo->player = NULL;
 
 				dmstart = ReadInt8((int8_t**)&pkp);
-				printf("%i\n", dmstart);
 
 				if(dmstart < 0) // Uh oh, client either bugging out or trying to mess us up, kick their ass.
 				{
@@ -291,12 +293,13 @@ void SV_ParsePacket (ENetPacket *pk, ENetPeer *p)
 				} 
 
 				deathmatchstarts[dmstart].type = from + 1;
+				G_CheckSpot(from, &deathmatchstarts[dmstart]);
 				P_SpawnPlayer(&deathmatchstarts[dmstart]);
 			}
-			else // Coop mode:
-				clients[from].player->playerstate = PST_REBORN;
 			resend = 1;
 		}
+		else
+			clients[from].firstspawn = 1; // Hack! Ew! Gross!
 		break;
 
 		default:

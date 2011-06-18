@@ -68,6 +68,7 @@ typedef struct
 	int id;
 	ENetPeer *peer;
 	player_t *player;
+	boolean firstspawn;
 	char name[MAXPLAYERNAME + 1];
 } client_t;
 
