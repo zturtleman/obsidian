@@ -240,6 +240,8 @@ void CL_ParsePacket(ENetPacket *pk)
 		{
 			int dmstart;
 
+			players[from].playerstate = PST_REBORN;
+
 			if(deathmatch) // Spawn in the recieved deathmatch spawn
 			{
 				// First dissociate the corpse...
@@ -248,10 +250,9 @@ void CL_ParsePacket(ENetPacket *pk)
 
 				dmstart = ReadInt8((int8_t**)&p);
 				deathmatchstarts[dmstart].type = from + 1;
+				G_CheckSpot(from, &deathmatchstarts[dmstart]);
 				P_SpawnPlayer(&deathmatchstarts[dmstart]);
 			}
-			else // Spawns ARE synced in coop just fine...
-				players[from].playerstate = PST_REBORN;
 		}
 		break;
 
