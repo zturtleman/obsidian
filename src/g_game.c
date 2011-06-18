@@ -1352,6 +1352,8 @@ void G_DeathMatchSpawnPlayer (int playernum)
 	{ 
 	    deathmatchstarts[i].type = playernum+1; 
 	    P_SpawnPlayer (&deathmatchstarts[i]); 
+        if(client)
+            CL_SendRespawn (i);
 	    return; 
 	} 
     } 
@@ -1390,6 +1392,8 @@ void G_DoReborn (int playernum)
 	if (G_CheckSpot (playernum, &playerstarts[playernum]) ) 
 	{ 
 	    P_SpawnPlayer (&playerstarts[playernum]); 
+        if(client)
+            CL_SendRespawn (-1);
 	    return; 
 	}
 	

@@ -274,8 +274,28 @@ void SV_ParsePacket (ENetPacket *pk, ENetPeer *p)
 		case MSG_RESPAWN:
 		if(clients[from].player)
 		{
-			clients[from].player->playerstate = PST_REBORN;
-			resend = 1;
+			int dmstart;
+
+			if(deathmatch)
+			{
+				if(clients[from].player->mo)
+					clients[from].player->mo->player = NULL;
+
+				dmstart = ReadInt8((int8_t**)&pk);
+				printf("%i\n", dmstart);
+
+				/*if(dmstart < 0) // Uh oh, client either bugging out or trying to mess us up, kick their ass.
+				{
+					SV_DropClient(from, "Invalid player start");
+					break;
+				}*/ //rofl fix me
+
+				deathmatchstarts[dmstart].type = from + 1;
+				P_SpawnPlayer(&deathmatchstarts[dmstart]);
+			}
+			else // Coop mode:
+				clients[from].player->playerstate = PST_REBORN;
+			//resend = 1;
 		}
 		break;
 

@@ -237,7 +237,22 @@ void CL_ParsePacket(ENetPacket *pk)
 
 		case MSG_RESPAWN:
 		if(playeringame[from])
-			players[from].playerstate = PST_REBORN;
+		{
+			int dmstart;
+
+			if(deathmatch) // Spawn in the recieved deathmatch spawn
+			{
+				// First dissociate the corpse...
+				if(players[from].mo)
+					players[from].mo->player = NULL;
+
+				dmstart = ReadInt8((int8_t**)&p);
+				deathmatchstarts[dmstart].type = from + 1;
+				P_SpawnPlayer(&deathmatchstarts[dmstart]);
+			}
+			else // Spawns ARE synced in coop just fine...
+				players[from].playerstate = PST_REBORN;
+		}
 		break;
 
 		case MSG_PICKUP:
@@ -316,12 +331,15 @@ void CL_SendFireCmd(weapontype_t w, int refire)
 	return;
 }
 
-void CL_SendReborn(void)
+void CL_SendRespawn(int startnum)
 {
-	ENetPacket *pk = enet_packet_create(NULL, 1, ENET_PACKET_FLAG_RELIABLE);
+	printf("%i\n", startnum);
+	ENetPacket *pk = enet_packet_create(NULL, startnum < 0 ? 1 : 2, ENET_PACKET_FLAG_RELIABLE);
 	void *p = pk->data;
 
 	WriteUInt8((uint8_t**)&p, MSG_RESPAWN);
+	if(startnum >= 0)
+		WriteInt8((int8_t**)&p, (int8_t)startnum);
 	enet_peer_send(srvpeer, 1, pk);
 	return;
 }
