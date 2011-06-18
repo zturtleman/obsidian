@@ -334,7 +334,6 @@ void CL_SendFireCmd(weapontype_t w, int refire)
 
 void CL_SendRespawn(int startnum)
 {
-	printf("%i\n", startnum);
 	ENetPacket *pk = enet_packet_create(NULL, startnum < 0 ? 1 : 2, ENET_PACKET_FLAG_RELIABLE);
 	void *p = pk->data;
 
