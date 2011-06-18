@@ -175,6 +175,9 @@ P_GiveWeapon
     boolean	gaveammo;
     boolean	gaveweapon;
 	
+    if (!player)
+        return false;
+
     if (netgame
 	&& (deathmatch!=2)
 	 && !dropped )
