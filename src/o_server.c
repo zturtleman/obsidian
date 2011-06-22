@@ -165,7 +165,6 @@ int SV_FindEmptyClientNum(void)
 void SV_ClientWelcome (client_t* cl)
 {
 	ENetPacket *pk = enet_packet_create(NULL, 32, ENET_PACKET_FLAG_RELIABLE);
-	ENetPacket *newplayer = enet_packet_create(NULL, 2, ENET_PACKET_FLAG_RELIABLE);
 	void *p = pk->data;
 	uint8_t inGame = 0;
 	uint8_t i;
@@ -182,12 +181,6 @@ void SV_ClientWelcome (client_t* cl)
 	enet_peer_send(cl->peer, 0, pk);
 	cl->type = CT_ACTIVE;
 
-	// Now, we inform everyone else about the new player. 
-	p = newplayer->data;
-	WriteUInt8((uint8_t**)&p, MSG_JOIN);
-	WriteUInt8((uint8_t**)&p, cl->id);
-	SV_BroadcastPacket(newplayer, cl->id);
-	
 	return;
 }
 

@@ -188,15 +188,6 @@ void CL_ParsePacket(ENetPacket *pk)
 			P_UseLines(&players[from]);
 		break;
 
-		case MSG_JOIN:
-		{
-			int newpl;
-			newpl = ReadUInt8((uint8_t**)&p);
-			playeringame[newpl] = true;
-			players[newpl].playerstate = PST_REBORN;
-		}
-		break;
-
 		case MSG_STATE:
 		if(players[from].mo && players[from].mo->health)
 			P_SetMobjState(players[from].mo, (statenum_t)ReadUInt16((uint16_t**)&p));
@@ -236,9 +227,11 @@ void CL_ParsePacket(ENetPacket *pk)
 		break;
 
 		case MSG_RESPAWN:
-		if(playeringame[from])
 		{
 			int dmstart;
+
+			if(!playeringame[from])
+				playeringame[from] = true;
 
 			players[from].playerstate = PST_REBORN;
 

@@ -17,11 +17,6 @@ Server Use: Update a particular client on the positions of the other clients.
 Client Use: Update the server with our current position.
 Data: 7 signed 32-bit integers, containing x, y, z, angle, momx, momy, and momz. If the server is sending this, there will be an additional unsigned 8-bit integer containing which player this affects.
 
-Message: MSG_JOIN (reliable)
-Server Use: Inform a client of a new client's connection.
-Client Use: <none>
-Data: 1 unsigned 8-bit integer containing the new client's id.
-
 Message: MSG_USE (reliable)
 Server Use: Inform a client that another client used something (lifts, doors, etc).
 Client Use: Inform the server that we just used something.
