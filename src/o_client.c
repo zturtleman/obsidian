@@ -159,6 +159,8 @@ void CL_ParsePacket(ENetPacket *pk)
 {
 	uint8_t from, msg;
 	void *p = pk->data;
+	mobj_t *mo;
+	fixed_t oldx, oldy, oldz;
 	
 	from = ((uint8_t *)(pk->data))[pk->dataLength - 1];
 	msg = ReadUInt8((uint8_t**)&p);
@@ -168,18 +170,33 @@ void CL_ParsePacket(ENetPacket *pk)
 		case MSG_POS:
 		if(playeringame[from] && players[from].mo && players[from].mo->health)
 		{
-			P_UnsetThingPosition(players[from].mo);
-			players[from].mo->x = ReadInt32((int32_t**)&p);
-			players[from].mo->y = ReadInt32((int32_t**)&p);
-			players[from].mo->z = ReadInt32((int32_t**)&p);
-			players[from].mo->angle = ReadInt32((int32_t**)&p);
-			players[from].mo->momx = ReadInt32((int32_t**)&p);
-			players[from].mo->momy = ReadInt32((int32_t**)&p);
-			players[from].mo->momz = ReadInt32((int32_t**)&p);
-			players[from].mo->subsector = R_PointInSubsector(players[from].mo->x, players[from].mo->y);
-			players[from].mo->floorz = players[from].mo->subsector->sector->floorheight;
-			players[from].mo->ceilingz = players[from].mo->subsector->sector->ceilingheight;
-			P_SetThingPosition(players[from].mo);
+			mo = players[from].mo;
+			oldx = mo->x;
+			oldy = mo->y;
+			oldz = mo->z;
+
+			P_UnsetThingPosition(mo);
+
+			mo->x = ReadInt32((int32_t**)&p);
+			mo->y = ReadInt32((int32_t**)&p);
+			mo->z = ReadInt32((int32_t**)&p);
+			mo->angle = ReadInt32((int32_t**)&p);
+			mo->momx = ReadInt32((int32_t**)&p);
+			mo->momy = ReadInt32((int32_t**)&p);
+			mo->momz = ReadInt32((int32_t**)&p);
+			mo->subsector = R_PointInSubsector(mo->x, mo->y);
+			mo->floorz = mo->subsector->sector->floorheight;
+			mo->ceilingz = mo->subsector->sector->ceilingheight;
+
+			if(!P_CheckPosition(mo, mo->x, mo->y)) // We need to mak sure they aren't colliding with anything...
+			{
+				mo->x = oldx;
+				mo->y = oldy;
+				mo->z = oldz;
+				// And if they do, move them back to they're last "good" position.
+			}
+
+			P_SetThingPosition(mo);
 		}
 		break;
 
