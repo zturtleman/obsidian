@@ -55,6 +55,7 @@
 // Data.
 #include "sounds.h"
 
+boolean server, client;
 
 //
 // Animating textures and planes
@@ -707,7 +708,10 @@ P_CrossSpecialLine
 	
       case 52:
 	// EXIT!
-	G_ExitLevel ();
+    if (server)
+        P_DamageMobj(thing, thing, thing, 10000, 0);
+    else if (!client)
+	    G_ExitLevel ();
 	break;
 	
       case 53:
@@ -790,7 +794,10 @@ P_CrossSpecialLine
 	
       case 124:
 	// Secret EXIT
-	G_SecretExitLevel ();
+    if (server)
+        P_DamageMobj(thing, thing, thing, 10000, 0);
+    else if (!client)
+	    G_SecretExitLevel ();
 	break;
 		
       case 125:

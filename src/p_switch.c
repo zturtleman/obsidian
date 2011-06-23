@@ -43,6 +43,7 @@
 #include "doomstat.h"
 #include "r_state.h"
 
+boolean client, server;
 
 //
 // CHANGE THE TEXTURE OF A WALL SWITCH TO ITS OPPOSITE
@@ -360,8 +361,13 @@ P_UseSpecialLine
 	
       case 11:
 	// Exit level
+    if (server)
+        P_DamageMobj(thing, thing, thing, 10000, 0);
+    else if (!client)
+    {
 	P_ChangeSwitchTexture(line,0);
 	G_ExitLevel ();
+    }
 	break;
 	
       case 14:
@@ -432,8 +438,13 @@ P_UseSpecialLine
 	
       case 51:
 	// Secret EXIT
-	P_ChangeSwitchTexture(line,0);
-	G_SecretExitLevel ();
+    if (server)
+        P_DamageMobj(thing, thing, thing, 10000, 0);
+    else if (!client)
+    {
+	    P_ChangeSwitchTexture(line,0);
+	    G_SecretExitLevel ();
+    }
 	break;
 	
       case 55:
