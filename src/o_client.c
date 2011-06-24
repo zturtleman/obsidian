@@ -188,12 +188,12 @@ void CL_ParsePacket(ENetPacket *pk)
 			mo->floorz = mo->subsector->sector->floorheight;
 			mo->ceilingz = mo->subsector->sector->ceilingheight;
 
-			if(!P_CheckPosition(mo, mo->x, mo->y)) // We need to mak sure they aren't colliding with anything...
+			if(!P_CheckPosition(mo, mo->x, mo->y)) // We need to make sure they aren't colliding with anything...
 			{
 				mo->x = oldx;
 				mo->y = oldy;
 				mo->z = oldz;
-				// And if they do, move them back to they're last "good" position.
+				// And if they do, move them back to their last "good" position.
 			}
 
 			P_SetThingPosition(mo);
