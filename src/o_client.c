@@ -44,6 +44,10 @@ boolean client;
 
 ENetPeer *srvpeer;
 
+// Chat stuff, basically working around Doom's crappy message system. We need a better one.
+uint8_t chatindex = 0;
+char chatmsg[128];
+
 void CL_Connect (char *srv_hn)
 {
 	ENetAddress addr = { ENET_HOST_ANY, 11666 };
@@ -147,6 +151,31 @@ void CL_Loop(void)
 				break;
 		}
 	}
+
+	// Check for chat:
+	char chat_tmp;
+
+	while (chat_tmp = HU_dequeueChatChar())
+	{
+		if (chat_tmp == '\b' && chatindex > 0)
+		{
+			chatindex --;
+			chatmsg[chatindex] = 0;
+		}
+		else
+		{
+			chatmsg[chatindex] = chat_tmp;
+			chatindex = (chatindex % 128) + 1;
+		}
+	}
+
+	if (chatmsg[chatindex - 1] == '\r') 
+	{
+		printf("Debug: %s\n", chatmsg);
+		memset(chatmsg, 0, sizeof(chatmsg));
+		chatindex = 0;
+	}
+
 	return;
 }
 
