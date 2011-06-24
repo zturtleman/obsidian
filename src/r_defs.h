@@ -134,6 +134,8 @@ typedef	struct
     int			linecount;
     struct line_s**	lines;	// [linecount] size
     
+	boolean moveable;
+
 } sector_t;
 
 

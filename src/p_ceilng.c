@@ -195,6 +195,10 @@ EV_DoCeiling
 	if (sec->specialdata)
 	    continue;
 	
+    // Set this sector to moveable:
+    sec->moveable = true;
+    printf("EV_DoCeiling\n");
+
 	// new door thinker
 	rtn = 1;
 	ceiling = Z_Malloc (sizeof(*ceiling), PU_LEVSPEC, 0);

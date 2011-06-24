@@ -147,7 +147,6 @@ EV_DoPlat
     secnum = -1;
     rtn = 0;
 
-    
     //	Activate all <type> plats that are in_stasis
     switch(type)
     {
@@ -166,6 +165,9 @@ EV_DoPlat
 	if (sec->specialdata)
 	    continue;
 	
+    // Set sector to moveable:
+    sec->moveable = true;
+
 	// Find lowest & highest floors around sector
 	rtn = 1;
 	plat = Z_Malloc( sizeof(*plat), PU_LEVSPEC, 0);

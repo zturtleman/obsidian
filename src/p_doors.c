@@ -273,6 +273,9 @@ EV_DoDoor
 	if (sec->specialdata)
 	    continue;
 		
+    // Set sector to moveable:
+    sec->moveable = true;
+    printf("EV_DoDoor\n");
 	
 	// new door thinker
 	rtn = 1;
@@ -477,7 +480,9 @@ EV_VerticalDoor
 	break;
     }
 	
-    
+    sec->moveable = true;
+    printf("EV_VerticalDoor\n");
+
     // new door thinker
     door = Z_Malloc (sizeof(*door), PU_LEVSPEC, 0);
     P_AddThinker (&door->thinker);
