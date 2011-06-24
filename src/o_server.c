@@ -139,8 +139,10 @@ void SV_Loop (void)
 				{
 					case 0:
 						SV_DropClient(from, "timed out");
+						break;
 					case 1:
 						SV_DropClient(from, "client exited");
+						break;
 				}
 			}
 		}

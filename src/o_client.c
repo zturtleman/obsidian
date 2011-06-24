@@ -157,15 +157,16 @@ void CL_Loop(void)
 
 	while (chat_tmp = HU_dequeueChatChar())
 	{
-		if (chat_tmp == '\b' && chatindex > 0)
+		if (chat_tmp == '\b')
 		{
-			chatindex --;
+			if (chatindex > 0)
+				chatindex --;
 			chatmsg[chatindex] = 0;
 		}
 		else
 		{
 			chatmsg[chatindex] = chat_tmp;
-			chatindex = (chatindex % 128) + 1;
+			chatindex = (chatindex + 1) % 128;
 		}
 	}
 
