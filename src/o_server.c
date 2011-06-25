@@ -299,6 +299,11 @@ void SV_ParsePacket (ENetPacket *pk, ENetPeer *p)
 			clients[from].firstspawn = 1; // Hack! Ew! Gross!
 		break;
 
+		case MSG_CHAT:
+			printf("%i > %s\n", from, pkp);
+			resend = 1;
+			break;
+
 		default:
 			resend = 0;
 			break;

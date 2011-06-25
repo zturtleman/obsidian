@@ -157,7 +157,7 @@ void CL_Loop(void)
 
 	while (chat_tmp = HU_dequeueChatChar())
 	{
-		if (chat_tmp == '\b')
+		if (chat_tmp == '\b') // Remove backspaces, they suck.
 		{
 			if (chatindex > 0)
 				chatindex --;
@@ -170,9 +170,10 @@ void CL_Loop(void)
 		}
 	}
 
-	if (chatmsg[chatindex - 1] == '\r') 
+	if (chatmsg[chatindex - 1] == '\r') // Okay to send it out now:
 	{
-		printf("Debug: %s\n", chatmsg);
+		printf(">>> %s\n", chatmsg);
+		CL_SendChat(chatmsg);
 		memset(chatmsg, 0, sizeof(chatmsg));
 		chatindex = 0;
 	}
@@ -313,6 +314,17 @@ void CL_ParsePacket(ENetPacket *pk)
 			break;
 		}
 
+		case MSG_CHAT:
+		{
+			char *c = malloc(128);
+
+			printf("%i > %s\n", from, p);
+			sprintf(c, "%i > %s", from, p);
+			printf("debug: %s\n", c);
+			players[consoleplayer].message = c;
+			break;
+		}
+
 		default:
 			break;		
 	}
@@ -380,6 +392,17 @@ void CL_SendRespawn(int startnum)
 	WriteUInt8((uint8_t**)&p, MSG_RESPAWN);
 	if(startnum >= 0)
 		WriteInt8((int8_t**)&p, (int8_t)startnum);
+	enet_peer_send(srvpeer, 1, pk);
+	return;
+}
+
+void CL_SendChat(char *sending)
+{
+	ENetPacket *pk = enet_packet_create(NULL, strlen(sending) + 2, ENET_PACKET_FLAG_RELIABLE);
+	void *p = pk->data;
+
+	WriteUInt8((uint8_t**)&p, MSG_CHAT);
+	memcpy(p, sending, strlen(sending) + 1);
 	enet_peer_send(srvpeer, 1, pk);
 	return;
 }
