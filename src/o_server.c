@@ -164,6 +164,9 @@ int SV_FindEmptyClientNum(void)
 	return -1;
 }
 
+int d_map, d_episode;
+skill_t d_skill;
+
 void SV_ClientWelcome (client_t* cl)
 {
 	ENetPacket *pk = enet_packet_create(NULL, 32, ENET_PACKET_FLAG_RELIABLE);
@@ -173,12 +176,19 @@ void SV_ClientWelcome (client_t* cl)
 
 	playeringame[cl->id] = true;
 	cl->player->playerstate = PST_REBORN;
-	WriteUInt8((uint8_t**)&p, MSG_WELCOME); // put a greeting marker on it
-	WriteUInt8((uint8_t**)&p, cl->id); // client will set this to consoleplayer
 	for (i = 0; i < MAXPLAYERS; i++)
 		if(playeringame[i])
 			inGame |= 1 << i;
+
+	WriteUInt8((uint8_t**)&p, MSG_WELCOME); // put a greeting marker on it
+	WriteUInt8((uint8_t**)&p, (uint8_t)OBS_PROTO); // Protocol version
+	WriteUInt8((uint8_t**)&p, (uint8_t)gameepisode); // Game episode... for doom(1).wad
+	WriteUInt8((uint8_t**)&p, (uint8_t)gamemap); // Game map
+	WriteUInt8((uint8_t**)&p, (uint8_t)gameskill); // Game skill
+	WriteUInt8((uint8_t**)&p, (uint8_t)deathmatch); // Game mode
+	WriteUInt8((uint8_t**)&p, cl->id); // client will set this to consoleplayer
 	WriteUInt8((uint8_t**)&p, inGame);
+
 	enet_packet_resize(pk, (uint8_t*)p - (uint8_t*)pk->data);
 	enet_peer_send(cl->peer, 0, pk);
 	cl->type = CT_ACTIVE;

@@ -1264,10 +1264,14 @@ void D_DoomMain (void)
     }
     
     // get skill / episode / map from parms
-    startskill = sk_medium;
-    startepisode = 1;
-    startmap = 1;
-    autostart = false;
+    // But only when this isn't a client
+    if (!client)
+    {
+        startskill = sk_medium;
+        startepisode = 1;
+        startmap = 1;
+        autostart = false;
+    }
 
     //!
     // @arg <skill>

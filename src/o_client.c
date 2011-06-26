@@ -48,6 +48,9 @@ ENetPeer *srvpeer;
 uint8_t chatindex = 0;
 char chatmsg[128];
 
+int startmap, startepisode;
+skill_t startskill;
+
 void CL_Connect (char *srv_hn)
 {
 	ENetAddress addr = { ENET_HOST_ANY, 11666 };
@@ -97,9 +100,21 @@ void CL_Connect (char *srv_hn)
 			// Read message type
 			msgid = ReadUInt8((uint8_t**)&pkd);
 
+			uint8_t sv_proto;
+
 			// Make sure it's a welcome message
 			if (msgid == MSG_WELCOME)
 			{
+				if((sv_proto = ReadUInt8((uint8_t**)&pkd)) != OBS_PROTO) // Incompatible!
+					I_Error("Server protocol %i does not match client protocol %i\n", sv_proto, OBS_PROTO);
+
+				startepisode = ReadUInt8((uint8_t**)&pkd);
+				printf ("read %i\n", startepisode);
+				startmap = ReadUInt8((uint8_t**)&pkd);
+				printf ("read %i\n", startmap);
+				startskill = (skill_t) ReadUInt8((uint8_t**)&pkd);
+				printf ("read %i\n", startskill);
+				deathmatch = ReadUInt8((uint8_t**)&pkd);
 				localid = ReadUInt8((uint8_t**)&pkd);
 				inGameMask = ReadUInt8((uint8_t**)&pkd);
 				return;
