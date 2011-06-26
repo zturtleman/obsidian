@@ -277,9 +277,7 @@ static default_t extra_defaults_list[] =
     {"vanilla_demo_limit",          &vanilla_demo_limit, DEFAULT_INT, 0, 0},
     {"vanilla_zero_tag",          &vanilla_zero_tag, DEFAULT_INT, 0, 0},
     {"vanilla_keyboard_mapping",    &vanilla_keyboard_mapping, DEFAULT_INT, 0, 0},
-#ifdef FEATURE_MULTIPLAYER
     {"player_name",                 &net_player_name,          DEFAULT_STRING, 0, 0},
-#endif
     {"video_driver",                &video_driver,             DEFAULT_STRING, 0, 0},
     {"joystick_index",              &joystick_index, DEFAULT_INT, 0, 0},
     {"joystick_x_axis",             &joystick_x_axis, DEFAULT_INT, 0, 0},

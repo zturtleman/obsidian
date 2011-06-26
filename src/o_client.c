@@ -134,6 +134,8 @@ void CL_Disconnect (void)
 	return;
 }
 
+char *player_name;
+
 void CL_Loop(void)
 {
 	ENetEvent event;

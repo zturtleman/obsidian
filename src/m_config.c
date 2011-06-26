@@ -189,6 +189,7 @@ extern int	showMessages;
 // machine-independent sound params
 extern	int	numChannels;
 
+extern char *player_name;
 
 extern char*	chat_macros[];
 
@@ -715,14 +716,12 @@ static default_t extra_defaults_list[] =
 
     CONFIG_VARIABLE_STRING(video_driver,           video_driver),
 
-/*
     //!
     // Name to use in network games for identification.  This is only 
     // used on the "waiting" screen while waiting for the game to start.
     //
 
-    CONFIG_VARIABLE_STRING(player_name,            net_player_name),
-*/
+    CONFIG_VARIABLE_STRING(player_name,            player_name),
 
     //!
     // Joystick number to use; '0' is the first joystick.  A negative
