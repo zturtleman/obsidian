@@ -1095,10 +1095,8 @@ void P_NumberMobjs (void)
 
 mobj_t *P_FindMobjById (int id)
 {
-	int i;
 	thinker_t *current;
 
-	i = 1;
 	current = thinkercap.next;
 
 	while (current != &thinkercap)
@@ -1112,4 +1110,50 @@ mobj_t *P_FindMobjById (int id)
 	}
 
 	return NULL; // Nothing found with this id, oh well.
+}
+
+// [tm512] P_MakeMobjBuffer
+// Cycle the thinker list, creating an array of bitmasks saying whether the mobj is there anymore or not.
+// Sent to clients upon connect so they can remove items that aren't still on the map.
+
+#define MAX_MOBJ_BUFFER 128 // Able to store info for up to 1024 mobjs
+
+uint8_t *P_MakeMobjBuffer (void)
+{
+	int i, j;
+	thinker_t *current;
+	uint8_t *mobjbuf = malloc(MAX_MOBJ_BUFFER);
+
+	current = thinkercap.next;
+	i = 1;
+	j = 0;
+	memset(mobjbuf, 0, MAX_MOBJ_BUFFER);
+
+	while (current != &thinkercap)
+	{
+		if (current->function.acp1 == (actionf_p1)P_MobjThinker && ((mobj_t*)current)->type != MT_PLAYER)
+		{
+			if(((mobj_t*)current)->netid == i) // The mobj for "i" is still here
+			{
+				mobjbuf[j] |= 1 << (i % 8);
+				current = current->next;
+			}
+
+			j += (!(++i % 8));
+
+			if(j == MAX_MOBJ_BUFFER - 1)
+				I_Error("P_MakeMobjBuffer: Buffer overflow\n");
+		}
+		else
+			current = current->next;
+	}
+/*
+	void *p = mobjbuf;
+	for (i = 0; i < 63; i++)
+		printf("%i ", ReadUInt8((uint8_t**)&p));
+	printf("\n");
+*/
+	free(mobjbuf);
+	mobjbuf = NULL;
+	return mobjbuf;
 }

@@ -173,6 +173,7 @@ void SV_ClientWelcome (client_t* cl)
 	void *p = pk->data;
 	uint8_t inGame = 0;
 	uint8_t i;
+	P_MakeMobjBuffer();
 
 	playeringame[cl->id] = true;
 	cl->player->playerstate = PST_REBORN;
