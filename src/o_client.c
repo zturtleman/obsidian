@@ -53,6 +53,7 @@ skill_t startskill;
 
 extern uint8_t *readmobjbuf;	
 uint8_t *readmobjbuf;
+int prndindex;
 
 void CL_Connect (char *srv_hn)
 {
@@ -111,6 +112,7 @@ void CL_Connect (char *srv_hn)
 				if((sv_proto = ReadUInt8((uint8_t**)&pkd)) != OBS_PROTO) // Incompatible!
 					I_Error("Server protocol %i does not match client protocol %i\n", sv_proto, OBS_PROTO);
 
+				prndindex = ReadInt32((int32_t**)&pkd);
 				startepisode = ReadUInt8((uint8_t**)&pkd);
 				startmap = ReadUInt8((uint8_t**)&pkd);
 				startskill = (skill_t) ReadUInt8((uint8_t**)&pkd);

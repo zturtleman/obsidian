@@ -57,7 +57,8 @@ static const unsigned char rndtable[256] = {
 };
 
 int	rndindex = 0;
-int	prndindex = 0;
+extern int	prndindex;
+int prndindex = 0;
 
 // Which one is deterministic?
 int P_Random (void)

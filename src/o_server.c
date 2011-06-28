@@ -166,6 +166,7 @@ int SV_FindEmptyClientNum(void)
 
 int d_map, d_episode;
 skill_t d_skill;
+int prndindex;
 uint8_t *P_MakeMobjBuffer (void);
 
 void SV_ClientWelcome (client_t* cl)
@@ -183,6 +184,8 @@ void SV_ClientWelcome (client_t* cl)
 
 	WriteUInt8((uint8_t**)&p, MSG_WELCOME); // put a greeting marker on it
 	WriteUInt8((uint8_t**)&p, (uint8_t)OBS_PROTO); // Protocol version
+	WriteInt32((int32_t**)&p, prndindex); // Random Index
+	printf ("sending %i as random index\n", prndindex);
 	WriteUInt8((uint8_t**)&p, (uint8_t)gameepisode); // Game episode... for doom(1).wad
 	WriteUInt8((uint8_t**)&p, (uint8_t)gamemap); // Game map
 	WriteUInt8((uint8_t**)&p, (uint8_t)gameskill); // Game skill
