@@ -31,6 +31,7 @@
 #include "enet/enet.h"
 
 #define MAXPLAYERNAME 10
+#define MAX_MOBJ_BUFFER 128 // Able to store info for up to 1024 mobjs
 #define OBS_PROTO 1
 
 extern boolean server;

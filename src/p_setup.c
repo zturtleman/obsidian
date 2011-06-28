@@ -750,6 +750,8 @@ static void P_LoadReject(int lumpnum)
 //
 
 void P_NumberMobjs (void);
+void P_ReadMobjBuffer (uint8_t *mobjbuf);
+uint8_t *readmobjbuf;
 boolean client, server;
 
 void
@@ -823,6 +825,8 @@ P_SetupLevel
     P_LoadThings (lumpnum+ML_THINGS);
     if(client || server)
         P_NumberMobjs();
+    if(client)
+        P_ReadMobjBuffer(readmobjbuf);
     
     // if deathmatch, randomly spawn the active players
     if (deathmatch)

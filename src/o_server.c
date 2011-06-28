@@ -166,14 +166,14 @@ int SV_FindEmptyClientNum(void)
 
 int d_map, d_episode;
 skill_t d_skill;
+uint8_t *P_MakeMobjBuffer (void);
 
 void SV_ClientWelcome (client_t* cl)
 {
-	ENetPacket *pk = enet_packet_create(NULL, 32, ENET_PACKET_FLAG_RELIABLE);
+	ENetPacket *pk = enet_packet_create(NULL, 32 + MAX_MOBJ_BUFFER, ENET_PACKET_FLAG_RELIABLE);
 	void *p = pk->data;
 	uint8_t inGame = 0;
 	uint8_t i;
-	P_MakeMobjBuffer();
 
 	playeringame[cl->id] = true;
 	cl->player->playerstate = PST_REBORN;
@@ -189,6 +189,8 @@ void SV_ClientWelcome (client_t* cl)
 	WriteUInt8((uint8_t**)&p, (uint8_t)deathmatch); // Game mode
 	WriteUInt8((uint8_t**)&p, cl->id); // client will set this to consoleplayer
 	WriteUInt8((uint8_t**)&p, inGame);
+	memcpy(p, P_MakeMobjBuffer(), MAX_MOBJ_BUFFER);
+	p += MAX_MOBJ_BUFFER;
 
 	enet_packet_resize(pk, (uint8_t*)p - (uint8_t*)pk->data);
 	enet_peer_send(cl->peer, 0, pk);

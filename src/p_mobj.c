@@ -1079,7 +1079,6 @@ void P_NumberMobjs (void)
 	{
 		if (current->function.acp1 == (actionf_p1)P_MobjThinker && ((mobj_t*)current)->type != MT_PLAYER)
 		{
-	//		printf("%u as %i\n", current, i); //debug
 			((mobj_t*)current)->netid = i;
 			i ++;
 		}
@@ -1116,8 +1115,6 @@ mobj_t *P_FindMobjById (int id)
 // Cycle the thinker list, creating an array of bitmasks saying whether the mobj is there anymore or not.
 // Sent to clients upon connect so they can remove items that aren't still on the map.
 
-#define MAX_MOBJ_BUFFER 128 // Able to store info for up to 1024 mobjs
-
 uint8_t *P_MakeMobjBuffer (void)
 {
 	int i, j;
@@ -1147,13 +1144,45 @@ uint8_t *P_MakeMobjBuffer (void)
 		else
 			current = current->next;
 	}
-/*
+
 	void *p = mobjbuf;
 	for (i = 0; i < 63; i++)
 		printf("%i ", ReadUInt8((uint8_t**)&p));
 	printf("\n");
-*/
-	free(mobjbuf);
-	mobjbuf = NULL;
+
 	return mobjbuf;
+}
+
+// [tm512] P_ReadMobjBuffer
+// Cycle the thinkers list, removing items that shouldn't be there anymore
+// Used by clients on a buffer sent to them with P_MakeMobjBuffer
+
+void P_ReadMobjBuffer (uint8_t *mobjbuf)
+{
+	int i, j;
+	thinker_t *current, *next;
+
+	current = thinkercap.next;
+	i = 1;
+	j = 0;
+
+	while(current != &thinkercap)
+	{
+		next = current->next;
+
+		if (current->function.acp1 == (actionf_p1)P_MobjThinker && ((mobj_t*)current)->type != MT_PLAYER)
+		{
+			if(((mobj_t*)current)->netid == i && !(mobjbuf[j] & 1 << (i % 8)))
+			{
+				P_RemoveMobj((mobj_t*)current);
+				printf("Remove mobj %i in byte %i\n", i, j);
+			}
+
+			j += (!(++i % 8));
+		}
+
+		current = next;
+	}
+
+	return;
 }

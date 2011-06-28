@@ -51,6 +51,9 @@ char chatmsg[128];
 int startmap, startepisode;
 skill_t startskill;
 
+extern uint8_t *readmobjbuf;	
+uint8_t *readmobjbuf;
+
 void CL_Connect (char *srv_hn)
 {
 	ENetAddress addr = { ENET_HOST_ANY, 11666 };
@@ -109,14 +112,13 @@ void CL_Connect (char *srv_hn)
 					I_Error("Server protocol %i does not match client protocol %i\n", sv_proto, OBS_PROTO);
 
 				startepisode = ReadUInt8((uint8_t**)&pkd);
-				printf ("read %i\n", startepisode);
 				startmap = ReadUInt8((uint8_t**)&pkd);
-				printf ("read %i\n", startmap);
 				startskill = (skill_t) ReadUInt8((uint8_t**)&pkd);
-				printf ("read %i\n", startskill);
 				deathmatch = ReadUInt8((uint8_t**)&pkd);
 				localid = ReadUInt8((uint8_t**)&pkd);
 				inGameMask = ReadUInt8((uint8_t**)&pkd);
+				readmobjbuf = malloc(MAX_MOBJ_BUFFER);
+				memcpy(readmobjbuf, pkd, MAX_MOBJ_BUFFER);
 				return;
 			}
 		}
