@@ -134,7 +134,16 @@ typedef	struct
     int			linecount;
     struct line_s**	lines;	// [linecount] size
     
-	boolean moveable;
+    enum
+    {
+        spt_none,
+        spt_ceiling,
+        spt_door,
+		spt_vdoor,
+        spt_floor,
+        spt_stair,
+        spt_plat
+    } specialtype;
 
 } sector_t;
 

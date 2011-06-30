@@ -165,8 +165,8 @@ EV_DoPlat
 	if (sec->specialdata)
 	    continue;
 	
-    // Set sector to moveable:
-    sec->moveable = true;
+    sec->specialtype = spt_plat;
+	printf("EV_DoPlat: %i\n", secnum);
 
 	// Find lowest & highest floors around sector
 	rtn = 1;

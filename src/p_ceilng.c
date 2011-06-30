@@ -195,9 +195,8 @@ EV_DoCeiling
 	if (sec->specialdata)
 	    continue;
 	
-    // Set this sector to moveable:
-    sec->moveable = true;
-    printf("EV_DoCeiling\n");
+    sec->specialtype = spt_ceiling;
+    printf("EV_DoCeiling: %i\n", secnum);
 
 	// new door thinker
 	rtn = 1;

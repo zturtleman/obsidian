@@ -276,9 +276,9 @@ EV_DoFloor
 	if (sec->specialdata)
 	    continue;
 	
-    // Set moveable to true:
-    sec->moveable = true;
-    printf("EV_DoFloor\n");
+    sec->specialtype = spt_floor;;
+    printf("EV_DoFloor: %i\n", secnum);
+
 	// new floor thinker
 	rtn = 1;
 	floor = Z_Malloc (sizeof(*floor), PU_LEVSPEC, 0);
@@ -482,8 +482,8 @@ EV_BuildStairs
 	if (sec->specialdata)
 	    continue;
 	
-    // Moveable:
-    sec->moveable = true;
+    sec->specialtype = spt_stair;
+	printf("EV_BuildStairs: %i\n", secnum);
 
 	// new floor thinker
 	rtn = 1;
