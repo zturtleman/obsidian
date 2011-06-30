@@ -173,6 +173,7 @@ void SV_ClientWelcome (client_t* cl)
 {
 	ENetPacket *pk = enet_packet_create(NULL, 32 + MAX_MOBJ_BUFFER, ENET_PACKET_FLAG_RELIABLE);
 	void *p = pk->data;
+	void *mobjbuf = P_MakeMobjBuffer();
 	uint8_t inGame = 0;
 	uint8_t i;
 
@@ -185,15 +186,15 @@ void SV_ClientWelcome (client_t* cl)
 	WriteUInt8((uint8_t**)&p, MSG_WELCOME); // put a greeting marker on it
 	WriteUInt8((uint8_t**)&p, (uint8_t)OBS_PROTO); // Protocol version
 	WriteInt32((int32_t**)&p, prndindex); // Random Index
-	printf ("sending %i as random index\n", prndindex);
 	WriteUInt8((uint8_t**)&p, (uint8_t)gameepisode); // Game episode... for doom(1).wad
 	WriteUInt8((uint8_t**)&p, (uint8_t)gamemap); // Game map
 	WriteUInt8((uint8_t**)&p, (uint8_t)gameskill); // Game skill
 	WriteUInt8((uint8_t**)&p, (uint8_t)deathmatch); // Game mode
 	WriteUInt8((uint8_t**)&p, cl->id); // client will set this to consoleplayer
 	WriteUInt8((uint8_t**)&p, inGame);
-	memcpy(p, P_MakeMobjBuffer(), MAX_MOBJ_BUFFER);
+	memcpy(p, mobjbuf, MAX_MOBJ_BUFFER);
 	p += MAX_MOBJ_BUFFER;
+	free(mobjbuf);
 
 	enet_packet_resize(pk, (uint8_t*)p - (uint8_t*)pk->data);
 	enet_peer_send(cl->peer, 0, pk);
