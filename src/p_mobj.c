@@ -1184,5 +1184,8 @@ void P_ReadMobjBuffer (uint8_t *mobjbuf)
 		current = next;
 	}
 
+	free(mobjbuf);
+	mobjbuf = NULL;
+
 	return;
 }
