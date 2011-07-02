@@ -100,6 +100,17 @@ typedef struct
 // The SECTORS record, at runtime.
 // Stores things/mobjs.
 //
+
+typedef enum
+{
+    spt_none,
+    spt_ceiling,
+    spt_door,
+    spt_floor,
+    spt_stair,
+    spt_plat
+} specialtype_e;
+
 typedef	struct
 {
     fixed_t	floorheight;
@@ -134,16 +145,7 @@ typedef	struct
     int			linecount;
     struct line_s**	lines;	// [linecount] size
     
-    enum
-    {
-        spt_none,
-        spt_ceiling,
-        spt_door,
-		spt_vdoor,
-        spt_floor,
-        spt_stair,
-        spt_plat
-    } specialtype;
+    specialtype_e specialtype;
 
 } sector_t;
 

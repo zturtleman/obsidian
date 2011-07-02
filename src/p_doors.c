@@ -479,7 +479,7 @@ EV_VerticalDoor
 	break;
     }
 	
-    sec->specialtype = spt_vdoor;
+    sec->specialtype = spt_door;
     printf("EV_VerticalDoor: %i\n", secnum);
 
     // new door thinker
