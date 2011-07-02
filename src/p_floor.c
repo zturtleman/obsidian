@@ -482,7 +482,7 @@ EV_BuildStairs
 	if (sec->specialdata)
 	    continue;
 	
-    sec->specialtype = spt_stair;
+    sec->specialtype = spt_floor;
 	printf("EV_BuildStairs: %i\n", secnum);
 
 	// new floor thinker

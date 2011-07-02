@@ -107,7 +107,6 @@ typedef enum
     spt_ceiling,
     spt_door,
     spt_floor,
-    spt_stair,
     spt_plat
 } specialtype_e;
 
