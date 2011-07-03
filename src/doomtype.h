@@ -111,7 +111,7 @@ typedef uint8_t byte;
 	// then merge the data together.
 	// Or we could just read byte by byte.
 
-	#define BP_READ(w,x) static __OBSIDIAN_INLINE x __OBSIDIAN_FORCEINLINE BP_MERGE(Read,w)(const x** const Ptr)\
+	#define BP_READ(w,x) static __OBSIDIAN_INLINE x __OBSIDIAN_FORCEINLINE BP_MERGE(Read,w)(x** Ptr)\
 	{\
 		x Ret = 0;\
 		uint8_t* p8;\
@@ -129,7 +129,7 @@ typedef uint8_t byte;
 	}
 #else
 	/* Normal Pointer Access */
-	#define BP_READ(w,x) static __OBSIDIAN_INLINE x __OBSIDIAN_FORCEINLINE BP_MERGE(Read,w)(const x** const Ptr)\
+	#define BP_READ(w,x) static __OBSIDIAN_INLINE x __OBSIDIAN_FORCEINLINE BP_MERGE(Read,w)(x** Ptr)\
 	{\
 		x Ret;\
 		\
@@ -149,7 +149,7 @@ BP_READ(UInt8,uint8_t)
 BP_READ(UInt16,uint16_t)
 BP_READ(UInt32,uint32_t)
 
-#define BP_WRITE(w,x) static __OBSIDIAN_INLINE void __OBSIDIAN_FORCEINLINE BP_MERGE(Write,w)(x** const Ptr, const x Val)\
+#define BP_WRITE(w,x) static __OBSIDIAN_INLINE void __OBSIDIAN_FORCEINLINE BP_MERGE(Write,w)(x** Ptr, x Val)\
 {\
 	if (!Ptr || !(*Ptr))\
 		return;\
