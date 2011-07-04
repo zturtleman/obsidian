@@ -629,5 +629,7 @@ void *SV_MakeSectorBuffer (void)
 			WriteInt32((int32_t**)&p, sectors[i].ceilingheight);
 		}
 
+	WriteInt8((int8_t**)&p, -1); // End of buffer
+
 	return secbuf;
 }
