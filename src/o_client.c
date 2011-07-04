@@ -443,8 +443,10 @@ void *CL_ReadSectorBuffer (void *secbuf)
 
 	while ((secnum = ReadInt32((int32_t**)&secbuf)) >= 0) // Read until we reach the end, -1
 	{
+		printf ("CL_ReadSectorBuffer: secnum %i\n", secnum);
 		if(spec = (specialtype_e)ReadUInt8((uint8_t**)&secbuf)) // Sector has a special
 		{
+			printf("CL_ReadSectorBuffer: spec %i\n", spec);
 			switch(spec)
 			{
 				case spt_ceiling:
@@ -453,6 +455,7 @@ void *CL_ReadSectorBuffer (void *secbuf)
 					P_AddThinker (&ceiling->thinker);
 					sectors[secnum].specialdata = ceiling;
 					ceiling->thinker.function.acp1 = (actionf_p1)T_MoveCeiling;
+					ceiling->sector = &sectors[secnum];
 					ceiling->type = (ceiling_e)ReadUInt8((uint8_t**)&secbuf);
 					ceiling->bottomheight = (fixed_t)ReadInt32((int32_t**)&secbuf);
 					ceiling->topheight = (fixed_t)ReadInt32((int32_t**)&secbuf);
