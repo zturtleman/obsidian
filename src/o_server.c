@@ -37,6 +37,7 @@
 #include "r_main.h"
 #include "p_local.h"
 #include "p_pspr.h"
+#include "p_spec.h"
 #include "m_argv.h"
 
 #include "o_server.h"
@@ -171,7 +172,9 @@ uint8_t *P_MakeMobjBuffer (void);
 
 void SV_ClientWelcome (client_t* cl)
 {
-	ENetPacket *pk = enet_packet_create(NULL, 32 + MAX_MOBJ_BUFFER, ENET_PACKET_FLAG_RELIABLE);
+	void *secbuf = SV_MakeSectorBuffer();
+	int secbuflen = ReadInt32((int32_t**)&secbuf);
+	ENetPacket *pk = enet_packet_create(NULL, 32 + MAX_MOBJ_BUFFER + secbuflen, ENET_PACKET_FLAG_RELIABLE);
 	void *p = pk->data;
 	void *mobjbuf = P_MakeMobjBuffer();
 	uint8_t inGame = 0;
@@ -191,10 +194,15 @@ void SV_ClientWelcome (client_t* cl)
 	WriteUInt8((uint8_t**)&p, (uint8_t)gameskill); // Game skill
 	WriteUInt8((uint8_t**)&p, (uint8_t)deathmatch); // Game mode
 	WriteUInt8((uint8_t**)&p, cl->id); // client will set this to consoleplayer
-	WriteUInt8((uint8_t**)&p, inGame);
-	memcpy(p, mobjbuf, MAX_MOBJ_BUFFER);
+	WriteUInt8((uint8_t**)&p, inGame); // Bit mask for which players are in game
+
+	memcpy(p, mobjbuf, MAX_MOBJ_BUFFER); // Bit masks for which items have been removed
 	p += MAX_MOBJ_BUFFER;
 	free(mobjbuf);
+
+	memcpy(p, secbuf, secbuflen); // Sector state information
+	p += secbuflen;
+	free(secbuf - 4);
 
 	enet_packet_resize(pk, (uint8_t*)p - (uint8_t*)pk->data);
 	enet_peer_send(cl->peer, 0, pk);
@@ -493,4 +501,133 @@ int SV_ClientNumForPeer(ENetPeer *p)
 			return i;
 	}
 	return -1;
+}
+
+// Loop through all sectors, if they have a special, write info about them out to a buffer.
+void *SV_MakeSectorBuffer (void)
+{
+	int i, j; // i is the iterator, j is the memory to allocate to secbuf
+	void *secbuf, *p;
+
+	for (i = 0, j = 0; i < numsectors; i++)
+		if(sectors[i].specialtype) 
+		{
+			// For each moving sector, allocate 13 bytes for the sector number,
+			// specialtype, floorheight, ceilingheight, and if the sector has it,
+			// enough room for to write enough info for specialdata.
+			j += 13;
+
+			if (!sectors[i].specialdata)
+				continue;
+
+			switch (sectors[i].specialtype)
+			{
+				case spt_ceiling:
+				j += 20;
+				break;
+
+				case spt_door:
+				j += 18;
+				break;
+
+				case spt_floor:
+				j += 17;
+				break;
+
+				case spt_plat:
+				j += 28;
+				break;
+
+				default:
+				I_Error ("Unknown specialtype %i at sector %i\n", sectors[i].specialdata, i);
+				break;
+			}
+		}
+
+	// allocate j, plus one for a 8-bit signed integer containing -1, which specifies the end of the buffer.
+	// Also allocate 4 bytes for putting j into the buffer, so we know how big the buffer is.
+	secbuf = malloc(j + 5);
+	p = secbuf; // Do not modify secbuf.
+	printf ("SV_MakeSectorBuffer: Allocated %i bytes\n", j+1);
+	WriteInt32((int32_t**)&p, j+1);
+
+	for (i = 0, j = 0; i < numsectors; i++)
+		if(sectors[i].specialtype)
+		{
+			WriteInt32((int32_t**)&p, i); // Sector number
+			WriteUInt8((uint8_t**)&p, (sectors[i].specialdata) ? sectors[i].specialtype : 0); // Sector type, 0 if it's not moving
+
+			if(sectors[i].specialdata)
+			{
+				switch(sectors[i].specialtype)
+				{
+					case spt_ceiling:
+					{
+						ceiling_t* ceil = (ceiling_t*)sectors[i].specialdata;
+
+						WriteUInt8((uint8_t**)&p, (uint8_t)ceil->type);
+						WriteInt32((int32_t**)&p, (int32_t)ceil->bottomheight);
+						WriteInt32((int32_t**)&p, (int32_t)ceil->topheight);
+						WriteInt32((int32_t**)&p, (int32_t)ceil->speed);
+						WriteUInt8((uint8_t**)&p, (uint8_t)ceil->crush);
+						WriteInt8((int8_t**)&p, (int8_t)ceil->direction);
+						WriteInt32((int32_t**)&p, (int32_t)ceil->tag);
+						WriteInt8((int8_t**)&p, (int8_t)ceil->olddirection);
+						break;
+					}
+
+					case spt_door:
+					{
+						vldoor_t *door = (vldoor_t*)sectors[i].specialdata;
+
+						WriteUInt8((uint8_t**)&p, (uint8_t)door->type);
+						WriteInt32((int32_t**)&p, (int32_t)door->topheight);
+						WriteInt32((int32_t**)&p, (int32_t)door->speed);
+						WriteInt8((int8_t**)&p, (int8_t)door->direction);
+						WriteInt32((int32_t**)&p, (int32_t)door->topwait);
+						WriteInt32((int32_t**)&p, (int32_t)door->topcountdown);
+						break;
+					}
+
+					case spt_floor:
+					{
+						floormove_t *floor = (floormove_t*)sectors[i].specialdata;
+
+						WriteUInt8((uint8_t**)&p, (uint8_t)floor->type);
+						WriteUInt8((uint8_t**)&p, (uint8_t)floor->crush);
+						WriteInt8((int8_t**)&p, (int8_t)floor->direction);
+						WriteInt32((int32_t**)&p, (int32_t)floor->newspecial);
+						WriteInt16((int16_t**)&p, (int16_t)floor->texture);
+						WriteInt32((int32_t**)&p, (int32_t)floor->floordestheight);
+						WriteInt32((int32_t**)&p, (int32_t)floor->speed);
+						break;
+					}
+
+					case spt_plat:
+					{
+						plat_t *plat = (plat_t*)sectors[i].specialdata;
+
+						WriteUInt8((uint8_t**)&p, (uint8_t)plat->type);
+						WriteInt32((int32_t**)&p, (int32_t)plat->speed);
+						WriteInt32((int32_t**)&p, (int32_t)plat->high);
+						WriteInt32((int32_t**)&p, (int32_t)plat->low);
+						WriteInt32((int32_t**)&p, (int32_t)plat->wait);
+						WriteInt32((int32_t**)&p, (int32_t)plat->count);
+						WriteUInt8((uint8_t**)&p, (uint8_t)plat->status);
+						WriteUInt8((uint8_t**)&p, (uint8_t)plat->oldstatus);
+						WriteUInt8((uint8_t**)&p, (uint8_t)plat->crush);
+						WriteInt32((int32_t**)&p, (int32_t)plat->tag);
+						break;
+					}
+
+					default:
+					break;
+				}
+			}
+
+			WriteInt32((int32_t**)&p, sectors[i].floorheight);
+			WriteInt32((int32_t**)&p, sectors[i].ceilingheight);
+		}
+
+	return secbuf;
 }

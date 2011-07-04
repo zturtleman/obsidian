@@ -47,6 +47,7 @@ void SV_SendWeapon(player_t *player, weapontype_t weapon);
 void SV_DamageMobj(mobj_t *target, int damage);
 void SV_KillMobj(mobj_t *source, mobj_t *target);
 int SV_ClientNumForPeer(ENetPeer *p);
+void *SV_MakeSectorBuffer(void);
 
 // Variables
 
