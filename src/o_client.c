@@ -33,8 +33,10 @@
 #include "r_defs.h"
 #include "r_main.h"
 #include "p_local.h"
+#include "p_spec.h"
 #include "deh_main.h"
 #include "p_inter.h"
+#include "z_zone.h"
 
 #include "o_client.h"
 #include "o_common.h"
@@ -52,7 +54,9 @@ int startmap, startepisode;
 skill_t startskill;
 
 extern uint8_t *readmobjbuf;	
+extern void *readsecbuf;
 uint8_t *readmobjbuf;
+void *readsecbuf;
 int prndindex;
 
 void CL_Connect (char *srv_hn)
@@ -121,6 +125,10 @@ void CL_Connect (char *srv_hn)
 				inGameMask = ReadUInt8((uint8_t**)&pkd);
 				readmobjbuf = malloc(MAX_MOBJ_BUFFER);
 				memcpy(readmobjbuf, pkd, MAX_MOBJ_BUFFER);
+				pkd += MAX_MOBJ_BUFFER;
+				readsecbuf = malloc(((int*)pkd)[0]);
+				memcpy(readsecbuf, pkd, ((int*)pkd)[0]);
+				pkd += ((int*)pkd)[0]; // Read the sector data, then increment.
 				return;
 			}
 		}
@@ -426,4 +434,43 @@ void CL_SendChat(char *sending)
 	memcpy(p, sending, strlen(sending) + 1);
 	enet_peer_send(srvpeer, 1, pk);
 	return;
+}
+
+void *CL_ReadSectorBuffer (void *secbuf)
+{
+	int secnum;
+	specialtype_e spec;
+
+	while ((secnum = ReadInt32((int32_t**)&secbuf)) >= 0) // Read until we reach the end, -1
+	{
+		if(spec = (specialtype_e)ReadUInt8((uint8_t**)&secbuf)) // Sector has a special
+		{
+			switch(spec)
+			{
+				case spt_ceiling:
+				{
+					ceiling_t *ceiling = Z_Malloc (sizeof(*ceiling), PU_LEVSPEC, 0);
+					P_AddThinker (&ceiling->thinker);
+					sectors[secnum].specialdata = ceiling;
+					ceiling->thinker.function.acp1 = (actionf_p1)T_MoveCeiling;
+					ceiling->type = (ceiling_e)ReadUInt8((uint8_t**)&secbuf);
+					ceiling->bottomheight = (fixed_t)ReadInt32((int32_t**)&secbuf);
+					ceiling->topheight = (fixed_t)ReadInt32((int32_t**)&secbuf);
+					ceiling->speed = (fixed_t)ReadInt32((int32_t**)&secbuf);
+					ceiling->crush = (boolean)ReadUInt8((uint8_t**)&secbuf);
+					ceiling->direction = ReadInt8((int8_t**)&secbuf);
+					ceiling->tag = ReadInt32((int32_t**)&secbuf);
+					ceiling->olddirection = ReadInt8((int8_t**)&secbuf);
+					break;
+				}
+				default:
+				printf ("read sector type %i\n", spec);
+				break;
+			}
+		}
+		sectors[secnum].floorheight = (fixed_t)ReadInt32((int32_t**)&secbuf);
+		sectors[secnum].ceilingheight = (fixed_t)ReadInt32((int32_t**)&secbuf);
+	}
+
+	return secbuf;
 }

@@ -173,7 +173,8 @@ uint8_t *P_MakeMobjBuffer (void);
 void SV_ClientWelcome (client_t* cl)
 {
 	void *secbuf = SV_MakeSectorBuffer();
-	int secbuflen = ReadInt32((int32_t**)&secbuf);
+	int secbuflen = ((int*)secbuf)[0];
+	printf ("secbuflen = %i\n", secbuflen);
 	ENetPacket *pk = enet_packet_create(NULL, 32 + MAX_MOBJ_BUFFER + secbuflen, ENET_PACKET_FLAG_RELIABLE);
 	void *p = pk->data;
 	void *mobjbuf = P_MakeMobjBuffer();
@@ -202,7 +203,7 @@ void SV_ClientWelcome (client_t* cl)
 
 	memcpy(p, secbuf, secbuflen); // Sector state information
 	p += secbuflen;
-	free(secbuf - 4);
+	free(secbuf);
 
 	enet_packet_resize(pk, (uint8_t*)p - (uint8_t*)pk->data);
 	enet_peer_send(cl->peer, 0, pk);
@@ -544,12 +545,13 @@ void *SV_MakeSectorBuffer (void)
 			}
 		}
 
-	// allocate j, plus one for a 8-bit signed integer containing -1, which specifies the end of the buffer.
+	// allocate j, plus 4 for an integer containing -1, which specifies the end of the buffer.
 	// Also allocate 4 bytes for putting j into the buffer, so we know how big the buffer is.
-	secbuf = malloc(j + 5);
+	j += 8;
+	secbuf = malloc(j);
 	p = secbuf; // Do not modify secbuf.
-	printf ("SV_MakeSectorBuffer: Allocated %i bytes\n", j+1);
-	WriteInt32((int32_t**)&p, j+1);
+	printf ("SV_MakeSectorBuffer: Allocated %i bytes\n", j);
+	WriteInt32((int32_t**)&p, j);
 
 	for (i = 0, j = 0; i < numsectors; i++)
 		if(sectors[i].specialtype)
@@ -625,11 +627,11 @@ void *SV_MakeSectorBuffer (void)
 				}
 			}
 
-			WriteInt32((int32_t**)&p, sectors[i].floorheight);
-			WriteInt32((int32_t**)&p, sectors[i].ceilingheight);
+			WriteInt32((int32_t**)&p, (int32_t)sectors[i].floorheight);
+			WriteInt32((int32_t**)&p, (int32_t)sectors[i].ceilingheight);
 		}
 
-	WriteInt8((int8_t**)&p, -1); // End of buffer
+	WriteInt32((int32_t**)&p, -1); // End of buffer
 
 	return secbuf;
 }

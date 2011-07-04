@@ -48,6 +48,7 @@
 
 #include "doomstat.h"
 
+#include "o_client.h"
 
 void	P_SpawnMapThing (mapthing_t*	mthing);
 
@@ -752,6 +753,7 @@ static void P_LoadReject(int lumpnum)
 void P_NumberMobjs (void);
 void P_ReadMobjBuffer (uint8_t *mobjbuf);
 uint8_t *readmobjbuf;
+void *readsecbuf;
 boolean client, server;
 
 void
@@ -826,7 +828,10 @@ P_SetupLevel
     if(client || server)
         P_NumberMobjs();
     if(client)
+	{
         P_ReadMobjBuffer(readmobjbuf);
+		CL_ReadSectorBuffer(readsecbuf + 4);
+	}
     
     // if deathmatch, randomly spawn the active players
     if (deathmatch)
