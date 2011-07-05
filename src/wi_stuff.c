@@ -1582,6 +1582,7 @@ void WI_checkForAccelerate(void)
 }
 
 
+boolean client, server;
 
 // Updates stuff each tick
 void WI_Ticker(void)
@@ -1598,7 +1599,10 @@ void WI_Ticker(void)
 	  S_ChangeMusic(mus_inter, true); 
     }
 
-    WI_checkForAccelerate();
+    if(!client && !server) // [tm512] Don't let anyone advance intermission in a netgame.
+        WI_checkForAccelerate();
+	else if ((client || server) && bcnt >= TICRATE * 5) // Automagically proceed after 5 seconds
+		acceleratestage = 1;
 
     switch (state)
     {
