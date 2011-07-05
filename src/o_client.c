@@ -443,10 +443,10 @@ void *CL_ReadSectorBuffer (void *secbuf)
 
 	while ((secnum = ReadInt32((int32_t**)&secbuf)) >= 0) // Read until we reach the end, -1
 	{
-		printf ("CL_ReadSectorBuffer: secnum %i\n", secnum);
+	//	printf ("CL_ReadSectorBuffer: secnum %i\n", secnum);
 		if(spec = (specialtype_e)ReadUInt8((uint8_t**)&secbuf)) // Sector has a special
 		{
-			printf("CL_ReadSectorBuffer: spec %i\n", spec);
+	//		printf("CL_ReadSectorBuffer: spec %i\n", spec);
 			switch(spec)
 			{
 				case spt_ceiling:
@@ -454,6 +454,7 @@ void *CL_ReadSectorBuffer (void *secbuf)
 					ceiling_t *ceiling = Z_Malloc (sizeof(*ceiling), PU_LEVSPEC, 0);
 					P_AddThinker (&ceiling->thinker);
 					sectors[secnum].specialdata = ceiling;
+					
 					ceiling->thinker.function.acp1 = (actionf_p1)T_MoveCeiling;
 					ceiling->sector = &sectors[secnum];
 					ceiling->type = (ceiling_e)ReadUInt8((uint8_t**)&secbuf);
@@ -466,8 +467,65 @@ void *CL_ReadSectorBuffer (void *secbuf)
 					ceiling->olddirection = ReadInt8((int8_t**)&secbuf);
 					break;
 				}
+
+				case spt_door:
+				{
+					vldoor_t *door = Z_Malloc (sizeof(*door), PU_LEVSPEC, 0);
+					P_AddThinker (&door->thinker);
+					sectors[secnum].specialdata = door;
+
+					door->thinker.function.acp1 = (actionf_p1)T_VerticalDoor;
+					door->sector = &sectors[secnum];
+					door->type = (vldoor_e)ReadUInt8((uint8_t**)&secbuf);
+					door->topheight = (fixed_t)ReadInt32((int32_t**)&secbuf);
+					door->speed = (fixed_t)ReadInt32((int32_t**)&secbuf);
+					door->direction = ReadInt8((int8_t**)&secbuf);
+					door->topwait = ReadInt32((int32_t**)&secbuf);
+					door->topcountdown = ReadInt32((int32_t**)&secbuf);
+					break;
+				}
+
+				case spt_floor:
+				{
+					floormove_t *floor = Z_Malloc (sizeof(*floor), PU_LEVSPEC, 0);
+					P_AddThinker (&floor->thinker);
+					sectors[secnum].specialdata = floor;
+
+					floor->thinker.function.acp1 = (actionf_p1)T_MoveFloor;
+					floor->sector = &sectors[secnum];
+					floor->type = (floor_e)ReadUInt8((uint8_t**)&secbuf);
+					floor->crush = (boolean)ReadUInt8((uint8_t**)&secbuf);
+					floor->direction = ReadInt8((int8_t**)&secbuf);
+					floor->newspecial = ReadInt32((int32_t**)&secbuf);
+					floor->texture = (short)ReadInt16((int16_t**)&secbuf);
+					floor->floordestheight = (fixed_t)ReadInt32((int32_t**)&secbuf);
+					floor->speed = (fixed_t)ReadInt32((int32_t**)&secbuf);
+					break;
+				}
+
+				case spt_plat:
+				{
+					plat_t *plat = Z_Malloc (sizeof(*plat), PU_LEVSPEC, 0);
+					P_AddThinker (&plat->thinker);
+					sectors[secnum].specialdata = plat;
+
+					plat->thinker.function.acp1 = (actionf_p1)T_PlatRaise;
+					plat->sector = &sectors[secnum];
+					plat->type = (plattype_e)ReadUInt8((uint8_t**)&secbuf);
+					plat->speed = (fixed_t)ReadInt32((int32_t**)&secbuf);
+					plat->low = (fixed_t)ReadInt32((int32_t**)&secbuf);
+					plat->high = (fixed_t)ReadInt32((int32_t**)&secbuf);
+					plat->wait = ReadInt32((int32_t**)&secbuf);
+					plat->count = ReadInt32((int32_t**)&secbuf);
+					plat->status = (plat_e)ReadUInt8((uint8_t**)&secbuf);
+					plat->oldstatus = (plat_e)ReadUInt8((uint8_t**)&secbuf);
+					plat->crush = (boolean)ReadUInt8((uint8_t**)&secbuf);
+					plat->tag = ReadInt32((int32_t**)&secbuf);
+					break;
+				}
+					
 				default:
-				printf ("read sector type %i\n", spec);
+				I_Error ("Read unknown sector type %i. Malformed packet?\n", spec);
 				break;
 			}
 		}
