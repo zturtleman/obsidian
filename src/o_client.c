@@ -350,6 +350,23 @@ void CL_ParsePacket(ENetPacket *pk)
 			break;
 		}
 
+		case MSG_DISC:
+		{
+			int d = ReadUInt8((uint8_t**)&p);
+			mobj_t *mo;
+
+			if(!playeringame[d] || !players[d].mo)
+				return;
+
+			playeringame[d] = false;
+			mo = players[d].mo;
+			P_RemoveMobj(mo);
+			mo->player = NULL;
+			players[d].mo = NULL;
+			memset(&players[d], 0, sizeof(player_t));
+			break;
+		}
+
 		default:
 			break;		
 	}

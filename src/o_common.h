@@ -51,7 +51,7 @@ typedef enum
 
 	MSG_RESPAWN, MSG_PICKUP, MSG_WPICKUP,
 
-	MSG_CHAT, MSG_NICK
+	MSG_CHAT, MSG_NICK, MSG_DISC
 } messagetype_e;
 
 #endif

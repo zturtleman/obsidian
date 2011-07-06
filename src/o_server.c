@@ -117,7 +117,6 @@ void SV_Loop (void)
 				clients[c].id = c;
 				clients[c].peer = event.peer;
 				clients[c].player = &players[c];
-				memset(clients[c].nick, 0, MAXPLAYERNAME);
 				clients[c].firstspawn = 0;
 				if(!clients[c].player) 
 				{
@@ -216,9 +215,16 @@ void SV_ClientWelcome (client_t* cl)
 void SV_DropClient(int cn, const char *reason) // Reset one of the client_t inside clients[]
 {
 	mobj_t *mo;
+	char discmsg[128];
+	ENetPacket *pk = enet_packet_create(NULL, 2, ENET_PACKET_FLAG_RELIABLE);
+	void *p = pk->data;
 
 	if(!clients[cn].type) // Client is already empty
 		return;
+
+	printf("%s disconnected (%s)\n", clients[cn].nick, reason);
+	snprintf(discmsg, 128, "%s disconnected.", clients[cn].nick);
+	SV_SendString(MSG_CHAT, discmsg, cn);
 
 	playeringame[cn] = false;
 	clients[cn].type = CT_EMPTY;
@@ -226,8 +232,13 @@ void SV_DropClient(int cn, const char *reason) // Reset one of the client_t insi
 	P_RemoveMobj(mo);
 	mo->player = NULL;
 	clients[cn].player->mo = NULL;
+	memset(&players[cn], 0, sizeof(player_t));
+	memset(clients[cn].nick, 0, MAXPLAYERNAME);
 	clients[cn].player = NULL;
-	printf("disconnected client %i (%s)\n", cn, reason);
+
+	WriteUInt8((uint8_t**)&p, MSG_DISC);
+	WriteUInt8((uint8_t**)&p, cn);
+	SV_BroadcastPacket(pk, -1);
 
 	return;
 }
