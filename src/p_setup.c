@@ -48,8 +48,6 @@
 
 #include "doomstat.h"
 
-#include "o_client.h"
-
 void	P_SpawnMapThing (mapthing_t*	mthing);
 
 
@@ -752,8 +750,9 @@ static void P_LoadReject(int lumpnum)
 
 void P_NumberMobjs (void);
 void P_ReadMobjBuffer (uint8_t *mobjbuf);
+void CL_ReadSectorBuffer (char *secbuf);
 uint8_t *readmobjbuf;
-void *readsecbuf;
+char *readsecbuf;
 boolean client, server;
 
 void

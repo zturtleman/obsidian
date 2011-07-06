@@ -44,6 +44,6 @@ void CL_SendStateUpdate(uint16_t state);
 void CL_SendFireCmd(weapontype_t w, int refire);
 void CL_SendRespawn(int startnum);
 void CL_SendChat(char *sending);
-void *CL_ReadSectorBuffer (void *secbuf);
+void CL_ReadSectorBuffer (char *secbuf);
 
 #endif

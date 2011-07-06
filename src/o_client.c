@@ -54,9 +54,9 @@ int startmap, startepisode;
 skill_t startskill;
 
 extern uint8_t *readmobjbuf;	
-extern void *readsecbuf;
+extern char *readsecbuf;
 uint8_t *readmobjbuf;
-void *readsecbuf;
+char *readsecbuf;
 int prndindex;
 
 void CL_Connect (char *srv_hn)
@@ -436,7 +436,7 @@ void CL_SendChat(char *sending)
 	return;
 }
 
-void *CL_ReadSectorBuffer (void *secbuf)
+void CL_ReadSectorBuffer (char *secbuf)
 {
 	int secnum;
 	specialtype_e spec;
@@ -533,5 +533,5 @@ void *CL_ReadSectorBuffer (void *secbuf)
 		sectors[secnum].ceilingheight = (fixed_t)ReadInt32((int32_t**)&secbuf);
 	}
 
-	return secbuf;
+	return;
 }
