@@ -1159,6 +1159,9 @@ uint8_t *P_MakeMobjBuffer (void)
 
 void P_ReadMobjBuffer (uint8_t *mobjbuf)
 {
+	if(mobjbuf == NULL) // Yeah, do NOT try to read this.
+		return;
+
 	int i, j;
 	thinker_t *current, *next;
 
@@ -1183,9 +1186,6 @@ void P_ReadMobjBuffer (uint8_t *mobjbuf)
 
 		current = next;
 	}
-
-	free(mobjbuf);
-	mobjbuf = NULL;
 
 	return;
 }

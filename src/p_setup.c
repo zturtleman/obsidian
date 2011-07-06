@@ -829,8 +829,14 @@ P_SetupLevel
         P_NumberMobjs();
     if(client)
 	{
-        P_ReadMobjBuffer(readmobjbuf);
-		CL_ReadSectorBuffer(readsecbuf + 4);
+        if(readmobjbuf && readsecbuf)
+        {
+            P_ReadMobjBuffer(readmobjbuf);
+		    CL_ReadSectorBuffer(readsecbuf + 4);
+            free(readmobjbuf);
+            free(readsecbuf);
+            readmobjbuf = readsecbuf = NULL;
+        }
 	}
     
     // if deathmatch, randomly spawn the active players
