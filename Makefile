@@ -28,6 +28,7 @@ endif
 default: noversion
 noversion: config textscreen opl pcsound obsidian setup
 version: clean configv textscreen opl pcsound obsidian setup
+noconfig: textscreen opl pcsound obsidian setup
 
 # Configuration
 
