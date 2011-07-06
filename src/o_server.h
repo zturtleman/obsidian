@@ -47,6 +47,7 @@ void SV_SendWeapon(player_t *player, weapontype_t weapon);
 void SV_DamageMobj(mobj_t *target, int damage);
 void SV_KillMobj(mobj_t *source, mobj_t *target);
 int SV_ClientNumForPeer(ENetPeer *p);
+void SV_SendString (messagetype_e type, const char *sending, int exclude);
 void *SV_MakeSectorBuffer(void);
 
 // Variables
@@ -70,7 +71,7 @@ typedef struct
 	ENetPeer *peer;
 	player_t *player;
 	boolean firstspawn;
-	char name[MAXPLAYERNAME + 1];
+	char nick[MAXPLAYERNAME];
 } client_t;
 
 client_t clients[MAXPLAYERS];

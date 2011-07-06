@@ -58,6 +58,7 @@ extern char *readsecbuf;
 uint8_t *readmobjbuf;
 char *readsecbuf;
 int prndindex;
+char *player_name;
 
 void CL_Connect (char *srv_hn)
 {
@@ -124,6 +125,9 @@ void CL_Connect (char *srv_hn)
 				readsecbuf = malloc(((int*)pkd)[0]);
 				memcpy(readsecbuf, pkd, ((int*)pkd)[0]);
 				pkd += ((int*)pkd)[0]; // Read the sector data, then increment.
+
+				CL_SendString(MSG_NICK, player_name);
+
 				return;
 			}
 		}
@@ -155,8 +159,6 @@ void CL_Disconnect (void)
 	enet_peer_reset(srvpeer);
 	return;
 }
-
-char *player_name;
 
 void CL_Loop(void)
 {
@@ -197,7 +199,7 @@ void CL_Loop(void)
 	if (chatmsg[chatindex - 1] == '\r') // Okay to send it out now:
 	{
 		printf(">>> %s\n", chatmsg);
-		CL_SendChat(chatmsg);
+		CL_SendString(MSG_CHAT, chatmsg);
 		memset(chatmsg, 0, sizeof(chatmsg));
 		chatindex = 0;
 	}
@@ -342,9 +344,8 @@ void CL_ParsePacket(ENetPacket *pk)
 		{
 			char *c = malloc(128);
 
-			printf("%i > %s\n", from, p);
-			sprintf(c, "%i > %s", from, p);
-			printf("debug: %s\n", c);
+			printf("%s\n", from, p);
+			sprintf(c, "%s", from, p);
 			players[consoleplayer].message = c;
 			break;
 		}
@@ -420,12 +421,12 @@ void CL_SendRespawn(int startnum)
 	return;
 }
 
-void CL_SendChat(char *sending)
+void CL_SendString(messagetype_e type, char *sending)
 {
 	ENetPacket *pk = enet_packet_create(NULL, strlen(sending) + 2, ENET_PACKET_FLAG_RELIABLE);
 	void *p = pk->data;
 
-	WriteUInt8((uint8_t**)&p, MSG_CHAT);
+	WriteUInt8((uint8_t**)&p, type);
 	memcpy(p, sending, strlen(sending) + 1);
 	enet_peer_send(srvpeer, 1, pk);
 	return;

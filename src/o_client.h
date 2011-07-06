@@ -29,6 +29,7 @@
 #define WIN32_LEAN_AND_MEAN
 
 #include "enet/enet.h"
+#include "o_common.h"
 
 ENetHost *localclient;
 int localid;
@@ -43,7 +44,7 @@ void CL_SendUseCmd(void);
 void CL_SendStateUpdate(uint16_t state);
 void CL_SendFireCmd(weapontype_t w, int refire);
 void CL_SendRespawn(int startnum);
-void CL_SendChat(char *sending);
+void CL_SendString(messagetype_e type, char *sending);
 void CL_ReadSectorBuffer (char *secbuf);
 
 #endif

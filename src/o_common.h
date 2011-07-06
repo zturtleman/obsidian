@@ -41,7 +41,7 @@ extern boolean client;
 
 // Protocol
 
-enum
+typedef enum
 {
 	MSG_NULL, MSG_WELCOME, MSG_POS, 
 
@@ -51,7 +51,7 @@ enum
 
 	MSG_RESPAWN, MSG_PICKUP, MSG_WPICKUP,
 
-	MSG_CHAT
-};
+	MSG_CHAT, MSG_NICK
+} messagetype_e;
 
 #endif
