@@ -1139,14 +1139,14 @@ uint8_t *P_MakeMobjBuffer (void)
 			j += (!(++i % 8));
 
 			if(j == MAX_MOBJ_BUFFER - 1)
-				I_Error("P_MakeMobjBuffer: Buffer overflow\n");
+				break; //I_Error("P_MakeMobjBuffer: Buffer overflow\n");
 		}
 		else
 			current = current->next;
 	}
 
 	void *p = mobjbuf;
-	for (i = 0; i < 63; i++)
+	for (i = 0; i < 127; i++)
 		printf("%i ", ReadUInt8((uint8_t**)&p));
 	printf("\n");
 
