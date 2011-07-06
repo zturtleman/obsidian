@@ -344,8 +344,8 @@ void CL_ParsePacket(ENetPacket *pk)
 		{
 			char *c = malloc(128);
 
-			printf("%s\n", from, p);
-			sprintf(c, "%s", from, p);
+			printf("%s\n", p);
+			sprintf(c, "%s", p);
 			players[consoleplayer].message = c;
 			break;
 		}

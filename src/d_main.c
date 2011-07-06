@@ -1448,6 +1448,14 @@ void D_DoomMain (void)
     DEH_printf("S_Init: Setting up sound.\n");
     S_Init (sfxVolume * 8, musicVolume * 8);
 
+    {
+        int i;
+        i = M_CheckParmWithArgs ("-connect", 1);
+
+        if(i > 0 && !server)
+             CL_Connect(myargv[i+1]);
+    }
+
     DEH_printf("D_CheckNetGame: Checking network game status.\n");
     D_CheckNetGame ();
 
@@ -1458,14 +1466,6 @@ void D_DoomMain (void)
 
     DEH_printf("ST_Init: Init status bar.\n");
     ST_Init ();
-
-    {
-        int i;
-        i = M_CheckParmWithArgs ("-connect", 1);
-
-        if(i > 0 && !server)
-             CL_Connect(myargv[i+1]);
-    }
 
     // If Doom II without a MAP01 lump, this is a store demo.  
     // Moved this here so that MAP01 isn't constantly looked up
