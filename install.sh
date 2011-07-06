@@ -4,7 +4,8 @@ jobs=2 # Number of make jobs to use, generally cpu cores x2 if you have hyperthr
 
 # Build enet:
 cd enet
-./configure && make -j${jobs} || exit 1
+./configure || exit 1 
+make -j${jobs} || exit 1
 cd ..
 
 # compile obsidian:
