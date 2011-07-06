@@ -1145,11 +1145,6 @@ uint8_t *P_MakeMobjBuffer (void)
 			current = current->next;
 	}
 
-	void *p = mobjbuf;
-	for (i = 0; i < 127; i++)
-		printf("%i ", ReadUInt8((uint8_t**)&p));
-	printf("\n");
-
 	return mobjbuf;
 }
 
@@ -1178,7 +1173,6 @@ void P_ReadMobjBuffer (uint8_t *mobjbuf)
 			if(((mobj_t*)current)->netid == i && !(mobjbuf[j] & 1 << (i % 8)))
 			{
 				P_RemoveMobj((mobj_t*)current);
-				printf("Remove mobj %i in byte %i\n", i, j);
 			}
 
 			j += (!(++i % 8));

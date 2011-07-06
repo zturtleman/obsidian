@@ -166,7 +166,6 @@ EV_DoPlat
 	    continue;
 	
     sec->specialtype = spt_plat;
-	printf("EV_DoPlat: %i\n", secnum);
 
 	// Find lowest & highest floors around sector
 	rtn = 1;

@@ -196,7 +196,6 @@ EV_DoCeiling
 	    continue;
 	
     sec->specialtype = spt_ceiling;
-    printf("EV_DoCeiling: %i\n", secnum);
 
 	// new door thinker
 	rtn = 1;

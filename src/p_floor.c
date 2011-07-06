@@ -277,7 +277,6 @@ EV_DoFloor
 	    continue;
 	
     sec->specialtype = spt_floor;;
-    printf("EV_DoFloor: %i\n", secnum);
 
 	// new floor thinker
 	rtn = 1;
@@ -483,7 +482,6 @@ EV_BuildStairs
 	    continue;
 	
     sec->specialtype = spt_floor;
-	printf("EV_BuildStairs: %i\n", secnum);
 
 	// new floor thinker
 	rtn = 1;

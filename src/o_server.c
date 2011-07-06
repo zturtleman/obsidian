@@ -174,7 +174,6 @@ void SV_ClientWelcome (client_t* cl)
 {
 	void *secbuf = SV_MakeSectorBuffer();
 	int secbuflen = ((int*)secbuf)[0];
-	printf ("secbuflen = %i\n", secbuflen);
 	ENetPacket *pk = enet_packet_create(NULL, 32 + MAX_MOBJ_BUFFER + secbuflen, ENET_PACKET_FLAG_RELIABLE);
 	void *p = pk->data;
 	void *mobjbuf = P_MakeMobjBuffer();
@@ -595,7 +594,6 @@ void *SV_MakeSectorBuffer (void)
 	j += 8;
 	secbuf = malloc(j);
 	p = secbuf; // Do not modify secbuf.
-	printf ("SV_MakeSectorBuffer: Allocated %i bytes\n", j);
 	WriteInt32((int32_t**)&p, j);
 
 	for (i = 0, j = 0; i < numsectors; i++)

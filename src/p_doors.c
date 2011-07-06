@@ -274,7 +274,6 @@ EV_DoDoor
 	    continue;
 		
     sec->specialtype = spt_door;
-    printf("EV_DoDoor: %i\n", secnum);
 	
 	// new door thinker
 	rtn = 1;
@@ -480,7 +479,6 @@ EV_VerticalDoor
     }
 	
     sec->specialtype = spt_door;
-    printf("EV_VerticalDoor: %i\n", secnum);
 
     // new door thinker
     door = Z_Malloc (sizeof(*door), PU_LEVSPEC, 0);

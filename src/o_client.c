@@ -456,10 +456,8 @@ void CL_ReadSectorBuffer (char *secbuf)
 
 	while ((secnum = ReadInt32((int32_t**)&secbuf)) >= 0) // Read until we reach the end, -1
 	{
-	//	printf ("CL_ReadSectorBuffer: secnum %i\n", secnum);
 		if(spec = (specialtype_e)ReadUInt8((uint8_t**)&secbuf)) // Sector has a special
 		{
-	//		printf("CL_ReadSectorBuffer: spec %i\n", spec);
 			switch(spec)
 			{
 				case spt_ceiling:
