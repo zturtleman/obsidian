@@ -87,12 +87,7 @@ void CL_Connect (char *srv_hn)
 	srvpeer = enet_host_connect (localclient, &addr, MAXPLAYERS * 2, 0);
 
 	if(enet_host_service (localclient, &event, 5000) > 0 && event.type == ENET_EVENT_TYPE_CONNECT)
-	{
 		enet_host_flush(localclient);
-		autostart = 1;
-		client = 1;
-		server = 0;
-	}
 	else
 	{
 		printf("Connection to %s:%i failed!\n", host, addr.port);

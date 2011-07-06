@@ -899,12 +899,11 @@ void D_DoomMain (void)
     if (M_CheckParm("-server") > 0) // Obsidian Dedicated Server
         SV_Main();
 
+    if (M_CheckParm("-connect") > 0)
     {
-        int i;
-        i = M_CheckParmWithArgs ("-connect", 1);
-
-        if(i > 0 && !server)
-             CL_Connect(myargv[i+1]);
+        client = 1;
+        server = 0;
+        autostart = 1;
     }
 
     //!
@@ -1459,6 +1458,14 @@ void D_DoomMain (void)
 
     DEH_printf("ST_Init: Init status bar.\n");
     ST_Init ();
+
+    {
+        int i;
+        i = M_CheckParmWithArgs ("-connect", 1);
+
+        if(i > 0 && !server)
+             CL_Connect(myargv[i+1]);
+    }
 
     // If Doom II without a MAP01 lump, this is a store demo.  
     // Moved this here so that MAP01 isn't constantly looked up
