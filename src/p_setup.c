@@ -826,17 +826,6 @@ P_SetupLevel
     P_LoadThings (lumpnum+ML_THINGS);
     if(client || server)
         P_NumberMobjs();
-    if(client)
-	{
-        if(readmobjbuf && readsecbuf)
-        {
-            P_ReadMobjBuffer(readmobjbuf);
-		    CL_ReadSectorBuffer(readsecbuf + 4);
-            free(readmobjbuf);
-            free(readsecbuf);
-            readmobjbuf = readsecbuf = NULL;
-        }
-	}
     
     // if deathmatch, randomly spawn the active players
     if (deathmatch && !client)
@@ -862,6 +851,18 @@ P_SetupLevel
     // preload graphics
     if (precache)
 	R_PrecacheLevel ();
+
+    if(client)
+	{
+        if(readmobjbuf && readsecbuf)
+        {
+            P_ReadMobjBuffer(readmobjbuf);
+		    CL_ReadSectorBuffer(readsecbuf + 4);
+            free(readmobjbuf);
+            free(readsecbuf);
+            readmobjbuf = readsecbuf = NULL;
+        }
+	}
 
     //printf ("free memory: 0x%x\n", Z_FreeMemory());
 

@@ -524,14 +524,15 @@ void CL_ReadSectorBuffer (char *secbuf)
 					plat->sector = &sectors[secnum];
 					plat->type = (plattype_e)ReadUInt8((uint8_t**)&secbuf);
 					plat->speed = (fixed_t)ReadInt32((int32_t**)&secbuf);
-					plat->low = (fixed_t)ReadInt32((int32_t**)&secbuf);
 					plat->high = (fixed_t)ReadInt32((int32_t**)&secbuf);
+					plat->low = (fixed_t)ReadInt32((int32_t**)&secbuf);
 					plat->wait = ReadInt32((int32_t**)&secbuf);
 					plat->count = ReadInt32((int32_t**)&secbuf);
 					plat->status = (plat_e)ReadUInt8((uint8_t**)&secbuf);
 					plat->oldstatus = (plat_e)ReadUInt8((uint8_t**)&secbuf);
 					plat->crush = (boolean)ReadUInt8((uint8_t**)&secbuf);
 					plat->tag = ReadInt32((int32_t**)&secbuf);
+					P_AddActivePlat(plat);
 					break;
 				}
 					
