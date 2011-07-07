@@ -198,8 +198,11 @@ void CL_Loop(void)
 
 	if (chatmsg[chatindex - 1] == '\r') // Okay to send it out now:
 	{
-		printf(">>> %s\n", chatmsg);
-		CL_SendString(MSG_CHAT, chatmsg);
+		if(strlen(chatmsg) > 2)
+		{
+			printf(">>> %s\n", chatmsg);
+			CL_SendString(MSG_CHAT, chatmsg);
+		}
 		memset(chatmsg, 0, sizeof(chatmsg));
 		chatindex = 0;
 	}
