@@ -839,7 +839,7 @@ P_SetupLevel
 	}
     
     // if deathmatch, randomly spawn the active players
-    if (deathmatch)
+    if (deathmatch && !client)
     {
 	for (i=0 ; i<MAXPLAYERS ; i++)
 	    if (playeringame[i])
