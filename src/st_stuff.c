@@ -1118,7 +1118,7 @@ static void ST_loadUnloadGraphics(load_callback_t callback)
     // face backgrounds for different color players
     for (i = 0; i < MAXPLAYERS; i++)
     {
-		DEH_snprintf(namebuf, 9, "STFB%d", i);
+		DEH_snprintf(namebuf, 9, "STFB%d", 1);
 		callback(namebuf, &faceback[i]);
 	}
 

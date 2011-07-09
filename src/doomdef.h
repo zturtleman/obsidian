@@ -132,7 +132,8 @@ typedef enum
 #define SCREENHEIGHT_4_3 240
 
 // The maximum number of players, multiplayer/networking.
-#define MAXPLAYERS		4
+#define MAXPLAYERS		16
+#define VMAXPLAYERS		4
 
 // State updates, number of tics / second.
 #define TICRATE		35
