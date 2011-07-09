@@ -118,7 +118,7 @@ void CL_Connect (char *srv_hn)
 				startskill = (skill_t) ReadUInt8((uint8_t**)&pkd);
 				deathmatch = ReadUInt8((uint8_t**)&pkd);
 				localid = ReadUInt8((uint8_t**)&pkd);
-				inGameMask = ReadUInt8((uint8_t**)&pkd);
+				inGameMask = ReadUInt16((uint16_t**)&pkd);
 				readmobjbuf = malloc(MAX_MOBJ_BUFFER);
 				memcpy(readmobjbuf, pkd, MAX_MOBJ_BUFFER);
 				pkd += MAX_MOBJ_BUFFER;

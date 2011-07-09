@@ -177,13 +177,13 @@ void SV_ClientWelcome (client_t* cl)
 	ENetPacket *pk = enet_packet_create(NULL, 32 + MAX_MOBJ_BUFFER + secbuflen, ENET_PACKET_FLAG_RELIABLE);
 	void *p = pk->data;
 	void *mobjbuf = P_MakeMobjBuffer();
-	uint8_t inGame = 0;
+	uint16_t inGame = 0;
 	uint8_t i;
 
 	playeringame[cl->id] = true;
 	cl->player->playerstate = PST_REBORN;
 	for (i = 0; i < MAXPLAYERS; i++)
-		if(playeringame[i])
+		//if(playeringame[i])
 			inGame |= 1 << i;
 
 	WriteUInt8((uint8_t**)&p, MSG_WELCOME); // put a greeting marker on it
@@ -194,7 +194,7 @@ void SV_ClientWelcome (client_t* cl)
 	WriteUInt8((uint8_t**)&p, (uint8_t)gameskill); // Game skill
 	WriteUInt8((uint8_t**)&p, (uint8_t)deathmatch); // Game mode
 	WriteUInt8((uint8_t**)&p, cl->id); // client will set this to consoleplayer
-	WriteUInt8((uint8_t**)&p, inGame); // Bit mask for which players are in game
+	WriteUInt16((uint16_t**)&p, inGame); // Bit mask for which players are in game
 
 	memcpy(p, mobjbuf, MAX_MOBJ_BUFFER); // Bit masks for which items have been removed
 	p += MAX_MOBJ_BUFFER;
