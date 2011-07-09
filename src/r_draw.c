@@ -555,21 +555,36 @@ void R_DrawTranslatedColumnLow (void)
 // Assumes a given structure of the PLAYPAL.
 // Could be read from a lump instead.
 //
+
+// [tm512] Add more colors, for up to 16 players - 7/9/2011
 void R_InitTranslationTables (void)
 {
     int		i;
 	
-    translationtables = Z_Malloc (256*3, PU_STATIC, 0);
+    translationtables = Z_Malloc (256*15, PU_STATIC, 0);
     
     // translate just the 16 green colors
     for (i=0 ; i<256 ; i++)
     {
 	if (i >= 0x70 && i<= 0x7f)
 	{
-	    // map green ramp to gray, brown, red
-	    translationtables[i] = 0x60 + (i&0xf);
-	    translationtables [i+256] = 0x40 + (i&0xf);
-	    translationtables [i+512] = 0x20 + (i&0xf);
+	    // map green ramp to gray, brown, red, etc
+	    translationtables[i] = 0x60 + (i&0xf); // Gray
+	    translationtables [i + 256] = 0x40 + (i&0xf); // Brown
+	    translationtables [i + (2 * 256)] = 0x20 + (i&0xf); // Red
+        translationtables [i + (3 * 256)] = 0x58 + (i&0xf); // Light Gray
+        translationtables [i + (4 * 256)] = 0x38 + (i&0xf); // Light Brown
+        translationtables [i + (5 * 256)] = 0xb0 + (i&0xf); // Light Red (Red Team)
+        translationtables [i + (6 * 256)] = (((i&0xf) < 9) ? 0xc7 : 0xf0 - 9) + (i&0xf); // Dark Blue
+        translationtables [i + (7 * 256)] = 0xd0 + (i&0xf); // Orange
+        translationtables [i + (8 * 256)] = 0xc0 + (i&0xf); // Blue (Blue Team)
+        translationtables [i + (9 * 256)] = 0x80 + (i&0xf); // Beige
+        translationtables [i + (10 * 256)] = 0x30 + (i&0xf); // Tan
+        translationtables [i + (11 * 256)] = 0x10 + (i&0xf); // Pink!
+        translationtables [i + (12 * 256)] = (((i&0xf) < 8) ? 0xe0 : 0xa0 - 8) + (i&0xf); // Yellow
+        translationtables [i + (13 * 256)] = 0x88 + (i&0xf); // Dark Beige
+        translationtables [i + (14 * 256)] = (((i&0xf) < 8) ? 0x78 : 0x98 - 8) + (i&0xf); // Dark/Vomit Greenish
+		translationtables [i + (15 * 256)] = 0xa4 + (i&0xf); // ?!?!?!
 	}
 	else
 	{
