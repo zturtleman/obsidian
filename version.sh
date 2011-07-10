@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
 # This will be the "versioner" that prepares a custom config.h for obsidian.
 # It will include the proper versions (date, revision, etc) for the build of obsidian if specified.
