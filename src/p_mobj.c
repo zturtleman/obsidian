@@ -761,7 +761,7 @@ void P_SpawnMapThing (mapthing_t* mthing)
     // count deathmatch start positions
     if (mthing->type == 11)
     {
-	if (deathmatch_p < &deathmatchstarts[10])
+	if (deathmatch_p < &deathmatchstarts[20])
 	{
 	    memcpy (deathmatch_p, mthing, sizeof(*mthing));
 	    deathmatch_p++;

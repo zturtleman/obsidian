@@ -33,7 +33,7 @@
 
 ENetHost *localclient;
 int localid;
-uint8_t inGameMask;
+uint16_t inGameMask;
 
 void CL_Connect (char *srv_hn);
 void CL_Loop(void);
