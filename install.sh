@@ -1,6 +1,6 @@
 #!/bin/sh
 
-jobs=2 # Number of make jobs to use, generally cpu cores x2 if you have hyperthreading.
+jobs=4 # Number of make jobs to use, generally cpu cores x2 if you have hyperthreading.
 
 # Build enet:
 cd enet
