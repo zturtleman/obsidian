@@ -1383,7 +1383,7 @@ void G_DoReborn (int playernum)
 	// spawn at random spot if in death match 
 	if (deathmatch) 
 	{ 
-	    G_DeathMatchSpawnPlayer (playernum, 0); 
+	    G_DeathMatchSpawnPlayer (playernum, 1); 
 	    return; 
 	} 
 		 

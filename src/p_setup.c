@@ -840,7 +840,7 @@ P_SetupLevel
 	    if (playeringame[i])
 	    {
 		players[i].mo = NULL;
-		G_DeathMatchSpawnPlayer (i, client);
+		G_DeathMatchSpawnPlayer (i, !client);
 	    }
 			
     }

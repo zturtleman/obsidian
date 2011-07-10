@@ -306,9 +306,6 @@ void CL_ParsePacket(ENetPacket *pk)
 		{
 			int dmstart;
 
-			if(players[from].playerstate == PST_LIVE) // Whut.
-				break;
-
 			if(!playeringame[from])
 			{
 				playeringame[from] = true;
