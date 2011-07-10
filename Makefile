@@ -87,7 +87,7 @@ $(OBJ_D)/%.o: src/%.c $(OBS_HEADERS)
 	$(CC) $(INCLUDES) -O$(OPT_LEVEL) -g$(DBG_LEVEL) -c $< -o $@
 
 $(OBS_OUT): $(OBS_OBJS)
-	$(CC) $(INCLUDES) $(LIBS) -lSDL_mixer -lm -o src/obsidian $(OBS_OBJS) enet/.libs/libenet.a textscreen/libtextscreen.a opl/libopl.a pcsound/libpcsound.a
+	$(CC) $(INCLUDES) $(LIBS) -lSDL_mixer -lm -lsamplerate -o src/obsidian $(OBS_OBJS) enet/.libs/libenet.a textscreen/libtextscreen.a opl/libopl.a pcsound/libpcsound.a
 
 SETUP_SOURCES = $(wildcard setup/*.c)
 SETUP_HEADERS = $(wildcard setup/*.h)
