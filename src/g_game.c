@@ -1350,7 +1350,7 @@ void G_DeathMatchSpawnPlayer (int playernum)
 	{ 
 	    deathmatchstarts[i].type = playernum+1; 
 	    P_SpawnPlayer (&deathmatchstarts[i]); 
-        if(client)
+        if(client && playernum == consoleplayer)
             CL_SendRespawn (i);
 	    return; 
 	} 
