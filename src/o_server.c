@@ -327,7 +327,8 @@ void SV_ParsePacket (ENetPacket *pk, ENetPeer *p)
 
 			if(deathmatch)
 			{
-				clients[from].player->mo->player = NULL;
+				if(clients[from].player->mo)
+					clients[from].player->mo->player = NULL;
 
 				dmstart = ReadInt8((int8_t**)&pkp);
 
