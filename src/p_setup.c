@@ -828,24 +828,15 @@ P_SetupLevel
         P_NumberMobjs();
     
     // if deathmatch, randomly spawn the active players
-    if (deathmatch && !server)
+    if (deathmatch)
     {
 	for (i=0 ; i<MAXPLAYERS ; i++)
-	    if (playeringame[i] && (!client || i != consoleplayer))
+	    if (playeringame[i])
 	    {
 		players[i].mo = NULL;
 		G_DeathMatchSpawnPlayer (i);
 	    }
 			
-    }
-
-    // In a netgame, only do this for our client
-    if(client)
-    {
-        memset(&players[consoleplayer], 0, sizeof(player_t));
-        players[consoleplayer].mo = NULL;
-        players[consoleplayer].playerstate = PST_REBORN;
-        G_DeathMatchSpawnPlayer(consoleplayer);
     }
 
     // clear special respawning que
