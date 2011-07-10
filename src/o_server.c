@@ -223,11 +223,17 @@ void SV_DropClient(int cn, const char *reason) // Reset one of the client_t insi
 
 	printf("%s disconnected (%s)\n", clients[cn].nick, reason);
 	snprintf(discmsg, 128, "%s disconnected.", clients[cn].nick);
-	SV_SendString(MSG_CHAT, discmsg, cn);
+
+	if(strlen(clients[cn].nick) > 0)
+		SV_SendString(MSG_CHAT, discmsg, cn);
 
 	playeringame[cn] = false;
 	clients[cn].type = CT_EMPTY;
 	mo = clients[cn].player->mo;
+
+	if (!mo)
+		return;
+
 	P_RemoveMobj(mo);
 	mo->player = NULL;
 	clients[cn].player->mo = NULL;
