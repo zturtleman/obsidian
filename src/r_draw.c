@@ -557,11 +557,14 @@ void R_DrawTranslatedColumnLow (void)
 //
 
 // [tm512] Add more colors, for up to 16 players - 7/9/2011
+
+#define MAXPLAYERCOLORS 16
+
 void R_InitTranslationTables (void)
 {
     int		i;
 	
-    translationtables = Z_Malloc (256*15, PU_STATIC, 0);
+    translationtables = Z_Malloc (256 * (MAXPLAYERCOLORS - 1), PU_STATIC, 0);
     
     // translate just the 16 green colors
     for (i=0 ; i<256 ; i++)
@@ -589,8 +592,9 @@ void R_InitTranslationTables (void)
 	else
 	{
 	    // Keep all other colors as is.
-	    translationtables[i] = translationtables[i+256] 
-		= translationtables[i+512] = i;
+        int j;
+        for(j = 0; j < MAXPLAYERCOLORS - 1; j++)
+            translationtables [i + (j * 256)] = i;
 	}
     }
 }
