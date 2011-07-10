@@ -375,6 +375,9 @@ P_TouchSpecialThing
     sound = sfx_itemup;	
     player = toucher->player;
 
+    if(!player) // Don't want this to happen, right?
+        return;
+
     // Dead thing touching.
     // Can happen with a sliding player corpse.
     if (toucher->health <= 0)
