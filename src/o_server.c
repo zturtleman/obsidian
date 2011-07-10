@@ -323,8 +323,7 @@ void SV_ParsePacket (ENetPacket *pk, ENetPeer *p)
 		{
 			int dmstart;
 
-			if(clients[from].player->playerstate != PST_REBORN)
-				clients[from].player->playerstate = PST_REBORN;
+			clients[from].player->playerstate = PST_REBORN;
 
 			if(deathmatch)
 			{
