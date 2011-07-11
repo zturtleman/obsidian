@@ -239,6 +239,7 @@ void SV_DropClient(int cn, const char *reason) // Reset one of the client_t insi
 	clients[cn].player->mo = NULL;
 	memset(&players[cn], 0, sizeof(player_t));
 	memset(clients[cn].nick, 0, MAXPLAYERNAME);
+	clients[cn].player->playerstate = PST_DEAD;
 	clients[cn].player = NULL;
 
 	WriteUInt8((uint8_t**)&p, MSG_DISC);
@@ -322,6 +323,9 @@ void SV_ParsePacket (ENetPacket *pk, ENetPeer *p)
 		if(clients[from].player && clients[from].firstspawn)
 		{
 			int dmstart;
+
+			if(clients[from].player->playerstate == PST_LIVE) // No respawning a live player
+				break;
 
 			clients[from].player->playerstate = PST_REBORN;
 
