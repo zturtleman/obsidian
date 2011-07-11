@@ -306,6 +306,9 @@ void CL_ParsePacket(ENetPacket *pk)
 		{
 			int dmstart;
 
+			if(players[from].playerstate == PST_LIVE) // Don't respawn a living player. (Causes ghosts if you do)
+				return;
+
 			if(!playeringame[from])
 			{
 				playeringame[from] = true;
@@ -373,6 +376,7 @@ void CL_ParsePacket(ENetPacket *pk)
 			mo->player = NULL;
 			players[d].mo = NULL;
 			memset(&players[d], 0, sizeof(player_t));
+			players[d].playerstate = PST_DEAD;
 			break;
 		}
 
