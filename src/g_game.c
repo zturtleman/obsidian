@@ -1296,7 +1296,7 @@ G_CheckSpot
     {
 	// first spawn of level, before corpses
 	for (i=0 ; i<playernum ; i++)
-	    if (players[i].mo->x == mthing->x << FRACBITS
+	    if (players[i].mo && players[i].mo->x == mthing->x << FRACBITS
 		&& players[i].mo->y == mthing->y << FRACBITS)
 		return false;	
 	return true;
@@ -1334,7 +1334,7 @@ G_CheckSpot
 // Spawns a player at one of the random death match spots 
 // called at level load and each death 
 //
-void G_DeathMatchSpawnPlayer (int playernum) 
+void G_DeathMatchSpawnPlayer (int playernum, boolean randomspawn) 
 { 
     int             i,j; 
     int				selections; 
@@ -1345,7 +1345,7 @@ void G_DeathMatchSpawnPlayer (int playernum)
  
     for (j=0 ; j<20 ; j++) 
     { 
-	i = P_Random() % selections; 
+	i = (randomspawn ? P_Random() : playernum) % selections; 
 	if (G_CheckSpot (playernum, &deathmatchstarts[i]) ) 
 	{ 
 	    deathmatchstarts[i].type = playernum+1; 
@@ -1383,7 +1383,7 @@ void G_DoReborn (int playernum)
 	// spawn at random spot if in death match 
 	if (deathmatch) 
 	{ 
-	    G_DeathMatchSpawnPlayer (playernum); 
+	    G_DeathMatchSpawnPlayer (playernum, 1); 
 	    return; 
 	} 
 		 

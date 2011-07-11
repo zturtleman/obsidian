@@ -827,25 +827,22 @@ P_SetupLevel
     if(client || server)
         P_NumberMobjs();
     
+    if(client) // Purge our player
+    {
+       memset(&players[consoleplayer], 0, sizeof(player_t));
+       players[consoleplayer].playerstate = PST_REBORN;
+    }
+
     // if deathmatch, randomly spawn the active players
-    if (deathmatch && !client && !server)
+    if (deathmatch && !server)
     {
 	for (i=0 ; i<MAXPLAYERS ; i++)
 	    if (playeringame[i])
 	    {
 		players[i].mo = NULL;
-		G_DeathMatchSpawnPlayer (i);
+		G_DeathMatchSpawnPlayer (i, !client);
 	    }
 			
-    }
-
-    // In a netgame, only do this for our client
-    if(client)
-    {
-        memset(&players[consoleplayer], 0, sizeof(player_t));
-        players[consoleplayer].mo = NULL;
-        players[consoleplayer].playerstate = PST_REBORN;
-        G_DeathMatchSpawnPlayer (consoleplayer);
     }
 
     // clear special respawning que

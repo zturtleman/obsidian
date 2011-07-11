@@ -78,7 +78,7 @@ void CL_Connect (char *srv_hn)
 
 	if (enet_address_set_host (&addr, host) < 0)
 	{
-		printf("Could not resolve address!\n");
+		I_Error("Could not resolve address!\n");
 		return;
 	}
 
@@ -91,7 +91,7 @@ void CL_Connect (char *srv_hn)
 		enet_host_flush(localclient);
 	else
 	{
-		printf("Connection to %s:%i failed!\n", host, addr.port);
+		I_Error ("Connection to %s:%i failed!\n", host, addr.port);
 		return;
 	}
 	
@@ -133,7 +133,7 @@ void CL_Connect (char *srv_hn)
 		}
 	
 	// Oops
-	printf("Failed to recieve greeting message. Connection failed!\n");
+	I_Error("Failed to recieve greeting message. Connection failed!\n");
 	return;
 }
 
@@ -172,8 +172,7 @@ void CL_Loop(void)
 				CL_ParsePacket(event.packet);
 				break;
 			case ENET_EVENT_TYPE_DISCONNECT:
-				DEH_printf("Connection to remote host was lost\n");
-				players[consoleplayer].message = "Connection to remote host was lost";
+				I_Error("Connection to remote host was lost\n");
 				break;
 		}
 	}
@@ -307,8 +306,8 @@ void CL_ParsePacket(ENetPacket *pk)
 		{
 			int dmstart;
 
-			if(players[from].playerstate == PST_LIVE) // Whut.
-				break;
+			if(players[from].playerstate == PST_LIVE) // Don't respawn a living player. (Causes ghosts if you do)
+				return;
 
 			if(!playeringame[from])
 			{
@@ -377,6 +376,7 @@ void CL_ParsePacket(ENetPacket *pk)
 			mo->player = NULL;
 			players[d].mo = NULL;
 			memset(&players[d], 0, sizeof(player_t));
+			players[d].playerstate = PST_DEAD;
 			break;
 		}
 
