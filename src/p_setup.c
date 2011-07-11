@@ -834,13 +834,13 @@ P_SetupLevel
     }
 
     // if deathmatch, randomly spawn the active players
-    if (deathmatch && !server)
+    if (deathmatch)
     {
 	for (i=0 ; i<MAXPLAYERS ; i++)
 	    if (playeringame[i])
 	    {
 		players[i].mo = NULL;
-		G_DeathMatchSpawnPlayer (i, !client);
+		G_DeathMatchSpawnPlayer (i, (!client || !server));
 	    }
 			
     }

@@ -117,7 +117,6 @@ void SV_Loop (void)
 				clients[c].id = c;
 				clients[c].peer = event.peer;
 				clients[c].player = &players[c];
-				clients[c].firstspawn = 0;
 				if(!clients[c].player) 
 				{
 					enet_peer_reset(clients[c].peer);
@@ -180,8 +179,7 @@ void SV_ClientWelcome (client_t* cl)
 	uint8_t inGame = 0;
 	uint8_t i;
 
-	playeringame[cl->id] = true;
-	cl->player->playerstate = PST_REBORN;
+	cl->player->playerstate = PST_DEAD;
 	for (i = 0; i < MAXPLAYERS; i++)
 		if(playeringame[i])
 			inGame |= 1 << i;
@@ -320,12 +318,22 @@ void SV_ParsePacket (ENetPacket *pk, ENetPeer *p)
 		break;
 
 		case MSG_RESPAWN:
-		if(clients[from].player && clients[from].firstspawn)
+		if(clients[from].player)
 		{
 			int dmstart;
 
 			if(clients[from].player->playerstate == PST_LIVE) // No respawning a live player
 				break;
+
+			if(!playeringame[from])
+			{
+				playeringame[from] = true;
+				if(clients[from].player->mo)
+				{
+					clients[from].player->mo->player = NULL;
+					clients[from].player->mo = NULL;
+				}
+			}
 
 			clients[from].player->playerstate = PST_REBORN;
 
@@ -348,8 +356,6 @@ void SV_ParsePacket (ENetPacket *pk, ENetPeer *p)
 			}
 			resend = 1;
 		}
-		else
-			clients[from].firstspawn = 1; // Hack! Ew! Gross!
 		break;
 
 		case MSG_CHAT:
