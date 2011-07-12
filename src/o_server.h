@@ -61,9 +61,6 @@ CT_ACTIVE
 ENetAddress addr;
 ENetHost *srv;
 
-// Have a damages integer for each client. Every tic, this will be sent out to the client and reset if they were hurt that tic.
-int damages[MAXPLAYERS];
-
 typedef struct
 {
 	int type;
@@ -71,6 +68,7 @@ typedef struct
 	ENetPeer *peer;
 	player_t *player;
 	char nick[MAXPLAYERNAME];
+	int damage;
 } client_t;
 
 client_t clients[MAXPLAYERS];

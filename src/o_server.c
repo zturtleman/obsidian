@@ -88,7 +88,7 @@ int SV_Main (void)
 		for(i = 0; i < MAXPLAYERS; i++)
 		{
 			clients[i].type = CT_EMPTY;
-			damages[i] = 0;
+			clients[i].damage = 0;
 		}
 	}
 
@@ -430,17 +430,17 @@ void SV_SendDamage(void)
 	// Send damage if needed.
 	for(i = 0; i < MAXPLAYERS; i++)
 	{
-		if(damages[i] && clients[i].player)
+		if(clients[i].damage && clients[i].player)
 		{
 			ENetPacket *dmg = enet_packet_create(NULL, 6, ENET_PACKET_FLAG_RELIABLE);
 			void *p = dmg->data;
 
 			WriteUInt8((uint8_t**)&p, MSG_DAMAGE);
 			WriteUInt8((uint8_t**)&p, i);
-			WriteInt32((int32_t**)&p, damages[i]);
+			WriteInt32((int32_t**)&p, clients[i].damage);
 			SV_BroadcastPacket(dmg, -1);
 
-			damages[i] = 0;
+			clients[i].damage = 0;
 		}
 	}
 }
@@ -503,7 +503,7 @@ void SV_DamageMobj(mobj_t *target, int damage)
 			continue;
 
 		if(clients[i].player->mo == target)
-			damages[i] += damage;
+			clients[i].damage += damage;
 	}
 
 	
@@ -531,7 +531,7 @@ void SV_KillMobj(mobj_t *source, mobj_t *target)
 
 	if(t <= MAXPLAYERS)
 	{
-		if(damages[t]) // Send unsent damage
+		if(clients[t].damage) // Send unsent damage
 			SV_SendDamage();
 
 		WriteUInt8((uint8_t**)&p, MSG_KILL);
