@@ -39,12 +39,19 @@
 #include "p_pspr.h"
 #include "p_spec.h"
 #include "m_argv.h"
+#include "m_config.h"
 
 #include "o_server.h"
 #include "o_common.h"
 
 boolean server;
 boolean client;
+
+char *sv_hostname;
+int sv_fraglimit;
+int sv_timelimit;
+int sv_skill;
+int sv_maxplayers;
 
 int SV_Main (void) 
 {
@@ -91,6 +98,9 @@ int SV_Main (void)
 			clients[i].damage = 0;
 		}
 	}
+
+	M_LoadServerDefaults();
+	startskill = sv_skill;
 
 	return 0;
 }
