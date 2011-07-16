@@ -32,6 +32,7 @@ void M_LoadDefaults(void);
 void M_SaveDefaults(void);
 void M_SetConfigDir(void);
 void M_ApplyPlatformDefaults(void);
+void M_LoadServerDefaults(void); 
 
 extern char *configdir;
 

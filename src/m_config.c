@@ -47,6 +47,7 @@
 
 #include "m_menu.h"
 #include "m_argv.h"
+#include "m_config.h"
 
 #include "w_wad.h"
 
@@ -216,7 +217,14 @@ static int snd_sbirq = 0;
 static int snd_sbdma = 0;
 static int snd_mport = 0;
 
-typedef enum 
+// Server stuff:
+extern char *sv_hostname;
+extern int sv_fraglimit;
+extern int sv_timelimit;
+extern int sv_skill;
+extern int sv_maxplayers;
+
+typedef enum
 {
     DEFAULT_INT,
     DEFAULT_INT_HEX,
@@ -1166,6 +1174,31 @@ static default_collection_t extra_defaults =
     NULL,
 };
 
+static default_t server_defaults_list[] =
+{
+	// Server name, to be sent to launchers eventually
+	CONFIG_VARIABLE_STRING(sv_hostname, sv_hostname),
+
+	// Fraglimit
+	CONFIG_VARIABLE_INT(sv_fraglimit, sv_fraglimit),
+
+	// Timelimit
+	CONFIG_VARIABLE_INT(sv_timelimit, sv_timelimit),
+
+	// Skill level
+	CONFIG_VARIABLE_INT(sv_skill, sv_skill),
+
+	// Max players/clients
+	CONFIG_VARIABLE_INT(sv_maxplayers, sv_maxplayers),
+};
+
+static default_collection_t server_defaults =
+{
+	server_defaults_list,
+	arrlen(server_defaults_list),
+	NULL,
+};
+
 static const int scantokey[128] =
 {
     0  ,    27,     '1',    '2',    '3',    '4',    '5',    '6',
@@ -1464,6 +1497,22 @@ void M_LoadDefaults (void)
 
     LoadDefaultCollection(&doom_defaults);
     LoadDefaultCollection(&extra_defaults);
+}
+
+void M_LoadServerDefaults (void)
+{
+	int i = M_CheckParmWithArgs("-svconfig", 1);
+
+	if (i)
+		server_defaults.filename = myargv[i + 1];
+	else
+		server_defaults.filename = "server.cfg";
+
+	printf ("Server config %s loaded\n", server_defaults.filename);
+	LoadDefaultCollection(&server_defaults);
+	SaveDefaultCollection(&server_defaults);
+
+	return;
 }
 
 // 

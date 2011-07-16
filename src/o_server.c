@@ -39,12 +39,19 @@
 #include "p_pspr.h"
 #include "p_spec.h"
 #include "m_argv.h"
+#include "m_config.h"
 
 #include "o_server.h"
 #include "o_common.h"
 
 boolean server;
 boolean client;
+
+char *sv_hostname;
+int sv_fraglimit;
+int sv_timelimit;
+int sv_skill;
+int sv_maxplayers;
 
 int SV_Main (void) 
 {
@@ -88,9 +95,12 @@ int SV_Main (void)
 		for(i = 0; i < MAXPLAYERS; i++)
 		{
 			clients[i].type = CT_EMPTY;
-			damages[i] = 0;
+			clients[i].damage = 0;
 		}
 	}
+
+	M_LoadServerDefaults();
+	startskill = sv_skill;
 
 	return 0;
 }
@@ -117,7 +127,6 @@ void SV_Loop (void)
 				clients[c].id = c;
 				clients[c].peer = event.peer;
 				clients[c].player = &players[c];
-				clients[c].firstspawn = 0;
 				if(!clients[c].player) 
 				{
 					enet_peer_reset(clients[c].peer);
@@ -180,8 +189,7 @@ void SV_ClientWelcome (client_t* cl)
 	uint16_t inGame = 0;
 	uint8_t i;
 
-	playeringame[cl->id] = true;
-	cl->player->playerstate = PST_REBORN;
+	cl->player->playerstate = PST_DEAD;
 	for (i = 0; i < MAXPLAYERS; i++)
 		//if(playeringame[i])
 			inGame |= 1 << i;
@@ -239,6 +247,7 @@ void SV_DropClient(int cn, const char *reason) // Reset one of the client_t insi
 	clients[cn].player->mo = NULL;
 	memset(&players[cn], 0, sizeof(player_t));
 	memset(clients[cn].nick, 0, MAXPLAYERNAME);
+	clients[cn].player->playerstate = PST_DEAD;
 	clients[cn].player = NULL;
 
 	WriteUInt8((uint8_t**)&p, MSG_DISC);
@@ -319,9 +328,22 @@ void SV_ParsePacket (ENetPacket *pk, ENetPeer *p)
 		break;
 
 		case MSG_RESPAWN:
-		if(clients[from].player && clients[from].firstspawn)
+		if(clients[from].player)
 		{
 			int dmstart;
+
+			if(clients[from].player->playerstate == PST_LIVE) // No respawning a live player
+				break;
+
+			if(!playeringame[from])
+			{
+				playeringame[from] = true;
+				if(clients[from].player->mo)
+				{
+					clients[from].player->mo->player = NULL;
+					clients[from].player->mo = NULL;
+				}
+			}
 
 			clients[from].player->playerstate = PST_REBORN;
 
@@ -344,8 +366,6 @@ void SV_ParsePacket (ENetPacket *pk, ENetPeer *p)
 			}
 			resend = 1;
 		}
-		else
-			clients[from].firstspawn = 1; // Hack! Ew! Gross!
 		break;
 
 		case MSG_CHAT:
@@ -420,17 +440,17 @@ void SV_SendDamage(void)
 	// Send damage if needed.
 	for(i = 0; i < MAXPLAYERS; i++)
 	{
-		if(damages[i] && clients[i].player)
+		if(clients[i].damage && clients[i].player)
 		{
 			ENetPacket *dmg = enet_packet_create(NULL, 6, ENET_PACKET_FLAG_RELIABLE);
 			void *p = dmg->data;
 
 			WriteUInt8((uint8_t**)&p, MSG_DAMAGE);
 			WriteUInt8((uint8_t**)&p, i);
-			WriteInt32((int32_t**)&p, damages[i]);
+			WriteInt32((int32_t**)&p, clients[i].damage);
 			SV_BroadcastPacket(dmg, -1);
 
-			damages[i] = 0;
+			clients[i].damage = 0;
 		}
 	}
 }
@@ -493,7 +513,7 @@ void SV_DamageMobj(mobj_t *target, int damage)
 			continue;
 
 		if(clients[i].player->mo == target)
-			damages[i] += damage;
+			clients[i].damage += damage;
 	}
 
 	
@@ -521,7 +541,7 @@ void SV_KillMobj(mobj_t *source, mobj_t *target)
 
 	if(t <= MAXPLAYERS)
 	{
-		if(damages[t]) // Send unsent damage
+		if(clients[t].damage) // Send unsent damage
 			SV_SendDamage();
 
 		WriteUInt8((uint8_t**)&p, MSG_KILL);
