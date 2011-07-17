@@ -1510,6 +1510,10 @@ void M_LoadServerDefaults (void)
 
 	printf ("Server config %s loaded\n", server_defaults.filename);
 	LoadDefaultCollection(&server_defaults);
+
+	if(sv_maxplayers == 0 || sv_maxplayers > MAXPLAYERS) // Sanity check!
+		sv_maxplayers = MAXPLAYERS;
+
 	SaveDefaultCollection(&server_defaults);
 
 	return;

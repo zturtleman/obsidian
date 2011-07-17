@@ -167,7 +167,7 @@ int SV_FindEmptyClientNum(void)
 {
 	int i;
 
-	for(i = 0; i < MAXPLAYERS; i++)
+	for(i = 0; i < sv_maxplayers; i++)
 		if(clients[i].type == CT_EMPTY)
 			return i;
 
@@ -555,7 +555,7 @@ int SV_ClientNumForPeer(ENetPeer *p)
 {
 	int i;
 	if(!p) return -1;
-	for (i = 0; i < MAXPLAYERS; i++)
+	for (i = 0; i < sv_maxplayers; i++)
 	{
 		if(clients[i].peer == p)
 			return i;
