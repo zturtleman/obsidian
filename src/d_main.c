@@ -1304,8 +1304,9 @@ void D_DoomMain (void)
 	startmap = 1;
 	autostart = true;
     }
-	
-    timelimit = 0;
+
+    if (!server)	
+        timelimit = 0;
 
     //! 
     // @arg <n>

@@ -101,6 +101,7 @@ int SV_Main (void)
 
 	M_LoadServerDefaults();
 	startskill = sv_skill;
+	timelimit = sv_timelimit;
 
 	return 0;
 }
@@ -571,6 +572,18 @@ void SV_SendString (messagetype_e type, const char *sending, int exclude)
 	WriteUInt8((uint8_t**)&p, type);
 	strncpy(p, sending, strlen(sending) + 1);
 	SV_BroadcastPacket(pk, exclude);
+	return;
+}
+
+void SV_SendExit (boolean secret)
+{
+	ENetPacket *pk = enet_packet_create(NULL, 2, ENET_PACKET_FLAG_RELIABLE);
+	void *p = pk->data;
+
+	WriteUInt8((uint8_t**)&p, MSG_EXITLEV);
+	WriteUInt8((uint8_t**)&p, secret);
+
+	SV_BroadcastPacket(pk, -1);
 	return;
 }
 

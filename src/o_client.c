@@ -28,6 +28,7 @@
 #include "enet/enet.h"
 
 #include "doomstat.h"
+#include "d_event.h"
 #include "p_mobj.h"
 #include "r_data.h"
 #include "r_defs.h"
@@ -212,6 +213,7 @@ void CL_Loop(void)
 // Pretty much the same here as serverside, except we're using different variables and reading some extra data,
 // we could be super concise and move this into an o_common.c, but that can wait for later maybe.
 void P_FireWeapon (player_t* player);
+gameaction_t gameaction;
 mobj_t *P_FindMobjById (int id);
 
 void CL_ParsePacket(ENetPacket *pk)
@@ -379,6 +381,10 @@ void CL_ParsePacket(ENetPacket *pk)
 			players[d].playerstate = PST_DEAD;
 			break;
 		}
+
+		case MSG_EXITLEV:
+			gameaction = ga_completed;
+			break;
 
 		default:
 			break;		

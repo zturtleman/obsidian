@@ -74,6 +74,7 @@
 #include "r_sky.h"
 
 #include "o_common.h"
+#include "o_server.h"
 
 #include "g_game.h"
 
@@ -94,7 +95,7 @@ void	G_DoLoadLevel (void);
 void	G_DoNewGame (void); 
 void	G_DoLoadGame (void); 
 void	G_DoPlayDemo (void); 
-void	G_DoCompleted (void); 
+void	G_DoCompleted (void);
 void	G_DoVictory (void); 
 void	G_DoWorldDone (void); 
 void	G_DoSaveGame (void); 
@@ -103,6 +104,7 @@ void	G_DoSaveGame (void);
 
 gamestate_t     oldgamestate; 
  
+extern gameaction_t    gameaction; 
 gameaction_t    gameaction; 
 gamestate_t     gamestate; 
 skill_t         gameskill; 
@@ -158,7 +160,7 @@ wbstartstruct_t wminfo;               	// parms for world map / intermission
  
 byte		consistancy[MAXPLAYERS][BACKUPTICS]; 
 
-boolean server; 
+boolean client, server; 
  
 // 
 // Controls 
@@ -1445,7 +1447,10 @@ boolean		secretexit;
 extern char*	pagename; 
  
 void G_ExitLevel (void) 
-{ 
+{
+    if (client)
+        return;
+ 
     secretexit = false; 
     gameaction = ga_completed; 
 } 
@@ -1453,6 +1458,9 @@ void G_ExitLevel (void)
 // Here's for the german edition.
 void G_SecretExitLevel (void) 
 { 
+    if (client)
+        return;
+
     // IF NO WOLF3D LEVELS, NO SECRET EXIT!
     if ( (gamemode == commercial)
       && (W_CheckNumForName("map31")<0))
@@ -1466,6 +1474,9 @@ void G_DoCompleted (void)
 { 
     int             i; 
     	 
+    if (server)
+        SV_SendExit(secretexit);
+
     gameaction = ga_nothing; 
  
     for (i=0 ; i<MAXPLAYERS ; i++) 
