@@ -291,6 +291,7 @@ void CL_ParsePacket(ENetPacket *pk)
 			prndindex = ReadInt16((int16_t**)&p);
 
 			CL_FireWeapon (pl, weapon);
+			break;
 		}
 
 		case MSG_DAMAGE:
