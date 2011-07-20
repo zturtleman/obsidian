@@ -735,6 +735,9 @@ P_KillMobj
 	// count environment kills against you
 	if (!source)	
 	    target->player->frags[target->player-players]++;
+
+    if (server && source) // Check for fraglimit:
+        SV_CheckFrags(source);
 			
 	target->flags &= ~MF_SOLID;
 	target->player->playerstate = PST_DEAD;

@@ -552,6 +552,36 @@ void SV_KillMobj(mobj_t *source, mobj_t *target)
 	}
 }
 
+// TODO: Make this a bit better.
+
+gameaction_t gameaction;
+
+void SV_CheckFrags (mobj_t *mo)
+{
+	int fragcount, i;
+
+	if (!mo->player || !sv_fraglimit)
+		return;
+
+	fragcount = 0;
+
+	for (i = 0; i < sv_maxplayers; i++)
+	{
+		if (clients[i].player == mo->player) // Check for suicides
+			fragcount -= mo->player->frags[i];
+		else
+			fragcount += mo->player->frags[i];
+	}
+
+	if (fragcount == sv_fraglimit)
+	{
+		printf("Fraglimit hit!\n");
+		gameaction = ga_completed;
+	}
+
+	return;
+}
+
 int SV_ClientNumForPeer(ENetPeer *p)
 {
 	int i;
