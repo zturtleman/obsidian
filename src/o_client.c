@@ -282,6 +282,18 @@ void CL_ParsePacket(ENetPacket *pk)
 		}
 		break;
 
+		case MSG_FIRE2:
+		{
+			player_t *pl = &players[consoleplayer];
+			weapontype_t weapon = (weapontype_t)ReadUInt8((uint8_t**)&p);
+
+			pl->refire = ReadInt16((int16_t**)&p);
+			prndindex = ReadInt16((int16_t**)&p);
+
+			CL_FireWeapon (pl, weapon);
+			break;
+		}
+
 		case MSG_DAMAGE:
 		{
 			int damaged;
@@ -465,6 +477,44 @@ void CL_SendString(messagetype_e type, char *sending)
 	WriteUInt8((uint8_t**)&p, type);
 	memcpy(p, sending, strlen(sending) + 1);
 	enet_peer_send(srvpeer, 1, pk);
+	return;
+}
+
+// This is horrible, and I should feel bad for this:
+
+boolean firefromsrv;
+
+void CL_FireWeapon (player_t *pl, weapontype_t weapon)
+{
+	firefromsrv = 1;
+
+	switch (weapon)
+	{
+		case wp_pistol:
+			A_FirePistol (pl, NULL);
+			break;
+		case wp_shotgun:
+			A_FireShotgun (pl, NULL);
+			break;
+		case wp_supershotgun:
+			A_FireShotgun2 (pl, NULL);
+			break;
+		case wp_chaingun:
+			A_FireCGun (pl, NULL);
+			break;
+		case wp_missile:
+			A_FireMissile (pl, NULL);
+			break;
+		case wp_plasma:
+			A_FirePlasma (pl, NULL);
+			break;
+		case wp_bfg:
+			A_FireBFG (pl, NULL);
+			break;
+		default: break;
+	}
+
+	firefromsrv = 0;
 	return;
 }
 

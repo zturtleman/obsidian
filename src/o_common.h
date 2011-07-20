@@ -32,7 +32,7 @@
 
 #define MAXPLAYERNAME 10
 #define MAX_MOBJ_BUFFER 128 // Able to store info for up to 1024 mobjs
-#define OBS_PROTO 1
+#define OBS_PROTO 2
 
 extern boolean server;
 extern boolean client;
@@ -53,7 +53,7 @@ typedef enum
 
 	MSG_CHAT, MSG_NICK, MSG_DISC,
 
-	MSG_EXITLEV
+	MSG_EXITLEV, MSG_FIRE2
 } messagetype_e;
 
 #endif
