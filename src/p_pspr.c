@@ -45,6 +45,7 @@
 
 #include "o_common.h"
 #include "o_client.h"
+#include "o_server.h"
 
 #define LOWERSPEED		FRACUNIT*6
 #define RAISESPEED		FRACUNIT*6
@@ -470,6 +471,7 @@ A_GunFlash
 // WEAPON ATTACKS
 //
 
+boolean firefromsrv = 0;
 
 //
 // A_Punch
@@ -579,8 +581,12 @@ A_FireMissile
 ( player_t*	player,
   pspdef_t*	psp ) 
 {
-    DecreaseAmmo(player, weaponinfo[player->readyweapon].ammo, 1);
-    P_SpawnPlayerMissile (player->mo, MT_ROCKET);
+    if (server || (client && !firefromsrv))
+        DecreaseAmmo(player, weaponinfo[player->readyweapon].ammo, 1);
+    if (server || firefromsrv)
+        P_SpawnPlayerMissile (player->mo, MT_ROCKET);
+    if (server)
+        SV_SendFire (player, wp_missile);
 }
 
 
@@ -592,9 +598,12 @@ A_FireBFG
 ( player_t*	player,
   pspdef_t*	psp ) 
 {
-    DecreaseAmmo(player, weaponinfo[player->readyweapon].ammo, 
-                 deh_bfg_cells_per_shot);
-    P_SpawnPlayerMissile (player->mo, MT_BFG);
+    if (server || (client && !firefromsrv))
+        DecreaseAmmo(player, weaponinfo[player->readyweapon].ammo, deh_bfg_cells_per_shot);
+    if (server || firefromsrv)
+        P_SpawnPlayerMissile (player->mo, MT_BFG);
+    if (server)
+        SV_SendFire (player, wp_bfg);
 }
 
 
@@ -607,13 +616,18 @@ A_FirePlasma
 ( player_t*	player,
   pspdef_t*	psp ) 
 {
-    DecreaseAmmo(player, weaponinfo[player->readyweapon].ammo, 1);
+    if (server || (client && !firefromsrv))
+    {
+        DecreaseAmmo(player, weaponinfo[player->readyweapon].ammo, 1);
 
-    P_SetPsprite (player,
+        P_SetPsprite (player,
 		  ps_flash,
 		  weaponinfo[player->readyweapon].flashstate+(P_Random ()&1) );
-
-    P_SpawnPlayerMissile (player->mo, MT_PLASMA);
+    }
+    if (server || firefromsrv)
+        P_SpawnPlayerMissile (player->mo, MT_PLASMA);
+    if (server)
+        SV_SendFire (player, wp_plasma);
 }
 
 
@@ -676,17 +690,24 @@ A_FirePistol
 ( player_t*	player,
   pspdef_t*	psp ) 
 {
-    S_StartSound (player->mo, sfx_pistol);
+    if (server || (client && !firefromsrv))
+    {
+        S_StartSound (player->mo, sfx_pistol);
 
-    P_SetMobjState (player->mo, S_PLAY_ATK2);
-    DecreaseAmmo(player, weaponinfo[player->readyweapon].ammo, 1);
+        P_SetMobjState (player->mo, S_PLAY_ATK2);
+        DecreaseAmmo(player, weaponinfo[player->readyweapon].ammo, 1);
 
-    P_SetPsprite (player,
+        P_SetPsprite (player,
 		  ps_flash,
 		  weaponinfo[player->readyweapon].flashstate);
-
-    P_BulletSlope (player->mo);
-    P_GunShot (player->mo, !player->refire);
+    }
+    if (server || firefromsrv)
+    {
+        P_BulletSlope (player->mo);
+        P_GunShot (player->mo, !player->refire);
+    }
+	if (server)
+        SV_SendFire (player, wp_pistol);
 }
 
 
@@ -699,20 +720,27 @@ A_FireShotgun
   pspdef_t*	psp ) 
 {
     int		i;
-	
-    S_StartSound (player->mo, sfx_shotgn);
-    P_SetMobjState (player->mo, S_PLAY_ATK2);
 
-    DecreaseAmmo(player, weaponinfo[player->readyweapon].ammo, 1);
+    if (server || (client && !firefromsrv))
+    {
+        S_StartSound (player->mo, sfx_shotgn);
+        P_SetMobjState (player->mo, S_PLAY_ATK2);
 
-    P_SetPsprite (player,
+        DecreaseAmmo(player, weaponinfo[player->readyweapon].ammo, 1);
+
+        P_SetPsprite (player,
 		  ps_flash,
 		  weaponinfo[player->readyweapon].flashstate);
-
-    P_BulletSlope (player->mo);
+    }
+    if (server || firefromsrv)
+    {
+        P_BulletSlope (player->mo);
 	
-    for (i=0 ; i<7 ; i++)
-	P_GunShot (player->mo, false);
+        for (i=0 ; i<7 ; i++)
+	        P_GunShot (player->mo, false);
+    }
+    if (server)
+        SV_SendFire (player, wp_shotgun);
 }
 
 
@@ -729,28 +757,34 @@ A_FireShotgun2
     angle_t	angle;
     int		damage;
 		
-	
-    S_StartSound (player->mo, sfx_dshtgn);
-    P_SetMobjState (player->mo, S_PLAY_ATK2);
+	if (server || (client && !firefromsrv))
+    {
+        S_StartSound (player->mo, sfx_dshtgn);
+        P_SetMobjState (player->mo, S_PLAY_ATK2);
 
-    DecreaseAmmo(player, weaponinfo[player->readyweapon].ammo, 2);
+        DecreaseAmmo(player, weaponinfo[player->readyweapon].ammo, 2);
 
-    P_SetPsprite (player,
+        P_SetPsprite (player,
 		  ps_flash,
 		  weaponinfo[player->readyweapon].flashstate);
-
-    P_BulletSlope (player->mo);
-	
-    for (i=0 ; i<20 ; i++)
+    }
+    if (server || firefromsrv)
     {
-	damage = 5*(P_Random ()%3+1);
-	angle = player->mo->angle;
-	angle += (P_Random()-P_Random())<<19;
-	P_LineAttack (player->mo,
+        P_BulletSlope (player->mo);
+	
+        for (i=0 ; i<20 ; i++)
+        {
+        	damage = 5*(P_Random ()%3+1);
+        	angle = player->mo->angle;
+        	angle += (P_Random()-P_Random())<<19;
+        	P_LineAttack (player->mo,
 		      angle,
 		      MISSILERANGE,
 		      bulletslope + ((P_Random()-P_Random())<<5), damage);
+        }
     }
+    if (server)
+        SV_SendFire (player, wp_supershotgun);
 }
 
 
@@ -762,23 +796,29 @@ A_FireCGun
 ( player_t*	player,
   pspdef_t*	psp ) 
 {
-    S_StartSound (player->mo, sfx_pistol);
+    if (server || (client && !firefromsrv))
+    {
+        S_StartSound (player->mo, sfx_pistol);
 
-    if (!player->ammo[weaponinfo[player->readyweapon].ammo])
-	return;
+        if (!player->ammo[weaponinfo[player->readyweapon].ammo])
+	        return;
 		
-    P_SetMobjState (player->mo, S_PLAY_ATK2);
-    DecreaseAmmo(player, weaponinfo[player->readyweapon].ammo, 1);
+        P_SetMobjState (player->mo, S_PLAY_ATK2);
+        DecreaseAmmo(player, weaponinfo[player->readyweapon].ammo, 1);
 
-    P_SetPsprite (player,
+        P_SetPsprite (player,
 		  ps_flash,
 		  weaponinfo[player->readyweapon].flashstate
 		  + psp->state
 		  - &states[S_CHAIN1] );
-
-    P_BulletSlope (player->mo);
-	
-    P_GunShot (player->mo, !player->refire);
+    }
+    if (server || firefromsrv)
+    {
+        P_BulletSlope (player->mo);
+        P_GunShot (player->mo, !player->refire);
+    }
+    if (server)
+        SV_SendFire (player, wp_chaingun);
 }
 
 

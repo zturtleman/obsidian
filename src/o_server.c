@@ -503,6 +503,31 @@ void SV_SendWeapon (player_t *player, weapontype_t weapon)
 	return;
 }
 
+void SV_SendFire (player_t *player, weapontype_t weapon)
+{
+	int i, t;
+	ENetPacket *pk = enet_packet_create(NULL, 6, ENET_PACKET_FLAG_RELIABLE);
+	void *p = pk->data;
+
+	t = sv_maxplayers + 1;
+
+	for (i = 0; i < sv_maxplayers; i++)
+		if (&players[i] == player)
+			t = i;
+
+	if(t > sv_maxplayers)
+		return;
+
+	WriteUInt8((uint8_t**)&p, MSG_FIRE2);
+	WriteUInt8((uint8_t**)&p, (uint8_t)weapon);
+	WriteInt16((int16_t**)&p, players[t].refire);
+	WriteInt16((int16_t**)&p, prndindex);
+
+	enet_peer_send(clients[t].peer, t + MAXPLAYERS, pk);
+
+	return;
+}
+
 void SV_DamageMobj(mobj_t *target, int damage)
 {
 	int i;

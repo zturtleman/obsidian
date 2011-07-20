@@ -53,7 +53,7 @@ typedef enum
 
 	MSG_CHAT, MSG_NICK, MSG_DISC,
 
-	MSG_EXITLEV
+	MSG_EXITLEV, MSG_FIRE2
 } messagetype_e;
 
 #endif

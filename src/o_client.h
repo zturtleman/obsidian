@@ -34,6 +34,7 @@
 ENetHost *localclient;
 int localid;
 uint8_t inGameMask;
+extern boolean firefromsrv;
 
 void CL_Connect (char *srv_hn);
 void CL_Loop(void);
@@ -45,6 +46,7 @@ void CL_SendStateUpdate(uint16_t state);
 void CL_SendFireCmd(weapontype_t w, int refire);
 void CL_SendRespawn(int startnum);
 void CL_SendString(messagetype_e type, char *sending);
+void CL_FireWeapon (player_t *pl, weapontype_t weapon);
 void CL_ReadSectorBuffer (char *secbuf);
 
 #endif

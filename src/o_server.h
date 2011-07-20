@@ -44,6 +44,7 @@ void SV_BroadcastPacket(ENetPacket *pk, int exclude);
 void SV_SendDamage(void);
 void SV_SendPickup(player_t *player, int netid);
 void SV_SendWeapon(player_t *player, weapontype_t weapon);
+void SV_SendFire (player_t *player, weapontype_t weapon);
 void SV_DamageMobj(mobj_t *target, int damage);
 void SV_KillMobj(mobj_t *source, mobj_t *target);
 void SV_CheckFrags (mobj_t *mo);
