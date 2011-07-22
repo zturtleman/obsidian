@@ -1631,6 +1631,7 @@ void G_WorldDone (void)
 	  case 11:
 	  case 20:
 	  case 30:
+        if (!client && !server) // [tm512] Nope, please don't do this.
 	    F_StartFinale ();
 	    break;
 	}
