@@ -491,15 +491,19 @@ void CL_FireWeapon (player_t *pl, weapontype_t weapon)
 	switch (weapon)
 	{
 		case wp_pistol:
+			P_BulletSlope (pl->mo);
 			A_FirePistol (pl, NULL);
 			break;
 		case wp_shotgun:
+			P_BulletSlope (pl->mo);
 			A_FireShotgun (pl, NULL);
 			break;
 		case wp_supershotgun:
+			P_BulletSlope (pl->mo);
 			A_FireShotgun2 (pl, NULL);
 			break;
 		case wp_chaingun:
+			P_BulletSlope (pl->mo);
 			A_FireCGun (pl, NULL);
 			break;
 		case wp_missile:

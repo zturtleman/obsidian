@@ -690,6 +690,8 @@ A_FirePistol
 ( player_t*	player,
   pspdef_t*	psp ) 
 {
+	if (server)
+        SV_SendFire (player, wp_pistol);
     if (player != &players[consoleplayer] || !client || !firefromsrv)
     {
         S_StartSound (player->mo, sfx_pistol);
@@ -706,8 +708,6 @@ A_FirePistol
         P_BulletSlope (player->mo);
         P_GunShot (player->mo, !player->refire);
     }
-	if (server)
-        SV_SendFire (player, wp_pistol);
 }
 
 
@@ -721,6 +721,8 @@ A_FireShotgun
 {
     int		i;
 
+    if (server)
+        SV_SendFire (player, wp_shotgun);
     if (player != &players[consoleplayer] || !client || !firefromsrv)
     {
         S_StartSound (player->mo, sfx_shotgn);
@@ -739,8 +741,6 @@ A_FireShotgun
         for (i=0 ; i<7 ; i++)
 	        P_GunShot (player->mo, false);
     }
-    if (server)
-        SV_SendFire (player, wp_shotgun);
 }
 
 
@@ -757,6 +757,8 @@ A_FireShotgun2
     angle_t	angle;
     int		damage;
 		
+    if (server)
+        SV_SendFire (player, wp_supershotgun);
 	if (player != &players[consoleplayer] || !client || !firefromsrv)
     {
         S_StartSound (player->mo, sfx_dshtgn);
@@ -783,8 +785,6 @@ A_FireShotgun2
 		      bulletslope + ((P_Random()-P_Random())<<5), damage);
         }
     }
-    if (server)
-        SV_SendFire (player, wp_supershotgun);
 }
 
 
@@ -796,6 +796,8 @@ A_FireCGun
 ( player_t*	player,
   pspdef_t*	psp ) 
 {
+    if (server)
+        SV_SendFire (player, wp_chaingun);
     if (player != &players[consoleplayer] || !client || !firefromsrv)
     {
         S_StartSound (player->mo, sfx_pistol);
@@ -817,8 +819,6 @@ A_FireCGun
         P_BulletSlope (player->mo);
         P_GunShot (player->mo, !player->refire);
     }
-    if (server)
-        SV_SendFire (player, wp_chaingun);
 }
 
 
