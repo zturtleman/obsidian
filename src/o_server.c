@@ -506,7 +506,7 @@ void SV_SendWeapon (player_t *player, weapontype_t weapon)
 void SV_SendFire (player_t *player, weapontype_t weapon)
 {
 	int i, t;
-	ENetPacket *pk = enet_packet_create(NULL, 6, ENET_PACKET_FLAG_RELIABLE);
+	ENetPacket *pk = enet_packet_create(NULL, 10, ENET_PACKET_FLAG_RELIABLE);
 	void *p = pk->data;
 
 	t = sv_maxplayers + 1;
@@ -521,6 +521,7 @@ void SV_SendFire (player_t *player, weapontype_t weapon)
 	WriteUInt8((uint8_t**)&p, MSG_FIRE2);
 	WriteUInt8((uint8_t**)&p, (uint8_t)weapon);
 	WriteInt16((int16_t**)&p, players[t].refire);
+	WriteInt32((int32_t**)&p, (int32_t)clients[t].player->mo->angle);
 	WriteInt16((int16_t**)&p, prndindex);
 
 	enet_peer_send(clients[t].peer, t + MAXPLAYERS, pk);

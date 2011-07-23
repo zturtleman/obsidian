@@ -302,11 +302,14 @@ void CL_ParsePacket(ENetPacket *pk)
 		{
 			player_t *pl = &players[consoleplayer];
 			weapontype_t weapon = (weapontype_t)ReadUInt8((uint8_t**)&p);
+			fixed_t storeangle = pl->mo->angle;
 
 			pl->refire = ReadInt16((int16_t**)&p);
+			pl->mo->angle = (fixed_t)ReadInt32((int32_t**)&p);
 			prndindex = ReadInt16((int16_t**)&p);
 
 			CL_FireWeapon (pl, weapon);
+			pl->mo->angle = storeangle;
 			break;
 		}
 
