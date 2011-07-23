@@ -844,7 +844,7 @@ P_DamageMobj
     }
 	
     player = target->player;
-    if (player && gameskill == sk_baby)
+    if (!client && player && gameskill == sk_baby)
 	damage >>= 1; 	// take half damage in trainer mode
 		
 
