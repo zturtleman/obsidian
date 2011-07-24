@@ -203,12 +203,12 @@ void SV_ClientWelcome (client_t* cl)
 
 	void *p = pk->data;
 	void *mobjbuf = P_MakeMobjBuffer();
-	uint8_t inGame = 0;
+	uint16_t inGame = 0;
 	uint8_t i, j;
 
 	cl->player->playerstate = PST_DEAD;
 	for (i = 0; i < MAXPLAYERS; i++)
-		if(playeringame[i])
+		//if(playeringame[i])
 			inGame |= 1 << i;
 
 	WriteUInt8((uint8_t**)&p, MSG_WELCOME); // put a greeting marker on it
@@ -219,7 +219,7 @@ void SV_ClientWelcome (client_t* cl)
 	WriteUInt8((uint8_t**)&p, (uint8_t)gameskill); // Game skill
 	WriteUInt8((uint8_t**)&p, (uint8_t)deathmatch); // Game mode
 	WriteUInt8((uint8_t**)&p, cl->id); // client will set this to consoleplayer
-	WriteUInt8((uint8_t**)&p, inGame); // Bit mask for which players are in game
+	WriteUInt16((uint16_t**)&p, inGame); // Bit mask for which players are in game
 
 	for (i = 0; i < MAXPLAYERS; i++)
 		for (j = 0; j < MAXPLAYERS; j++)

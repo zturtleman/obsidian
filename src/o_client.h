@@ -46,7 +46,7 @@
 
 ENetHost *localclient;
 int localid;
-uint8_t inGameMask;
+uint16_t inGameMask;
 extern boolean firefromsrv;
 
 void CL_Connect (char *srv_hn);

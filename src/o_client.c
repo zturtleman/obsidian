@@ -136,7 +136,7 @@ void CL_Connect (char *srv_hn)
 				startskill = (skill_t) ReadUInt8((uint8_t**)&pkd);
 				deathmatch = ReadUInt8((uint8_t**)&pkd);
 				localid = ReadUInt8((uint8_t**)&pkd);
-				inGameMask = ReadUInt8((uint8_t**)&pkd);
+				inGameMask = ReadUInt16((uint16_t**)&pkd);
 
 				for (i = 0; i < MAXPLAYERS; i++)
 					for (j = 0; j < MAXPLAYERS; j++)
@@ -433,10 +433,6 @@ void CL_ParsePacket(ENetPacket *pk)
 			players[d].playerstate = PST_DEAD;
 			break;
 		}
-
-		case MSG_EXITLEV:
-			gameaction = ga_completed;
-			break;
 
 		default:
 			break;		
