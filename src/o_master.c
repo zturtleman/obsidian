@@ -32,10 +32,37 @@
     ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
     THE POSSIBILITY OF SUCH DAMAGE. 
     ---
-    o_query : Master server broadcasting, launcher response
+    o_master : Master server broadcasting
 */
 
-#ifndef __O_QUERY_H__
-#define __O_QUERY_H__
+#include <stdio.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <netinet/in.h>
+#include "master/master.h"
 
-#endif
+masterserver_t master;
+
+// Initialize socket
+int MA_Init (void)
+{
+	if ((master.sock = socket (PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
+	{
+		printf ("Failed to create master server socket. Proceeding without advertising to the master.\n");
+		return 1;
+	}
+
+	memset (&master.server, 0, sizeof(master.server));
+	master.server.sin_family = AF_INET;
+	master.server.sin_addr.s_addr = inet_addr (masters[0]);
+	master.server.sin_port = htons(11500);
+
+	if ((connect(master.sock, (struct sockaddr*)&master.server, sizeof(master.server))) < 0)
+	{
+		printf ("Failed to connect to master server. Proceeding without advertising to the master.\n");
+		return 2;
+	}
+
+	

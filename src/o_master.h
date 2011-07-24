@@ -32,5 +32,22 @@
     ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
     THE POSSIBILITY OF SUCH DAMAGE. 
     ---
-    o_query : Master server broadcasting, launcher response
+    o_master : Master server broadcasting
 */
+
+#ifndef __O_QUERY_H__
+#define __O_QUERY_H__
+
+#define MAXMASTERBUFFER 512
+
+typedef struct
+{
+	int sock;
+	struct sockaddr_in server;
+	uint8_t *buffer
+} masterserver_t;
+
+char *masters[]
+{ "crimson.lostsig.net" };
+
+#endif
