@@ -122,7 +122,7 @@ void CL_Connect (char *srv_hn)
 			// Read message type
 			msgid = ReadUInt8((uint8_t**)&pkd);
 
-			uint8_t sv_proto;
+			uint8_t sv_proto, i, j;
 
 			// Make sure it's a welcome message
 			if (msgid == MSG_WELCOME)
@@ -137,6 +137,14 @@ void CL_Connect (char *srv_hn)
 				deathmatch = ReadUInt8((uint8_t**)&pkd);
 				localid = ReadUInt8((uint8_t**)&pkd);
 				inGameMask = ReadUInt8((uint8_t**)&pkd);
+
+				for (i = 0; i < MAXPLAYERS; i++)
+					for (j = 0; j < MAXPLAYERS; j++)
+					{
+						players[i].frags[j] = ReadInt8((int8_t**)&pkd);
+						printf("players[%i].frags[%i] == %i\n", i, j, players[i].frags[j]);
+					}
+
 				readmobjbuf = malloc(MAX_MOBJ_BUFFER);
 				memcpy(readmobjbuf, pkd, MAX_MOBJ_BUFFER);
 				pkd += MAX_MOBJ_BUFFER;

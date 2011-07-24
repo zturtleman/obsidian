@@ -806,7 +806,8 @@ void G_DoLoadLevel (void)
 	turbodetected[i] = false;
 	if (playeringame[i] && players[i].playerstate == PST_DEAD) 
 	    players[i].playerstate = PST_REBORN; 
-	memset (players[i].frags,0,sizeof(players[i].frags)); 
+    if (!client)
+	    memset (players[i].frags,0,sizeof(players[i].frags)); 
     } 
 		 
     P_SetupLevel (gameepisode, gamemap, 0, gameskill);    

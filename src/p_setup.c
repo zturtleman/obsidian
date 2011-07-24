@@ -841,6 +841,7 @@ P_SetupLevel
     int		i;
     char	lumpname[9];
     int		lumpnum;
+    int		fragsbak[MAXPLAYERS];
 	
     totalkills = totalitems = totalsecret = wminfo.maxfrags = 0;
     wminfo.partime = 180;
@@ -910,10 +911,14 @@ P_SetupLevel
 	for (i=0 ; i<MAXPLAYERS ; i++)
 	    if (playeringame[i])
 	    {
+            if (readsecbuf) // Hacky, but it keeps it from doing this except on connection
+                memcpy (fragsbak, players[i].frags, sizeof(int) * MAXPLAYERS);
             memset(&players[i], 0, sizeof(player_t));
             players[i].playerstate = PST_REBORN;
 		    players[i].mo = NULL;
 		    G_DeathMatchSpawnPlayer (i, (!client || !server));
+            if (readsecbuf)
+			    memcpy (players[i].frags, fragsbak, sizeof(int) * MAXPLAYERS);
 	    }
 			
     }

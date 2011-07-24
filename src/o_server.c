@@ -197,11 +197,14 @@ void SV_ClientWelcome (client_t* cl)
 {
 	void *secbuf = SV_MakeSectorBuffer();
 	int secbuflen = ((int*)secbuf)[0];
-	ENetPacket *pk = enet_packet_create(NULL, 32 + MAX_MOBJ_BUFFER + secbuflen, ENET_PACKET_FLAG_RELIABLE);
+	ENetPacket *pk = enet_packet_create(NULL,
+		32 + (MAXPLAYERS * MAXPLAYERS) + MAX_MOBJ_BUFFER + secbuflen, 
+		ENET_PACKET_FLAG_RELIABLE);
+
 	void *p = pk->data;
 	void *mobjbuf = P_MakeMobjBuffer();
 	uint8_t inGame = 0;
-	uint8_t i;
+	uint8_t i, j;
 
 	cl->player->playerstate = PST_DEAD;
 	for (i = 0; i < MAXPLAYERS; i++)
@@ -217,6 +220,10 @@ void SV_ClientWelcome (client_t* cl)
 	WriteUInt8((uint8_t**)&p, (uint8_t)deathmatch); // Game mode
 	WriteUInt8((uint8_t**)&p, cl->id); // client will set this to consoleplayer
 	WriteUInt8((uint8_t**)&p, inGame); // Bit mask for which players are in game
+
+	for (i = 0; i < MAXPLAYERS; i++)
+		for (j = 0; j < MAXPLAYERS; j++)
+			WriteInt8((int8_t**)&p, players[i].frags[j]);
 
 	memcpy(p, mobjbuf, MAX_MOBJ_BUFFER); // Bit masks for which items have been removed
 	p += MAX_MOBJ_BUFFER;
