@@ -35,8 +35,8 @@
     o_master : Master server broadcasting
 */
 
-#ifndef __O_QUERY_H__
-#define __O_QUERY_H__
+#ifndef __O_MASTER_H__
+#define __O_MASTER_H__
 
 #define MAXMASTERBUFFER 512
 
@@ -47,7 +47,7 @@ typedef struct
 	uint8_t *buffer
 } masterserver_t;
 
-char *masters[]
+char *masters[] = 
 { "crimson.lostsig.net" };
 
 #endif

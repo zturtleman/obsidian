@@ -41,28 +41,30 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <netinet/in.h>
+#include <netdb.h>
 #include "master/master.h"
+#include "o_master.h"
 
 masterserver_t master;
+struct sockaddr_in thisServer;
 
-// Initialize socket
 int MA_Init (void)
 {
-	if ((master.sock = socket (PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
+	int status;
+	struct addrinfo hints, *addrList;
+
+	memset (&hints, 0, sizeof(struct addrinfo));
+	hints.ai_family = AF_INET;
+	hints.ai_socktype = SOCK_DGRAM;
+
+	if ((status = getaddrinfo(masters[0], "11500", &hints, &addrList)) != 0)
 	{
-		printf ("Failed to create master server socket. Proceeding without advertising to the master.\n");
+		printf("Error in getaddrinfo: %s\n", gai_strerror(status));
 		return 1;
 	}
 
-	memset (&master.server, 0, sizeof(master.server));
-	master.server.sin_family = AF_INET;
-	master.server.sin_addr.s_addr = inet_addr (masters[0]);
-	master.server.sin_port = htons(11500);
+	master.server = *(struct sockaddr_in *)addrList->ai_addr;
+	freeaddrinfo (addrList);
 
-	if ((connect(master.sock, (struct sockaddr*)&master.server, sizeof(master.server))) < 0)
-	{
-		printf ("Failed to connect to master server. Proceeding without advertising to the master.\n");
-		return 2;
-	}
-
-	
+	return 0;
+}
