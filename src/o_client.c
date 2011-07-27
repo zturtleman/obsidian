@@ -140,10 +140,7 @@ void CL_Connect (char *srv_hn)
 
 				for (i = 0; i < MAXPLAYERS; i++)
 					for (j = 0; j < MAXPLAYERS; j++)
-					{
 						players[i].frags[j] = ReadInt8((int8_t**)&pkd);
-						printf("players[%i].frags[%i] == %i\n", i, j, players[i].frags[j]);
-					}
 
 				readmobjbuf = malloc(MAX_MOBJ_BUFFER);
 				memcpy(readmobjbuf, pkd, MAX_MOBJ_BUFFER);
