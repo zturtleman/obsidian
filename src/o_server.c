@@ -66,6 +66,8 @@ int sv_timelimit;
 int sv_skill;
 int sv_maxplayers;
 
+int MA_Init (void);
+
 int SV_Main (void) 
 {
 	int i, j, attempts;
@@ -101,6 +103,8 @@ int SV_Main (void)
 	else
 	{
 		printf("Obsidian Dedicated Server started on%s port %i\n", addr.port == 11666 ? "" : " alternate", addr.port);
+		int ret = MA_Init();
+		printf ("%i\n", ret);
 		autostart = 1;
 		server = 1;
 		client = 0;

@@ -38,13 +38,14 @@
 #ifndef __O_MASTER_H__
 #define __O_MASTER_H__
 
-#define MAXMASTERBUFFER 512
+#define MAXMASTERBUFFER 1024
 
 typedef struct
 {
 	int sock;
 	struct sockaddr_in server;
-	uint8_t *buffer
+	uint8_t *buffer;
+	const uint8_t *buffer_begin;
 } masterserver_t;
 
 char *masters[] = 

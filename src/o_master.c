@@ -36,10 +36,12 @@
 */
 
 #include <stdio.h>
+#include <string.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include <netinet/in.h>
 #include <netdb.h>
 #include "master/master.h"
@@ -52,19 +54,53 @@ int MA_Init (void)
 {
 	int status;
 	struct addrinfo hints, *addrList;
+	fd_set fdset;
+	struct timeval timeout = { 10, 0 };
 
 	memset (&hints, 0, sizeof(struct addrinfo));
 	hints.ai_family = AF_INET;
-	hints.ai_socktype = SOCK_DGRAM;
+	hints.ai_socktype = SOCK_STREAM;
 
 	if ((status = getaddrinfo(masters[0], "11500", &hints, &addrList)) != 0)
 	{
-		printf("Error in getaddrinfo: %s\n", gai_strerror(status));
+		printf ("MA_Init: Error in getaddrinfo: %s\n", gai_strerror(status));
 		return 1;
 	}
 
-	master.server = *(struct sockaddr_in *)addrList->ai_addr;
+	if ((master.sock = socket (addrList->ai_family, addrList->ai_socktype, addrList->ai_protocol)) < 0)
+	{
+		printf ("MA_Init: Could not create socket.\n");
+		return 2;
+	}
+
+	fcntl (master.sock, F_SETFL, O_NONBLOCK);
+	FD_ZERO (&fdset);
+	FD_SET (master.sock, &fdset);
+
+	master.server = *(struct sockaddr_in *) addrList->ai_addr;
+	master.buffer = (uint8_t*) malloc (MAXMASTERBUFFER);
+	master.buffer_begin = master.buffer; // Used for reset. Don't modify it!
+
 	freeaddrinfo (addrList);
 
-	return 0;
+	if (connect (master.sock, &master.server, sizeof (master.server)) < 0)
+	{
+		printf ("MA_Init: Could not connect to master.\n");
+		return 3;
+	}
+
+	if (select (master.sock + 1, NULL, &fdset, NULL, &timeout) == 1)
+	{
+		int serror;
+		socklen_t slen = sizeof (serror);
+		getsockopt (master.sock, SOL_SOCKET, SO_ERROR, &serror, &slen);
+
+		if (!serror) // Success!
+			return 0;
+		else
+		{
+			printf ("MA_Init: Could not connect to master.\n");
+			return 4;
+		}
+	}
 }
