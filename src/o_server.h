@@ -85,6 +85,11 @@ typedef struct
 	player_t *player;
 	char nick[MAXPLAYERNAME];
 	int damage;
+	struct
+	{
+		mobj_t *source;
+		int tic;
+	} death;
 } client_t;
 
 client_t clients[MAXPLAYERS];

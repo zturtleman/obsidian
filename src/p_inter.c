@@ -704,7 +704,18 @@ P_KillMobj
     mobj_t*	mo;
 
     if(server)	
-        SV_KillMobj(source, target);
+	{
+		int i;
+        for (i = 0; i < MAXPLAYERS; i++)
+		{
+			if (clients[i].player->mo == target)
+			{
+				clients[i].death.source = source;
+				clients[i].death.tic = gametic;
+				break;
+			}
+		}
+	}
 
     target->flags &= ~(MF_SHOOTABLE|MF_FLOAT|MF_SKULLFLY);
 
