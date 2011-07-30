@@ -56,6 +56,7 @@
 
 #include "o_server.h"
 #include "o_common.h"
+#include "o_master.h"
 
 boolean server;
 boolean client;
@@ -66,7 +67,8 @@ int sv_timelimit;
 int sv_skill;
 int sv_maxplayers;
 
-int MA_Init (void);
+int MA_Init (void); // FIXME: Move this elsewhere
+void SV_InitMaster(void); // ^^^^
 
 int SV_Main (void) 
 {
@@ -103,8 +105,7 @@ int SV_Main (void)
 	else
 	{
 		printf("Obsidian Dedicated Server started on%s port %i\n", addr.port == 11666 ? "" : " alternate", addr.port);
-		int ret = MA_Init();
-		printf ("%i\n", ret);
+		SV_InitMaster();
 		autostart = 1;
 		server = 1;
 		client = 0;
@@ -796,4 +797,32 @@ void *SV_MakeSectorBuffer (void)
 	WriteInt32((int32_t**)&p, -1); // End of buffer
 
 	return secbuf;
+}
+
+boolean sv_usemaster = 1; // TEMP: Move this to the config stuffs
+void SV_InitMaster (void)
+{
+	if (!sv_usemaster)
+	{
+		printf ("SV_InitMaster: sv_usemaster is set to false. Will not contact the master server.\n");
+		return;
+	}
+
+	int ret; // Return value.
+
+	// Attempt connection
+	if ((ret = MA_Init()) > 0)
+	{
+		sv_usemaster = false;
+		return;
+	}
+
+	char testtext[] = "Hello, world!";
+	int i;
+	for (i = 0; i < strlen(testtext); i++)
+	{
+		*master.sendbuf.head = testtext[i];
+		master.sendbuf.head ++;
+	}
+	MA_Send();
 }

@@ -76,6 +76,7 @@ CT_ACTIVE
 
 ENetAddress addr;
 ENetHost *srv;
+boolean usemaster;
 
 typedef struct
 {

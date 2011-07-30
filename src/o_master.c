@@ -44,24 +44,27 @@
 #include <fcntl.h>
 #include <netinet/in.h>
 #include <netdb.h>
+#include <errno.h>
 #include "master/master.h"
 #include "o_master.h"
 
-masterserver_t master;
 struct sockaddr_in thisServer;
+fd_set fdset;
+
+// Sockets suck.
+// This file is here to hide them from the rest of the code.
 
 int MA_Init (void)
 {
 	int status;
 	struct addrinfo hints, *addrList;
-	fd_set fdset;
 	struct timeval timeout = { 10, 0 };
 
 	memset (&hints, 0, sizeof(struct addrinfo));
 	hints.ai_family = AF_INET;
 	hints.ai_socktype = SOCK_STREAM;
 
-	if ((status = getaddrinfo(masters[0], "11500", &hints, &addrList)) != 0)
+	if ((status = getaddrinfo("localhost", "11500", &hints, &addrList)) != 0)
 	{
 		printf ("MA_Init: Error in getaddrinfo: %s\n", gai_strerror(status));
 		return 1;
@@ -78,16 +81,12 @@ int MA_Init (void)
 	FD_SET (master.sock, &fdset);
 
 	master.server = *(struct sockaddr_in *) addrList->ai_addr;
-	master.buffer = (uint8_t*) malloc (MAXMASTERBUFFER);
-	master.buffer_begin = master.buffer; // Used for reset. Don't modify it!
+	master.sendbuf.head = master.sendbuf.tail = (uint8_t*) malloc (MAXMASTERBUFFER);
+	master.recvbuf.head = master.recvbuf.tail = (uint8_t*) malloc (MAXMASTERBUFFER);
 
 	freeaddrinfo (addrList);
 
-	if (connect (master.sock, &master.server, sizeof (master.server)) < 0)
-	{
-		printf ("MA_Init: Could not connect to master.\n");
-		return 3;
-	}
+	connect (master.sock, &master.server, sizeof (master.server));
 
 	if (select (master.sock + 1, NULL, &fdset, NULL, &timeout) == 1)
 	{
@@ -96,11 +95,38 @@ int MA_Init (void)
 		getsockopt (master.sock, SOL_SOCKET, SO_ERROR, &serror, &slen);
 
 		if (!serror) // Success!
+		{
+			printf ("MA_Init: Successfully connected to master.\n");
 			return 0;
+		}
 		else
 		{
 			printf ("MA_Init: Could not connect to master.\n");
 			return 4;
 		}
 	}
+}
+
+// Sends the current master.buffer to the master server
+// Returns 0 on success.
+
+int MA_Send (void)
+{
+	int totalToSend = master.sendbuf.head - master.sendbuf.tail;
+	int totalSent, tempSent;
+
+	printf ("MA_Send: Attempting to send %i bytes.\n", totalToSend);
+
+	totalSent = tempSent = 0;
+	while (totalSent < totalToSend)
+	{
+		tempSent = send (master.sock, (master.sendbuf.tail + totalSent), (totalToSend - totalSent), 0);
+		if (tempSent < 0)
+		{
+			printf ("MA_Send: Error %i!\n");
+			return 1;
+		}
+		totalSent += tempSent;
+	}
+	return 0;
 }

@@ -12,4 +12,7 @@
 #define SERVER_CHALLENGE 0x45
 #define LAUNCHER_CHALLENGE 0x46
 
+#define SERVER_INIT 0x55
+#define SERVER_UPD 0x65
+
 #endif

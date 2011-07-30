@@ -38,17 +38,24 @@
 #ifndef __O_MASTER_H__
 #define __O_MASTER_H__
 
-#define MAXMASTERBUFFER 1024
+#define MAXMASTERBUFFER 2048
 
 typedef struct
 {
 	int sock;
 	struct sockaddr_in server;
-	uint8_t *buffer;
-	const uint8_t *buffer_begin;
+	struct
+	{
+		uint8_t *head;
+		uint8_t *tail;
+	} sendbuf;
+	struct
+	{
+		uint8_t *head;
+		uint8_t *tail;
+	} recvbuf;
 } masterserver_t;
 
-char *masters[] = 
-{ "crimson.lostsig.net" };
+masterserver_t master;
 
 #endif
