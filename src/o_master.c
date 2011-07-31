@@ -128,5 +128,8 @@ int MA_Send (void)
 		}
 		totalSent += tempSent;
 	}
+
+	master.sendbuf.head = master.sendbuf.tail; // Reset it for next time
+
 	return 0;
 }
