@@ -80,8 +80,10 @@ int initialize (void)
 }
 
 // Checks for new connections via accept() and loads them into sock_t linked list.
-void getnewconn (void)
+// Returns 0 if a new socket was added.
+int getnewconn (void)
 {
+	static socklen_t socklen = sizeof (struct sockaddr_storage);
 	struct sockaddr_storage tempAddr;
 	int tempSock;
 	static sock_t *slnext = NULL;
@@ -94,10 +96,11 @@ void getnewconn (void)
 		memset (slnext, 0, sizeof (sock_t));
 	}
 
-	if ((tempSock = accept (mastersock, (struct sockaddr *)&tempAddr, sizeof(struct sockaddr_storage))) < 0)
-		return; // Not this time. D:
-	else // YES A NEW CLIENT
+	// Loop through and get new waiting connections, but don't do more than 10 each time around.
+	if ((tempSock = accept (mastersock, (struct sockaddr *)&tempAddr, &socklen)) >= 0)
 	{
+		// YES A NEW CLIENT WOO YEAH
+		printf (".");
 		// Fill it out, then put it in the linked list.
 		if (!sltail && !slhead) sltail = slhead = slnext; // :|
 		slnext->s = tempSock;
@@ -109,12 +112,18 @@ void getnewconn (void)
 		slnext = NULL; // Let's get another next time.
 	}
 
-	return;
+	return (tempSock < 0);
 }
 
 void masterloop (void)
 {
-	getnewconn();
+	int i;
+
+	// Get up to 10 new connections per iteration.
+	// We can change this to alter performance.
+	for (i = 0; i < 10; i++)
+		if (getnewconn())
+			break;
 
 	usleep (50000);
 	return;
@@ -126,10 +135,10 @@ int main (void)
 	printf ("obsidian master server\n");
 
 	if (initialize()) return 1;
+
 	char ipchar[32];
 	inet_ntop (AF_INET, &(((struct sockaddr_in *)masteraddr.ai_addr)->sin_addr), ipchar, 32);
 	printf ("bound to %s:%s\n", ipchar, MASTERPORT);
-	printf ("server_t struct is %i bytes\n", sizeof(server_t));
 
 	for (;;) masterloop();
 
