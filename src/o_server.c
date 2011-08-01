@@ -141,8 +141,6 @@ void SV_Loop (void)
 				clients[c].id = c;
 				clients[c].peer = event.peer;
 				clients[c].player = &players[c];
-				clients[c].death.source = NULL;
-				clients[c].death.tic = 0;
 				if(!clients[c].player) 
 				{
 					enet_peer_reset(clients[c].peer);
@@ -474,20 +472,6 @@ void SV_SendDamage(void)
 			SV_BroadcastPacket(dmg, -1);
 
 			clients[i].damage = 0;
-		}
-
-		/* [tm512]
-		   I really wanted to avoid something hacky like this, but there was an issue
-		   where the server was telling the client to kill a player prior to when the 
-		   client would have normally killed that player. This resulted in several bad
-		   side effects, such as projectiles flying through players. I am able to work
-		   around this bug if I send the death messages one tic after they actually
-		   happened. It's pretty horrible, but better than nothing. - 7/29/11
-		*/
-		if (clients[i].death.tic && clients[i].death.tic < gametic)
-		{
-			SV_KillMobj (clients[i].death.source, clients[i].player->mo);
-			clients[i].death.tic = 0;
 		}
 	}
 }
