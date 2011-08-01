@@ -38,7 +38,7 @@ typedef struct
 typedef struct sock_s
 {
 	int s;
-	struct sockaddr *addr;
+	struct sockaddr addr;
 	enum
 	{ 
 		uninit,

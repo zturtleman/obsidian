@@ -24,11 +24,12 @@
 #include "master.h"
 
 server_t serverlist[MAXSERVERS]; // Server list
-sock_t *slcap; // Socket linked list cap
+sock_t *slhead = NULL, *sltail = NULL; // Socket linked list magic
 int numservers = 0;
 
 int mastersock;
 struct addrinfo masteraddr;
+struct timespec lasttic = { 0, 0 };
 fd_set fdread, fdwrite, fdexce;
 
 int initialize (void)
@@ -78,6 +79,47 @@ int initialize (void)
 	return 0;
 }
 
+// Checks for new connections via accept() and loads them into sock_t linked list.
+void getnewconn (void)
+{
+	struct sockaddr_storage tempAddr;
+	int tempSock;
+	static sock_t *slnext = NULL;
+
+	// if slnext is NULL, we need to allocate some more memory for a new one.
+	// After using up this new one, we set it back to NULL.
+	if (!slnext)
+	{
+		slnext = (sock_t *) malloc (sizeof (sock_t));
+		memset (slnext, 0, sizeof (sock_t));
+	}
+
+	if ((tempSock = accept (mastersock, (struct sockaddr *)&tempAddr, sizeof(struct sockaddr_storage))) < 0)
+		return; // Not this time. D:
+	else // YES A NEW CLIENT
+	{
+		// Fill it out, then put it in the linked list.
+		if (!sltail && !slhead) sltail = slhead = slnext; // :|
+		slnext->s = tempSock;
+		slnext->addr = *((struct sockaddr *) &tempAddr);
+		slhead->next = slnext;
+		slnext->prev = slhead;
+		slnext->next = NULL;
+		slhead = slnext;
+		slnext = NULL; // Let's get another next time.
+	}
+
+	return;
+}
+
+void masterloop (void)
+{
+	getnewconn();
+
+	usleep (50000);
+	return;
+}
+
 int main (void)
 {
 	// Hello, world
@@ -88,6 +130,8 @@ int main (void)
 	inet_ntop (AF_INET, &(((struct sockaddr_in *)masteraddr.ai_addr)->sin_addr), ipchar, 32);
 	printf ("bound to %s:%s\n", ipchar, MASTERPORT);
 	printf ("server_t struct is %i bytes\n", sizeof(server_t));
+
+	for (;;) masterloop();
 
 	return 0;
 }
