@@ -23,14 +23,15 @@
 #include "config.h"
 #include "master.h"
 
-server_t serverlist[MAXSERVERS]; // Server list
+sock_t *serverlist[MAXSERVERS]; // Server list
 sock_t *slhead = NULL, *sltail = NULL; // Socket linked list magic
 int numservers = 0;
 
 int mastersock;
 struct addrinfo masteraddr;
-struct timespec lasttic = { 0, 0 };
+
 fd_set fdread, fdwrite, fdexce;
+int maxfd = 0;
 
 int initialize (void)
 {
@@ -69,11 +70,18 @@ int initialize (void)
 		return 4;
 	}
 
+	maxfd = mastersock;
+
 	// Okay, so if we've gotten here, the server's socket is bound and listening
 	// for new connections. However, since the socket is still blocking, it will
 	// NOT perform well for our purposes. Set the socket to non-blocking:
 
 	fcntl (mastersock, F_SETFL, O_NONBLOCK);
+
+	// Zero the fd_sets...
+	FD_ZERO (&fdread);
+	FD_ZERO (&fdwrite);
+	FD_ZERO (&fdexce);
 
 	// At this point, the server is ready to wait for new connections and handle them! :D
 	return 0;
@@ -110,20 +118,64 @@ int getnewconn (void)
 		slnext->next = NULL;
 		slhead = slnext;
 		slnext = NULL; // Let's get another next time.
+
+		// Now, add the socket to our fd_sets, for select():
+		FD_SET (tempSock, &fdread);
+		FD_SET (tempSock, &fdwrite);
+		FD_SET (tempSock, &fdexce);
+
+		// If this new file descriptor is higher, use that for select.
+		maxfd = tempSock > maxfd ? tempSock : maxfd;
 	}
 
 	return (tempSock < 0);
+}
+
+void checksockets (void)
+{
+	struct timeval timeout = { 0, 0 };
+
+	if (select (maxfd + 1, &fdread, &fdwrite, &fdexce, &timeout) < 0) // Error!
+	{
+		fprintf (stderr, "ERROR: checksockets select failed: %i\n", errno);
+		return;
+	}
+
+	// Iterate through the linked list
+	sock_t *crawler = sltail;
+	for (; crawler != NULL; crawler = crawler->next)
+	{
+		// If the socket is not initialized, don't check for being able to write
+		// to them, just see if they're open for reading.
+		if ((crawler->type == uninit || crawler->type == clean) && FD_ISSET (crawler->s, &fdread))
+			uninit_handler (crawler);
+
+		// Don't ever read from launchers, just give them their stuff and close()
+		if (crawler->type == launcher && FD_ISSET (crawler->s, &fdwrite))
+			launcher_handler (crawler);
+
+		// Servers can be read and written to, 
+		if (crawler->type == server && (FD_ISSET (crawler->s, &fdread) || FD_ISSET (crawler->s, &fdwrite)))
+			server_handler (crawler);
+	}
+
+	return;
 }
 
 void masterloop (void)
 {
 	int i;
 
-	// Get up to 10 new connections per iteration.
+	// Get up to 10 new connections per cycle.
 	// We can change this to alter performance.
 	for (i = 0; i < 10; i++)
 		if (getnewconn())
 			break;
+
+	// Now check all of our file descriptors to see which ones are ready
+	// to do something. Then, we can try reading or writing to them from
+	// there.
+	checksockets();
 
 	usleep (50000);
 	return;

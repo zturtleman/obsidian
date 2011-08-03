@@ -19,7 +19,7 @@
 #define MAXPLAYERS 4
 #define MAXPLAYERNAME 10
 
-typedef struct
+/*typedef struct
 {
 	// Properties:
 	char hostname[128];
@@ -33,7 +33,7 @@ typedef struct
 	uint8_t maxclients;
 	char playernames[MAXPLAYERS][MAXPLAYERNAME];
 	char wads[5][16]; // Bleh static limits.
-} server_t;
+} server_t;*/ // Remove this soon
 
 typedef struct sock_s
 {
@@ -43,9 +43,9 @@ typedef struct sock_s
 	{ 
 		uninit,
 		launcher, 
-		server 
+		server, 
+		clean
 	} type;
-	server_t *server; // NULL for launchers, 
 
 	struct sock_s *prev;
 	struct sock_s *next;
