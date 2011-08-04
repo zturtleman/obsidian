@@ -23,9 +23,10 @@
 #include "config.h"
 #include "master.h"
 
-sock_t *serverlist[MAXSERVERS]; // Server list
+sock_t *serverlist[MAXSERVERS] = { 0 }; // Server list
 sock_t *slhead = NULL, *sltail = NULL; // Socket linked list magic
 int numservers = 0;
+struct timeval timenow;
 
 int mastersock;
 struct addrinfo masteraddr;
@@ -108,15 +109,24 @@ int getnewconn (void)
 	if ((tempSock = accept (mastersock, (struct sockaddr *)&tempAddr, &socklen)) >= 0)
 	{
 		// YES A NEW CLIENT WOO YEAH
-		printf (".");
+		printf (".\n");
 		// Fill it out, then put it in the linked list.
-		if (!sltail && !slhead) sltail = slhead = slnext; // :|
 		slnext->s = tempSock;
 		slnext->addr = *((struct sockaddr *) &tempAddr);
-		slhead->next = slnext;
-		slnext->prev = slhead;
-		slnext->next = NULL;
-		slhead = slnext;
+		gettimeofday (&slnext->ctime, NULL);
+		if (!sltail && !slhead)
+		{
+			sltail = slhead = slnext; // :|
+			slnext->next = slnext->prev = NULL;
+		}
+		else
+		{
+			slhead->next = slnext;
+			slnext->prev = slhead;
+			slnext->next = NULL;
+			slhead = slnext;
+		}
+		printf ("Adding sock_t 0x%x to linked list after 0x%x and before 0x%x\n", slnext, slnext->prev, slnext->next);
 		slnext = NULL; // Let's get another next time.
 
 		// Now, add the socket to our fd_sets, for select():
@@ -129,6 +139,75 @@ int getnewconn (void)
 	}
 
 	return (tempSock < 0);
+}
+
+// Removes a socket from existence
+void purgesock (sock_t *sock)
+{
+	printf ("Purging socket %x\n", sock);
+	// Server? Remove it from the list:
+	int i;
+	if (sock->type == server)
+		for (i = 0; i < MAXSERVERS; i++)
+			if (serverlist[i] == sock)
+				serverlist[i] == NULL;
+
+	// Link prev and next to each other
+	if (sock->next)
+		sock->next->prev = sock->prev;
+	if (sock->prev)
+		sock->prev->next = sock->next;
+
+	// Set new sltail and slhead where applicable
+	if (sock == slhead)
+		slhead = sock->prev;
+	if (sock == sltail)
+		sltail = sock->next;
+
+	free (sock);
+	return;
+}
+
+// Returns an empty slot in the serverlist array, or -1 if it's full
+int findemptyserver (void)
+{
+	int i;
+
+	for (i = 0; i < MAXSERVERS; i++)
+		if (serverlist[i] == NULL)
+			return i;
+
+	return -1;
+}
+
+void uninit_handler (sock_t *sock)
+{
+	// For this, we're only gonna need a single byte
+	uint8_t buf;
+	int res; // Store the return value of recv/send
+
+	if ((res = recv (sock->s, &buf, 1, 0)) < 1)
+		purgesock (sock);
+
+	if (buf == 0x45) // Server
+	{
+		int freeSlot; // Find free slot on server list array
+		if ((freeSlot = findemptyserver()) < 0) purgesock (sock);
+		else serverlist[freeSlot] = sock;
+
+		sock->type = server;
+		sock->heartbeats = 2; // Miss 2 heartbeats, get booted
+		numservers ++;
+
+		// Echo this back to them so they know we recieved the message
+		// We don't care about return value here
+		send (sock->s, &buf, 1, 0);
+	}
+	else if (buf = 0x46) // Launcher
+		sock->type = launcher;
+	else purgesock (sock); // Neither server or launcher, goodbye.
+
+	return;
 }
 
 void checksockets (void)
@@ -147,16 +226,31 @@ void checksockets (void)
 	{
 		// If the socket is not initialized, don't check for being able to write
 		// to them, just see if they're open for reading.
-		if ((crawler->type == uninit || crawler->type == clean) && FD_ISSET (crawler->s, &fdread))
+		if (crawler->type == uninit && FD_ISSET (crawler->s, &fdread))
 			uninit_handler (crawler);
 
 		// Don't ever read from launchers, just give them their stuff and close()
-		if (crawler->type == launcher && FD_ISSET (crawler->s, &fdwrite))
-			launcher_handler (crawler);
+	//	if (crawler->type == launcher && FD_ISSET (crawler->s, &fdwrite))
+	//		launcher_handler (crawler);
 
 		// Servers can be read and written to, 
-		if (crawler->type == server && (FD_ISSET (crawler->s, &fdread) || FD_ISSET (crawler->s, &fdwrite)))
-			server_handler (crawler);
+	//	if (crawler->type == server && (FD_ISSET (crawler->s, &fdread) || FD_ISSET (crawler->s, &fdwrite)))
+	//		server_handler (crawler);
+
+		// If a socket is older than 3 seconds, and still not initialized, remove it:
+		// Do this ONLY to ->prev so we don't mess up our pointers!
+		if (crawler->prev && crawler->prev->type == uninit && crawler->prev->ctime.tv_sec + 3 < timenow.tv_sec)
+		{
+			purgesock (crawler->prev);
+			continue;
+		}
+
+		// Unfortunately the above doesn't work if crawler == slhead
+		if (crawler == slhead && crawler->type == uninit && crawler->ctime.tv_sec + 3 < timenow.tv_sec)
+		{
+			purgesock (crawler);
+			break;
+		}
 	}
 
 	return;
@@ -165,6 +259,8 @@ void checksockets (void)
 void masterloop (void)
 {
 	int i;
+
+	gettimeofday (&timenow, NULL);
 
 	// Get up to 10 new connections per cycle.
 	// We can change this to alter performance.

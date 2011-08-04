@@ -43,9 +43,10 @@ typedef struct sock_s
 	{ 
 		uninit,
 		launcher, 
-		server, 
-		clean
+		server
 	} type;
+	struct timeval ctime;
+	int heartbeats; // (servers only)
 
 	struct sock_s *prev;
 	struct sock_s *next;
