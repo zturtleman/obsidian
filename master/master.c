@@ -105,7 +105,7 @@ int getnewconn (void)
 		memset (slnext, 0, sizeof (sock_t));
 	}
 
-	// Loop through and get new waiting connections, but don't do more than 10 each time around.
+	// Get new waiting connections,
 	if ((tempSock = accept (mastersock, (struct sockaddr *)&tempAddr, &socklen)) >= 0)
 	{
 		// YES A NEW CLIENT WOO YEAH
@@ -144,13 +144,16 @@ int getnewconn (void)
 // Removes a socket from existence
 void purgesock (sock_t *sock)
 {
-	printf ("Purging socket %x\n", sock);
+	printf ("Purging socket 0x%x\n", sock);
 	// Server? Remove it from the list:
 	int i;
 	if (sock->type == server)
 		for (i = 0; i < MAXSERVERS; i++)
 			if (serverlist[i] == sock)
+			{
 				serverlist[i] == NULL;
+				numservers --;
+			}
 
 	// Link prev and next to each other
 	if (sock->next)
@@ -203,10 +206,15 @@ void uninit_handler (sock_t *sock)
 		// We don't care about return value here
 		send (sock->s, &buf, 1, 0);
 	}
-	else if (buf = 0x46) // Launcher
+	else if (buf == 0x46) // Launcher
 		sock->type = launcher;
 	else purgesock (sock); // Neither server or launcher, goodbye.
 
+	return;
+}
+
+void launcher_handler (sock_t *crawler)
+{
 	return;
 }
 
@@ -237,16 +245,16 @@ void checksockets (void)
 	//	if (crawler->type == server && (FD_ISSET (crawler->s, &fdread) || FD_ISSET (crawler->s, &fdwrite)))
 	//		server_handler (crawler);
 
-		// If a socket is older than 3 seconds, and still not initialized, remove it:
+		// If a socket is older than 3 seconds, and is not a server, remove it:
 		// Do this ONLY to ->prev so we don't mess up our pointers!
-		if (crawler->prev && crawler->prev->type == uninit && crawler->prev->ctime.tv_sec + 3 < timenow.tv_sec)
+		if (crawler->prev && crawler->prev->type != server && crawler->prev->ctime.tv_sec + 3 < timenow.tv_sec)
 		{
 			purgesock (crawler->prev);
 			continue;
 		}
 
 		// Unfortunately the above doesn't work if crawler == slhead
-		if (crawler == slhead && crawler->type == uninit && crawler->ctime.tv_sec + 3 < timenow.tv_sec)
+		if (crawler == slhead && crawler->type != server && crawler->ctime.tv_sec + 3 < timenow.tv_sec)
 		{
 			purgesock (crawler);
 			break;
