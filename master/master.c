@@ -18,6 +18,7 @@
 #include <netinet/in.h>
 #include <netdb.h>
 #include <errno.h>
+#include <sys/time.h>
 
 // My includes
 #include "config.h"
@@ -151,7 +152,7 @@ void purgesock (sock_t *sock)
 		for (i = 0; i < MAXSERVERS; i++)
 			if (serverlist[i] == sock)
 			{
-				serverlist[i] == NULL;
+				serverlist[i] = NULL;
 				numservers --;
 			}
 
@@ -215,6 +216,40 @@ void uninit_handler (sock_t *sock)
 
 void launcher_handler (sock_t *crawler)
 {
+	// Allocate 6 bytes per server, plus 2 bytes for the number of servers.
+	// Also make a duplicate pointer so we do not modify the original.
+	int toMalloc = (6 * numservers) + 2;
+	int i, totalSent, tempSent;
+	uint8_t *buf = (uint8_t *) malloc (toMalloc);
+	uint8_t *p = buf;
+
+	// Write the number of servers (short), then increment
+	*p = htons ((uint16_t) numservers);
+	p += 2;
+
+	for (i = 0; i < MAXSERVERS; i++)
+	{
+		if (!serverlist[i]) continue;
+
+		// Write IP address
+		*p = (uint32_t) ((struct sockaddr_in *) &serverlist[i]->addr)->sin_addr.s_addr;
+		p += 4;
+
+		// Write port number
+		*p = (uint16_t) ((struct sockaddr_in *) &serverlist[i]->addr)->sin_port;
+		p += 2;
+	}
+
+	totalSent = tempSent = 0;
+
+	while (totalSent < toMalloc)
+	{
+		if ((tempSent = send (crawler->s, buf + totalSent, toMalloc - totalSent, 0)) < 0)
+			break;
+
+		totalSent += tempSent;
+	}
+ 
 	return;
 }
 
@@ -238,8 +273,8 @@ void checksockets (void)
 			uninit_handler (crawler);
 
 		// Don't ever read from launchers, just give them their stuff and close()
-	//	if (crawler->type == launcher && FD_ISSET (crawler->s, &fdwrite))
-	//		launcher_handler (crawler);
+		if (crawler->type == launcher && FD_ISSET (crawler->s, &fdwrite))
+			launcher_handler (crawler);
 
 		// Servers can be read and written to, 
 	//	if (crawler->type == server && (FD_ISSET (crawler->s, &fdread) || FD_ISSET (crawler->s, &fdwrite)))

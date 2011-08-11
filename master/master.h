@@ -19,22 +19,6 @@
 #define MAXPLAYERS 4
 #define MAXPLAYERNAME 10
 
-/*typedef struct
-{
-	// Properties:
-	char hostname[128];
-	char website[64];
-	char email[64];
-	uint8_t episode;
-	uint8_t map;
-	uint8_t skill;
-	uint8_t gametype;
-	uint8_t clients;
-	uint8_t maxclients;
-	char playernames[MAXPLAYERS][MAXPLAYERNAME];
-	char wads[5][16]; // Bleh static limits.
-} server_t;*/ // Remove this soon
-
 typedef struct sock_s
 {
 	int s;
