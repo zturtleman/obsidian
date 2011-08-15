@@ -51,6 +51,8 @@
 #include "deh_main.h"
 #include "p_inter.h"
 #include "z_zone.h"
+#include "sounds.h"
+#include "s_sound.h"
 
 #include "o_client.h"
 #include "o_common.h"
@@ -406,10 +408,17 @@ void CL_ParsePacket(ENetPacket *pk)
 		case MSG_CHAT:
 		{
 			char *c = malloc(128);
+			boolean sound;
+
+			sound = ReadInt8 ((uint8_t**)&p);
 
 			printf("%s\n", p);
 			sprintf(c, "%s", p);
 			players[consoleplayer].message = c;
+
+			if (sound)
+				S_StartSound (0, (gamemode == commercial) ? sfx_radio : sfx_tink);
+
 			break;
 		}
 

@@ -62,7 +62,7 @@ void SV_DamageMobj(mobj_t *target, int damage);
 void SV_KillMobj(mobj_t *source, mobj_t *target);
 void SV_CheckFrags (mobj_t *mo);
 int SV_ClientNumForPeer(ENetPeer *p);
-void SV_SendString (messagetype_e type, const char *sending, int exclude);
+void SV_SendString (messagetype_e type, const char *sending, int exclude, boolean sound);
 void SV_SendExit (boolean secret);
 void *SV_MakeSectorBuffer(void);
 

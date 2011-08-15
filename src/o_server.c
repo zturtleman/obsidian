@@ -254,7 +254,7 @@ void SV_DropClient(int cn, const char *reason) // Reset one of the client_t insi
 	snprintf(discmsg, 128, "%s disconnected.", clients[cn].nick);
 
 	if(strlen(clients[cn].nick) > 0)
-		SV_SendString(MSG_CHAT, discmsg, cn);
+		SV_SendString(MSG_CHAT, discmsg, cn, 0);
 
 	playeringame[cn] = false;
 	clients[cn].type = CT_EMPTY;
@@ -394,7 +394,7 @@ void SV_ParsePacket (ENetPacket *pk, ENetPeer *p)
 			char sendchat[130 + MAXPLAYERNAME]; // 128 for original message, 2 for ": ", and MAXPLAYERNAME to hold the player's name.
 			printf("<%s> %s\n", clients[from].nick, pkp);
 			snprintf(sendchat, 130 + MAXPLAYERNAME, "%s: %s", clients[from].nick, pkp);
-			SV_SendString(MSG_CHAT, sendchat, from);
+			SV_SendString(MSG_CHAT, sendchat, from, 1);
 			resend = 0;
 			break;
 		}
@@ -405,7 +405,7 @@ void SV_ParsePacket (ENetPacket *pk, ENetPeer *p)
 			strncpy(clients[from].nick, pkp, MAXPLAYERNAME);
 			printf("Client %i sets nickname to \"%s\"\n", from, clients[from].nick);
 			snprintf(joinmsg, 128, "%s has entered the game!", clients[from].nick);
-			SV_SendString(MSG_CHAT, joinmsg, -1);
+			SV_SendString(MSG_CHAT, joinmsg, -1, 0);
 			resend = 0;
 			break;
 		}
@@ -640,12 +640,13 @@ int SV_ClientNumForPeer(ENetPeer *p)
 	return -1;
 }
 
-void SV_SendString (messagetype_e type, const char *sending, int exclude)
+void SV_SendString (messagetype_e type, const char *sending, int exclude, boolean sound)
 {
 	ENetPacket *pk = enet_packet_create(NULL, strlen(sending) + 2, ENET_PACKET_FLAG_RELIABLE);
 	void *p = pk->data;
 
 	WriteUInt8((uint8_t**)&p, type);
+	WriteUInt8((uint8_t**)&p, sound);
 	strncpy(p, sending, strlen(sending) + 1);
 	SV_BroadcastPacket(pk, exclude);
 	return;
