@@ -109,8 +109,6 @@ int getnewconn (void)
 	// Get new waiting connections,
 	if ((tempSock = accept (mastersock, (struct sockaddr *)&tempAddr, &socklen)) >= 0)
 	{
-		// YES A NEW CLIENT WOO YEAH
-		printf (".\n");
 		// Fill it out, then put it in the linked list.
 		slnext->s = tempSock;
 		slnext->addr = *((struct sockaddr *) &tempAddr);
@@ -168,6 +166,13 @@ void purgesock (sock_t *sock)
 	if (sock == sltail)
 		sltail = sock->next;
 
+	// Clear file descriptor from our fdsets
+	FD_CLR (sock->s, &fdread);
+	FD_CLR (sock->s, &fdwrite);
+	FD_CLR (sock->s, &fdexce);
+
+	// Close the file descriptor and free the allocated memory
+	close (sock->s);
 	free (sock);
 	return;
 }
