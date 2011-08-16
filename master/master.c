@@ -158,7 +158,7 @@ void purgesock (sock_t *sock)
 		
 		char ipchar[32];
 		inet_ntop (AF_INET, &((struct sockaddr_in *) &sock->addr)->sin_addr, ipchar, 32);
-		printf ("Removing server [%i] [%s]\n", i, ipchar);
+		printf ("Removing server [%i] [%s:%i]\n", i, ipchar, ntohs (sock->port));
 	}
 
 	// Link prev and next to each other
@@ -208,6 +208,14 @@ void uninit_handler (sock_t *sock)
 	if (buf == SERVER_CHALLENGE) // Server
 	{
 		int freeSlot; // Find free slot on server list array
+		short port; // Read in the server's port number.
+
+		if (recv (sock->s, &sock->port, 2, 0) < 2)
+		{
+			purgesock (sock);
+			return;
+		}
+
 		if ((freeSlot = findemptyserver()) < 0) purgesock (sock);
 		else serverlist[freeSlot] = sock;
 
@@ -217,11 +225,11 @@ void uninit_handler (sock_t *sock)
 
 		// Echo this back to them so they know we recieved the message
 		// We don't care about return value here
-		send (sock->s, &buf, 1, 0);
+		send (sock->s, &buf, 1, MSG_NOSIGNAL);
 
 		char ipchar[32];
 		inet_ntop (AF_INET, &((struct sockaddr_in *) &sock->addr)->sin_addr, ipchar, 32);
-		printf ("Added server    [%i] [%s]\n", freeSlot, ipchar);
+		printf ("Added server    [%i] [%s:%i]\n", freeSlot, ipchar, ntohs (sock->port));
 	}
 	else if (buf == LAUNCHER_CHALLENGE) // Launcher
 		sock->type = launcher;
@@ -252,7 +260,7 @@ void launcher_handler (sock_t *sock)
 		p += 4;
 
 		// Write port number
-		*p = (uint16_t) ((struct sockaddr_in *) &serverlist[i]->addr)->sin_port;
+		*p = (uint16_t) serverlist[i]->port;
 		p += 2;
 	}
 
@@ -260,7 +268,7 @@ void launcher_handler (sock_t *sock)
 
 	while (totalSent < toMalloc)
 	{
-		if ((tempSent = send (sock->s, buf + totalSent, toMalloc - totalSent, 0)) < 0)
+		if ((tempSent = send (sock->s, buf + totalSent, toMalloc - totalSent, MSG_NOSIGNAL)) < 0)
 			break;
 
 		totalSent += tempSent;
