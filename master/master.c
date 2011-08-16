@@ -125,7 +125,7 @@ int getnewconn (void)
 			slnext->next = NULL;
 			slhead = slnext;
 		}
-		printf ("Adding sock_t 0x%x to linked list after 0x%x and before 0x%x\n", slnext, slnext->prev, slnext->next);
+//		printf ("Adding sock_t 0x%x to linked list after 0x%x and before 0x%x\n", slnext, slnext->prev, slnext->next);
 		slnext = NULL; // Let's get another next time.
 
 		// Now, add the socket to our fd_sets, for select():
@@ -143,16 +143,23 @@ int getnewconn (void)
 // Removes a socket from existence
 void purgesock (sock_t *sock)
 {
-	printf ("Purging socket 0x%x\n", sock);
+//	printf ("Purging socket 0x%x\n", sock);
 	// Server? Remove it from the list:
 	int i;
 	if (sock->type == server)
+	{
 		for (i = 0; i < MAXSERVERS; i++)
 			if (serverlist[i] == sock)
 			{
 				serverlist[i] = NULL;
 				numservers --;
+				break;
 			}
+		
+		char ipchar[32];
+		inet_ntop (AF_INET, &((struct sockaddr_in *) &sock->addr)->sin_addr, ipchar, 32);
+		printf ("Removing server [%i] [%s]\n", i, ipchar);
+	}
 
 	// Link prev and next to each other
 	if (sock->next)
@@ -198,7 +205,7 @@ void uninit_handler (sock_t *sock)
 	if ((res = recv (sock->s, &buf, 1, 0)) < 1)
 		purgesock (sock);
 
-	if (buf == 0x45) // Server
+	if (buf == SERVER_CHALLENGE) // Server
 	{
 		int freeSlot; // Find free slot on server list array
 		if ((freeSlot = findemptyserver()) < 0) purgesock (sock);
@@ -211,15 +218,19 @@ void uninit_handler (sock_t *sock)
 		// Echo this back to them so they know we recieved the message
 		// We don't care about return value here
 		send (sock->s, &buf, 1, 0);
+
+		char ipchar[32];
+		inet_ntop (AF_INET, &((struct sockaddr_in *) &sock->addr)->sin_addr, ipchar, 32);
+		printf ("Added server    [%i] [%s]\n", freeSlot, ipchar);
 	}
-	else if (buf == 0x46) // Launcher
+	else if (buf == LAUNCHER_CHALLENGE) // Launcher
 		sock->type = launcher;
 	else purgesock (sock); // Neither server or launcher, goodbye.
 
 	return;
 }
 
-void launcher_handler (sock_t *crawler)
+void launcher_handler (sock_t *sock)
 {
 	// Allocate 6 bytes per server, plus 2 bytes for the number of servers.
 	// Also make a duplicate pointer so we do not modify the original.
@@ -249,12 +260,26 @@ void launcher_handler (sock_t *crawler)
 
 	while (totalSent < toMalloc)
 	{
-		if ((tempSent = send (crawler->s, buf + totalSent, toMalloc - totalSent, 0)) < 0)
+		if ((tempSent = send (sock->s, buf + totalSent, toMalloc - totalSent, 0)) < 0)
 			break;
 
 		totalSent += tempSent;
 	}
  
+	return;
+}
+
+void server_handler (sock_t *sock)
+{
+	uint8_t buf;
+
+	// Receive if possible
+	if (recv (sock->s, &buf, 1, 0) < 1)
+		return;
+
+	if (buf == SERVER_UPD)
+		sock->heartbeats = 2;
+
 	return;
 }
 
@@ -281,21 +306,29 @@ void checksockets (void)
 		if (crawler->type == launcher && FD_ISSET (crawler->s, &fdwrite))
 			launcher_handler (crawler);
 
-		// Servers can be read and written to, 
-	//	if (crawler->type == server && (FD_ISSET (crawler->s, &fdread) || FD_ISSET (crawler->s, &fdwrite)))
-	//		server_handler (crawler);
+		// Servers will send periodic messages to reset their heartbeat counter 
+		if (crawler->type == server && FD_ISSET (crawler->s, &fdread))
+			server_handler (crawler);
 
-		// If a socket is older than 3 seconds, and is not a server, remove it:
+		// If a socket is too old, remove it.
 		// Do this ONLY to ->prev so we don't mess up our pointers!
-		if (crawler->prev && crawler->prev->type != server && crawler->prev->ctime.tv_sec + 3 < timenow.tv_sec)
+		if (crawler->prev && crawler->prev->ctime.tv_sec + (crawler->prev->type == server ? SERVER_TIMEOUT : 3) < timenow.tv_sec)
 		{
+			if (crawler->prev->type == server)
+				if (--crawler->prev->heartbeats)
+					continue;
+
 			purgesock (crawler->prev);
 			continue;
 		}
 
 		// Unfortunately the above doesn't work if crawler == slhead
-		if (crawler == slhead && crawler->type != server && crawler->ctime.tv_sec + 3 < timenow.tv_sec)
+		if (crawler == slhead && crawler->ctime.tv_sec + (crawler->type == server ? SERVER_TIMEOUT : 3) < timenow.tv_sec)
 		{
+			if (crawler->type == server)
+				if (--crawler->heartbeats)
+					continue;
+
 			purgesock (crawler);
 			break;
 		}
@@ -334,7 +367,7 @@ int main (void)
 
 	char ipchar[32];
 	inet_ntop (AF_INET, &(((struct sockaddr_in *)masteraddr.ai_addr)->sin_addr), ipchar, 32);
-	printf ("bound to %s:%s\n", ipchar, MASTERPORT);
+	printf ("bound to %s:%s\n\n", ipchar, MASTERPORT);
 
 	for (;;) masterloop();
 
