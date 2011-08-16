@@ -800,6 +800,7 @@ void *SV_MakeSectorBuffer (void)
 }
 
 boolean sv_usemaster = 1; // TEMP: Move this to the config stuffs
+
 void SV_InitMaster (void)
 {
 	if (!sv_usemaster)
@@ -817,12 +818,11 @@ void SV_InitMaster (void)
 		return;
 	}
 
-	char testtext[] = "Hello, world!";
-	int i;
-	for (i = 0; i < strlen(testtext); i++)
-	{
-		*master.sendbuf.head = testtext[i];
-		master.sendbuf.head ++;
-	}
+	*master.sendbuf.head = 0x45;
+	master.sendbuf.head ++;
+	printf ("port = %i\n", addr.port);
+	*((uint16_t*)master.sendbuf.head) = htons (addr.port);
+	master.sendbuf.head += 2;
+
 	MA_Send();
 }

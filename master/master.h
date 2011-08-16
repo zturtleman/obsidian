@@ -31,7 +31,7 @@ typedef struct sock_s
 	} type;
 	struct timeval ctime;
 	int heartbeats; // (servers only)
-	short port; // (servers only, nbo)
+	uint16_t port; // (servers only, nbo)
 
 	struct sock_s *prev;
 	struct sock_s *next;

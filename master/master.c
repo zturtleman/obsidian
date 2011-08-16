@@ -111,6 +111,9 @@ int getnewconn (void)
 	{
 		// Fill it out, then put it in the linked list.
 		slnext->s = tempSock;
+		// Non-blocking please:
+		fcntl (slnext->s, F_SETFL, O_NONBLOCK);
+
 		slnext->addr = *((struct sockaddr *) &tempAddr);
 		gettimeofday (&slnext->ctime, NULL);
 		if (!sltail && !slhead)
