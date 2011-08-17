@@ -128,7 +128,7 @@ int getnewconn (void)
 			slnext->next = NULL;
 			slhead = slnext;
 		}
-//		printf ("Adding sock_t 0x%x to linked list after 0x%x and before 0x%x\n", slnext, slnext->prev, slnext->next);
+
 		slnext = NULL; // Let's get another next time.
 
 		// Now, add the socket to our fd_sets, for select():
@@ -146,7 +146,6 @@ int getnewconn (void)
 // Removes a socket from existence
 void purgesock (sock_t *sock)
 {
-//	printf ("Purging socket 0x%x\n", sock);
 	// Server? Remove it from the list:
 	int i;
 	if (sock->type == server)
@@ -251,20 +250,21 @@ void launcher_handler (sock_t *sock)
 	uint8_t *p = buf;
 
 	// Write the number of servers (short), then increment
-	*p = htons ((uint16_t) numservers);
+	*((uint16_t*)p) = htons ((uint16_t) numservers);
 	p += 2;
 
 	for (i = 0; i < MAXSERVERS; i++)
 	{
-		if (!serverlist[i]) continue;
+		if (serverlist[i])
+		{
+			// Write IP address
+			*((uint32_t*)p) = (uint32_t) ((struct sockaddr_in *) &serverlist[i]->addr)->sin_addr.s_addr;
+			p += 4;
 
-		// Write IP address
-		*p = (uint32_t) ((struct sockaddr_in *) &serverlist[i]->addr)->sin_addr.s_addr;
-		p += 4;
-
-		// Write port number
-		*p = (uint16_t) serverlist[i]->port;
-		p += 2;
+			// Write port number
+			*((uint16_t*)p) = (uint16_t) serverlist[i]->port;
+			p += 2;
+		}
 	}
 
 	totalSent = tempSent = 0;
@@ -276,6 +276,9 @@ void launcher_handler (sock_t *sock)
 
 		totalSent += tempSent;
 	}
+
+	// Goodbye now!
+	purgesock (sock);
  
 	return;
 }
