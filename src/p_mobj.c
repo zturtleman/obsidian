@@ -60,9 +60,6 @@ P_SetMobjState
 {
     state_t*	st;
 
-    if(client && mobj == players[consoleplayer].mo)
-        CL_SendStateUpdate((uint16_t)state);
-
     do
     {
 	if (state == S_NULL)
@@ -228,7 +225,7 @@ void P_XYMovement (mobj_t* mo)
 	&& mo->momx < STOPSPEED
 	&& mo->momy > -STOPSPEED
 	&& mo->momy < STOPSPEED
-	&& (!player
+	&& (!player || client
 	    || (player->cmd.forwardmove== 0
 		&& player->cmd.sidemove == 0 ) ) )
     {

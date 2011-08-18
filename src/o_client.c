@@ -281,6 +281,11 @@ void CL_ParsePacket(ENetPacket *pk)
 			mo->momx = ReadInt32((int32_t**)&p);
 			mo->momy = ReadInt32((int32_t**)&p);
 			mo->momz = ReadInt32((int32_t**)&p);
+
+			// Hack-ish, the client will tell us if forward/side move is on, if it is, make them run
+			if (ReadInt8((int8_t**)&p) && players[from].mo->state == &states[S_PLAY])
+				P_SetMobjState (players[from].mo, S_PLAY_RUN1);
+
 			mo->subsector = R_PointInSubsector(mo->x, mo->y);
 			mo->floorz = mo->subsector->sector->floorheight;
 			mo->ceilingz = mo->subsector->sector->ceilingheight;
@@ -300,11 +305,6 @@ void CL_ParsePacket(ENetPacket *pk)
 		case MSG_USE:
 		if(players[from].mo && players[from].mo->health)
 			P_UseLines(&players[from]);
-		break;
-
-		case MSG_STATE:
-		if(players[from].mo && players[from].mo->health)
-			P_SetMobjState(players[from].mo, (statenum_t)ReadUInt16((uint16_t**)&p));
 		break;
 
 		case MSG_FIRE:
@@ -455,7 +455,7 @@ void CL_ParsePacket(ENetPacket *pk)
 
 void CL_SendPosUpdate(fixed_t x, fixed_t y, fixed_t z, fixed_t ang, fixed_t momx, fixed_t momy, fixed_t momz)
 {
-	ENetPacket *pk = enet_packet_create(NULL, 29, 0);
+	ENetPacket *pk = enet_packet_create(NULL, 30, ENET_PACKET_FLAG_RELIABLE);
 	void *p = pk->data;
 
 	WriteUInt8((uint8_t**)&p, MSG_POS);
@@ -466,7 +466,8 @@ void CL_SendPosUpdate(fixed_t x, fixed_t y, fixed_t z, fixed_t ang, fixed_t momx
 	WriteInt32((int32_t**)&p, momx);
 	WriteInt32((int32_t**)&p, momy);
 	WriteInt32((int32_t**)&p, momz);
-	enet_peer_send(srvpeer, 0, pk);
+	WriteInt8((int8_t**)&p, (players[consoleplayer].cmd.forwardmove || players[consoleplayer].cmd.sidemove));
+	enet_peer_send(srvpeer, 1, pk);
 	return;
 }
 
@@ -476,17 +477,6 @@ void CL_SendUseCmd(void)
 	void *p = pk->data;
 
 	WriteUInt8((uint8_t**)&p, MSG_USE);
-	enet_peer_send(srvpeer, 0, pk);
-	return;
-}
-
-void CL_SendStateUpdate(uint16_t state)
-{
-	ENetPacket *pk = enet_packet_create(NULL, 3, 0);
-	void *p = pk->data;
-
-	WriteUInt8((uint8_t**)&p, MSG_STATE);
-	WriteUInt16((uint16_t**)&p, state);
 	enet_peer_send(srvpeer, 0, pk);
 	return;
 }

@@ -45,7 +45,7 @@
 
 #define MAXPLAYERNAME 10
 #define MAX_MOBJ_BUFFER 128 // Able to store info for up to 1024 mobjs
-#define OBS_PROTO 2
+#define OBS_PROTO 3
 
 extern boolean server;
 extern boolean client;
@@ -58,15 +58,15 @@ typedef enum
 {
 	MSG_NULL, MSG_WELCOME, MSG_POS, 
 
-	MSG_JOIN, MSG_USE, MSG_STATE, 
+	MSG_JOIN, MSG_USE, MSG_FIRE,
 
-	MSG_FIRE, MSG_DAMAGE, MSG_KILL,
+	MSG_DAMAGE, MSG_KILL, MSG_RESPAWN,
 
-	MSG_RESPAWN, MSG_PICKUP, MSG_WPICKUP,
+	MSG_PICKUP, MSG_WPICKUP, MSG_CHAT,
 
-	MSG_CHAT, MSG_NICK, MSG_DISC,
+	MSG_NICK, MSG_DISC, MSG_EXITLEV, 
 
-	MSG_EXITLEV, MSG_FIRE2
+	MSG_FIRE2
 } messagetype_e;
 
 #endif
