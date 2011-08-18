@@ -605,7 +605,7 @@ void P_RemoveMobj (mobj_t* mobj)
 }
 
 
-
+int netidmax = 0;
 
 //
 // P_RespawnSpecials
@@ -626,6 +626,10 @@ void P_RespawnSpecials (void)
     // [tm512] Add "newdeath", this needs itemrespawn too.
     if (deathmatch != 2 && deathmatch != 3)
 	return;	
+
+    // Don't do this on clients.
+	if (client)
+        return;
 
     // nothing left to respawn?
     if (iquehead == iquetail)
@@ -659,8 +663,13 @@ void P_RespawnSpecials (void)
 	z = ONFLOORZ;
 
     mo = P_SpawnMobj (x,y,z, i);
+
+    mo->netid = ++netidmax;
     mo->spawnpoint = *mthing;	
     mo->angle = ANG45 * (mthing->angle/45);
+
+	// [tm512] Send the client info to spawn this. - 8/18/11
+	SV_SpawnMobj (mo);
 
     // pull it from the que
     iquetail = (iquetail+1)&(ITEMQUESIZE-1);
@@ -1081,6 +1090,8 @@ void P_NumberMobjs (void)
 		}
 		current = current->next;
 	}
+
+	netidmax = i;
 
 	return;
 }

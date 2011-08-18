@@ -65,6 +65,7 @@ int SV_ClientNumForPeer(ENetPeer *p);
 void SV_SendString (messagetype_e type, const char *sending, int exclude, boolean sound);
 void SV_SendExit (boolean secret);
 void *SV_MakeSectorBuffer(void);
+void SV_SpawnMobj (mobj_t *mo);
 
 // Variables
 

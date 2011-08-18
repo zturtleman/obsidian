@@ -66,7 +66,7 @@ typedef enum
 
 	MSG_NICK, MSG_DISC, MSG_EXITLEV, 
 
-	MSG_FIRE2
+	MSG_FIRE2, MSG_SMOBJ
 } messagetype_e;
 
 #endif

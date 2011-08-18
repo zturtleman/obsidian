@@ -444,6 +444,29 @@ void CL_ParsePacket(ENetPacket *pk)
 			gameaction = ga_completed;
 			break;
 
+		case MSG_SMOBJ:
+		{
+			mobj_t *mo;
+			statenum_t st;
+			fixed_t x = ReadInt32((int32_t**)&p);
+			fixed_t y = ReadInt32((int32_t**)&p);
+			fixed_t z = ReadInt32((int32_t**)&p);
+			mobjtype_t type = (mobjtype_t)ReadUInt16((uint16_t**)&p);
+
+			// Telefog
+			mo = P_SpawnMobj (x, y, z, MT_IFOG);
+			S_StartSound (mo, sfx_itmbk);
+
+			mo = P_SpawnMobj (x, y, z, type);
+
+			if ((st = ReadUInt16((uint16_t**)&p)) < NUMSTATES)
+				P_SetMobjState(mo, (statenum_t)st);
+
+			mo->netid = ReadUInt16((uint16_t**)&p);
+
+			break;
+		}
+
 		default:
 			break;		
 	}

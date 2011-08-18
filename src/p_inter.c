@@ -674,7 +674,7 @@ P_TouchSpecialThing
 	break;
 		
       default:
-	I_Error ("P_SpecialThing: Unknown gettable thing");
+	I_Error ("P_SpecialThing: Unknown gettable thing %i", special->sprite);
     }
 	
     if (special->flags & MF_COUNTITEM)

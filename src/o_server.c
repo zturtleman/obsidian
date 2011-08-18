@@ -786,3 +786,22 @@ void *SV_MakeSectorBuffer (void)
 
 	return secbuf;
 }
+
+// Tell our clients to spawn a mobj
+// Currently only used for the item respawn queue in -altdeath and -newdeath
+void SV_SpawnMobj (mobj_t *mo)
+{
+	ENetPacket *pk = enet_packet_create (NULL, 19, ENET_PACKET_FLAG_RELIABLE);
+	void *p = pk->data;
+
+	WriteUInt8((uint8_t**)&p, MSG_SMOBJ);
+	WriteInt32((int32_t**)&p, mo->x);
+	WriteInt32((int32_t**)&p, mo->y);
+	WriteInt32((int32_t**)&p, mo->z);
+	WriteUInt16((uint16_t**)&p, (uint16_t)mo->type);
+	WriteUInt16((uint16_t**)&p, (uint16_t)mo->state);
+	WriteUInt16((uint16_t**)&p, mo->netid);
+
+	SV_BroadcastPacket(pk, -1);
+	return;
+}
