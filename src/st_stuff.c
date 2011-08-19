@@ -923,6 +923,9 @@ void ST_updateWidgets(void)
 void ST_Ticker (void)
 {
 
+    if (!plyr) // this segfaults on the server sometimes
+        return;
+
     st_clock++;
     st_randomnumber = M_Random();
     ST_updateWidgets();
