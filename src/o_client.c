@@ -75,7 +75,6 @@ uint8_t *readmobjbuf;
 char *readsecbuf;
 int prndindex;
 char *player_name;
-boolean netstat = 0;
 
 void CL_Connect (char *srv_hn)
 {
@@ -89,9 +88,6 @@ void CL_Connect (char *srv_hn)
 
 	host = strtok(srv_hn, ":");
 	port = strtok(NULL, ":");
-	netstat = M_CheckParm ("-netstat");
-	if (netstat)
-		printf ("CL_Connect: Enabling network debug information.\n");
 
 	if (port)
 		addr.port = atoi(port);
@@ -229,18 +225,6 @@ void CL_Loop(void)
 		}
 		memset(chatmsg, 0, sizeof(chatmsg));
 		chatindex = 0;
-	}
-
-	// Print network bandwidth info to stdout
-	if (netstat && !(gametic % 35))
-	{
-		ENetHost *lc = localclient;
-		printf ("avg in: %i avg out: %i ping: %i\n", 
-		        (lc->totalReceivedData / lc->totalReceivedPackets), (lc->totalSentData / lc->totalSentPackets),
-		        srvpeer->lastRoundTripTime);
-		if (!(gametic % 3500)) // Reset every 10 seconds:
-			lc->totalReceivedData = lc->totalReceivedPackets =
-			lc->totalSentData = lc->totalSentPackets = 0;
 	}
 
 	return;
