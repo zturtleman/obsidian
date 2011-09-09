@@ -330,7 +330,7 @@ void CL_ParsePacket(ENetPacket *pk)
 					{
 						damage &= 0x7F;
 						damage <<= 8;
-						damage |= ReadUInt8((uint8_t**)&p);;
+						damage |= ReadUInt8((uint8_t**)&p);
 					}
 
 					if (damage)
