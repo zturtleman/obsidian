@@ -303,8 +303,18 @@ int W_CheckNumForName (char* name)
     return -1;
 }
 
+// [tm512] Range NumForName
+// Linear Search that checks for a lump number ONLY
+// inside a range, not all lumps.
+int W_RangeCheckNumForName (int min, int max, char *name)
+{
+	int i;
+	for (i = min; i <= max; i++)
+		if (!strncasecmp (lumpinfo[i].name, name, 8))
+			return i;
 
-
+	I_Error ("W_RangeCheckNumForName: %s not found!", name);
+}
 
 //
 // W_GetNumForName
