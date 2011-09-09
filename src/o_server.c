@@ -108,7 +108,7 @@ int SV_Main (void)
 		for(i = 0; i < MAXPLAYERS; i++)
 		{
 			clients[i].type = CT_EMPTY;
-			clients[i].damage = 0;
+			memset (&clients[i].damage, 0, sizeof (int) * (MAXPLAYERS + 1));
 		}
 	}
 
@@ -448,23 +448,44 @@ void SV_BroadcastPacket(ENetPacket *pk, int exclude)
 
 void SV_SendDamage(void)
 {
-	int i;
+	int i, j, pksize;
+
+	uint8_t dmgbuf[2 + (MAXPLAYERS + 1) * 2] = {0};
+	void *p = dmgbuf;
 
 	// Send damage if needed.
-	for(i = 0; i < MAXPLAYERS; i++)
+	for (i = 0; i < MAXPLAYERS; i++)
 	{
-		if(clients[i].damage && clients[i].player)
+		// Do we have anything to send?
+		uint8_t hasdamage = 0;
+		for (j = 0; j < MAXPLAYERS + 1; j++)
+			if (hasdamage = (clients[i].damage[j] > 0)) break;
+
+		if (!clients[i].player || !clients[i].player->mo || !hasdamage) continue;
+
+		WriteUInt8((uint8_t**)&p, MSG_DAMAGE);
+		WriteUInt8((uint8_t**)&p, i);
+		pksize = 2;
+
+		// Pack the damage into a small amount of data
+		// Normally values are low, so we can fit them into a single byte
+		// Thanks GhostlyDeath for the tip on variable-bit integers
+		for (j = 0; j < MAXPLAYERS + 1; j++)
 		{
-			ENetPacket *dmg = enet_packet_create(NULL, 6, ENET_PACKET_FLAG_RELIABLE);
-			void *p = dmg->data;
+			if (clients[i].damage[j] > 0x7F) // damage > 127
+			{
+				pksize ++;
+				WriteUInt8((uint8_t**)&p, ((clients[i].damage[j] & 0x7f) >> 8) | 0x80);
+			}
 
-			WriteUInt8((uint8_t**)&p, MSG_DAMAGE);
-			WriteUInt8((uint8_t**)&p, i);
-			WriteInt32((int32_t**)&p, clients[i].damage);
-			SV_BroadcastPacket(dmg, -1);
-
-			clients[i].damage = 0;
+			pksize ++;
+			WriteUInt8((uint8_t**)&p, (uint8_t)clients[i].damage[j] & 0xFF);
 		}
+
+		ENetPacket *dmg = enet_packet_create (dmgbuf, pksize, ENET_PACKET_FLAG_RELIABLE);
+		p = dmgbuf;
+		memset (&clients[i].damage, 0, sizeof (int) * (MAXPLAYERS + 1));
+		SV_BroadcastPacket(dmg, -1);
 	}
 }
 
@@ -541,21 +562,26 @@ void SV_SendFire (player_t *player, weapontype_t weapon)
 	return;
 }
 
-void SV_DamageMobj(mobj_t *target, int damage)
+void SV_DamageMobj(mobj_t *target, mobj_t *source, int damage)
 {
-	int i;
+	int i, s, t;
+	s = t = MAXPLAYERS;
 
 	// Loop through all players and see if our target and source have players.
 	for(i = 0; i < MAXPLAYERS; i++)
 	{
-		if(!clients[i].player || !clients[i].player->mo)
+		if (!clients[i].player || !clients[i].player->mo)
 			continue;
 
-		if(clients[i].player->mo == target)
-			clients[i].damage += damage;
+		if (clients[i].player->mo == target)
+			t = i;
+
+		if (clients[i].player->mo == source && source)
+			s = i;
 	}
 
-	
+	if (t < MAXPLAYERS)
+		clients[t].damage[s] += damage;
 }
 
 void SV_KillMobj(mobj_t *source, mobj_t *target)
@@ -564,7 +590,7 @@ void SV_KillMobj(mobj_t *source, mobj_t *target)
 	ENetPacket *pk = enet_packet_create(NULL, 3, ENET_PACKET_FLAG_RELIABLE);
 	void *p = pk->data;
 
-	s = t = MAXPLAYERS + 1;
+	s = t = MAXPLAYERS;
 
 	for(i = 0; i < MAXPLAYERS; i++)
 	{
@@ -578,7 +604,7 @@ void SV_KillMobj(mobj_t *source, mobj_t *target)
 			s = i;
 	}
 
-	if(t <= MAXPLAYERS)
+	if(t < MAXPLAYERS)
 	{
 		if(clients[t].damage) // Send unsent damage
 			SV_SendDamage();

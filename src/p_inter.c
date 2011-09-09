@@ -946,7 +946,7 @@ P_DamageMobj
     target->health -= damage;	
 
 	if(server)
-		SV_DamageMobj(target, damage);
+		SV_DamageMobj(target, source, damage);
 
     if (target->health <= 0 && !client)
     {

@@ -319,10 +319,24 @@ void CL_ParsePacket(ENetPacket *pk)
 
 		case MSG_DAMAGE:
 		{
-			int damaged;
+			int i, b, damaged, damage;
 			damaged = ReadUInt8((uint8_t**)&p);
+
 			if(players[damaged].mo)
-				P_DamageMobj(players[damaged].mo, NULL, NULL, ReadInt32((int32_t**)&p), true);
+			{
+				for (i = 0; i < MAXPLAYERS + 1; i++)
+				{
+					if ((damage = ReadUInt8((uint8_t**)&p)) > 0x7F)
+					{
+						damage &= 0x7F;
+						damage <<= 8;
+						damage |= ReadUInt8((uint8_t**)&p);;
+					}
+
+					if (damage)
+						P_DamageMobj(players[damaged].mo, NULL, i < 4 ? players[i].mo : NULL, damage, true);
+				}
+			}
 		}
 		break;
 
