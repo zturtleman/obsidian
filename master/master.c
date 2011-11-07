@@ -246,7 +246,7 @@ void launcher_handler (sock_t *sock)
 	// Also make a duplicate pointer so we do not modify the original.
 	int toMalloc = (6 * numservers) + 2;
 	int i, totalSent, tempSent;
-	uint8_t *buf = (uint8_t *) malloc (toMalloc);
+	uint8_t buf[toMalloc] = { 0 };
 	uint8_t *p = buf;
 
 	// Write the number of servers (short), then increment
